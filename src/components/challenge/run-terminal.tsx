@@ -22,30 +22,42 @@ export function RunTerminal({
         <span className='flex items-center gap-1.5'>
           <Terminal className='size-3.5' /> Terminal
         </span>
-        {running ? (
-          <span className='flex items-center gap-1.5 normal-case'>
-            <Loader2 className='size-3 animate-spin' /> rodando…
-          </span>
-        ) : result ? (
-          <span
-            className={cn(
-              'flex items-center gap-1.5 font-semibold normal-case',
-              result.ok ? 'text-mint' : 'text-destructive-foreground',
-            )}
-          >
-            {result.ok ? (
-              <CheckCircle2 className='size-3.5' />
-            ) : (
-              <XCircle className='size-3.5' />
-            )}
-            {total > 0
-              ? `${passed}/${total} testes`
-              : result.error
-                ? 'erro'
-                : 'ok'}{' '}
-            · {result.durationMs}ms
-          </span>
-        ) : null}
+        <div className='flex items-center gap-3'>
+          {running ? (
+            <span className='flex items-center gap-1.5 normal-case'>
+              <Loader2 className='size-3 animate-spin' /> rodando…
+            </span>
+          ) : result ? (
+            <span
+              className={cn(
+                'flex items-center gap-1.5 font-semibold normal-case',
+                result.ok ? 'text-mint' : 'text-destructive-foreground',
+              )}
+            >
+              {result.ok ? (
+                <CheckCircle2 className='size-3.5' />
+              ) : (
+                <XCircle className='size-3.5' />
+              )}
+              {total > 0
+                ? `${passed}/${total} testes`
+                : result.error
+                  ? 'erro'
+                  : 'ok'}{' '}
+              · {result.durationMs}ms
+            </span>
+          ) : null}
+          {onClose && (
+            <button
+              type='button'
+              onClick={onClose}
+              aria-label='Fechar terminal'
+              className='-mr-1 grid size-6 place-items-center rounded text-muted-foreground hover:bg-white/[0.06] hover:text-foreground'
+            >
+              <X className='size-3.5' />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className='min-h-0 flex-1 overflow-y-auto px-4 py-3 font-mono text-[12px] leading-relaxed'>

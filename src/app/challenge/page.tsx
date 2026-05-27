@@ -19,6 +19,7 @@ import {
   PlayCircle,
   Send,
   Sparkles,
+  Terminal,
   X,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -248,6 +249,18 @@ export default function ChallengePage() {
               <Button
                 size='xs'
                 variant='ghost'
+                onClick={() => setShowPanel((s) => !s)}
+                className={cn(
+                  'gap-1.5 rounded-md hover:text-foreground',
+                  showPanel ? 'text-foreground' : 'text-muted-foreground',
+                )}
+              >
+                <Terminal className='size-3.5' />
+                {language === 'react' ? 'Preview' : 'Terminal'}
+              </Button>
+              <Button
+                size='xs'
+                variant='ghost'
                 onClick={run}
                 disabled={running}
                 className='gap-1.5 rounded-md text-muted-foreground hover:text-foreground'
@@ -286,9 +299,13 @@ export default function ChallengePage() {
           </div>
           {showPanel &&
             (language === 'react' ? (
-              <ReactPreview code={code} />
+              <ReactPreview code={code} onClose={() => setShowPanel(false)} />
             ) : (
-              <RunTerminal result={result} running={running} />
+              <RunTerminal
+                result={result}
+                running={running}
+                onClose={() => setShowPanel(false)}
+              />
             ))}
         </section>
 

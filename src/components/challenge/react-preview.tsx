@@ -1,6 +1,6 @@
 'use client'
 
-import { Eye } from 'lucide-react'
+import { Eye, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { transform } from 'sucrase'
 
@@ -44,7 +44,13 @@ ${compiled}
 </html>`
 }
 
-export function ReactPreview({ code }: { code: string }) {
+export function ReactPreview({
+  code,
+  onClose,
+}: {
+  code: string
+  onClose?: () => void
+}) {
   const [srcDoc, setSrcDoc] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -62,8 +68,20 @@ export function ReactPreview({ code }: { code: string }) {
 
   return (
     <div className='flex h-[55%] min-h-[200px] shrink-0 flex-col border-t border-white/[0.06] bg-[#0a0a0c]'>
-      <div className='flex h-9 shrink-0 items-center gap-1.5 border-b border-white/[0.06] px-4 font-mono text-[11px] tracking-wider text-muted-foreground uppercase'>
-        <Eye className='size-3.5' /> Preview
+      <div className='flex h-9 shrink-0 items-center justify-between border-b border-white/[0.06] px-4 font-mono text-[11px] tracking-wider text-muted-foreground uppercase'>
+        <span className='flex items-center gap-1.5'>
+          <Eye className='size-3.5' /> Preview
+        </span>
+        {onClose && (
+          <button
+            type='button'
+            onClick={onClose}
+            aria-label='Fechar preview'
+            className='-mr-1 grid size-6 place-items-center rounded text-muted-foreground hover:bg-white/[0.06] hover:text-foreground'
+          >
+            <X className='size-3.5' />
+          </button>
+        )}
       </div>
       {error ? (
         <div className='px-4 py-3 font-mono text-[12px] text-destructive-foreground'>
