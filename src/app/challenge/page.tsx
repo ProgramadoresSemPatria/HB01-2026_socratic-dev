@@ -229,7 +229,7 @@ export default function ChallengePage() {
       </header>
 
       {/* Workspace */}
-      <div className='grid min-h-0 flex-1 lg:grid-cols-[360px_1fr_400px]'>
+      <div className='grid min-h-0 flex-1 lg:grid-cols-[360px_1fr_400px] lg:grid-rows-[minmax(0,1fr)]'>
         {/* Briefing panel */}
         <aside className='overflow-y-auto border-r border-white/[0.06] bg-card/30'>
           <BriefingPanel />
