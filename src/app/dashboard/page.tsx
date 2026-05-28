@@ -456,6 +456,7 @@ function IndependenceRing({ score }: { score: number }) {
             <RadialBar
               background={{ fill: 'oklch(0 0 0 / 0.05)' }}
               dataKey='value'
+              fill={IRIS}
               cornerRadius={20}
             />
           </RadialBarChart>
