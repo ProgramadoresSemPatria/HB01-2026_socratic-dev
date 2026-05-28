@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { LEVEL_LABEL, type Challenge } from '@/lib/challenge'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
-import { ArrowRight, Code2, Palette } from 'lucide-react'
+import { ArrowRight, Code2, Network } from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import * as React from 'react'
@@ -15,11 +15,11 @@ type Filter = 'all' | 'code' | 'design'
 const FILTERS: { id: Filter; label: string }[] = [
   { id: 'all', label: 'Todos' },
   { id: 'code', label: 'Código' },
-  { id: 'design', label: 'Design System' },
+  { id: 'design', label: 'System Design' },
 ]
 
 function stackLabel(c: Challenge): string {
-  if (c.kind === 'design') return 'Design System'
+  if (c.kind === 'design') return 'System Design'
   if (c.stack === 'javascript') return 'JavaScript'
   return 'TypeScript'
 }
@@ -109,7 +109,7 @@ export default function ChallengesLibraryPage() {
               visible.map((c, i) => {
                 const isDesign = c.kind === 'design'
                 const href = `${isDesign ? '/design' : '/challenge'}?id=${c.id}`
-                const Icon = isDesign ? Palette : Code2
+                const Icon = isDesign ? Network : Code2
                 return (
                   <motion.div
                     key={c.id}

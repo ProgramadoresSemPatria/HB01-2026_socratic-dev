@@ -12,7 +12,7 @@ import {
   Code2,
   Info,
   Loader2,
-  Palette,
+  Network,
   Sparkles,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -115,9 +115,9 @@ const tracks = [
   },
   {
     id: 'design',
-    name: 'Design System',
-    desc: 'Desenhe a arquitetura num canvas; a IA analisa.',
-    Icon: Palette,
+    name: 'System Design',
+    desc: 'Arquitete sistemas num canvas; a IA analisa.',
+    Icon: Network,
   },
 ]
 
@@ -125,7 +125,7 @@ const stepMeta = [
   {
     eyebrow: '01 · Trilha',
     title: 'Como você quer treinar hoje?',
-    subtitle: 'Código ou arquitetura de design system — escolha a trilha.',
+    subtitle: 'Código ou system design (arquitetura) — escolha a trilha.',
   },
   {
     eyebrow: '02 · Nível',
@@ -371,11 +371,11 @@ export default function OnboardingPage() {
 
                   {track === 'design' && (
                     <div className='rounded-2xl border border-[#DFE5E9] bg-[#F7F9FA] p-4 text-sm text-[#6b6478]'>
-                      Design System não precisa de linguagem — você vai{' '}
+                      System design não tem linguagem — você vai{' '}
                       <span className='font-medium text-[#1b1916]'>
-                        desenhar a arquitetura
+                        desenhar a arquitetura do sistema
                       </span>{' '}
-                      num canvas e a IA analisa o que você criou.
+                      (serviços, dados, fluxo) num canvas e a IA analisa.
                     </div>
                   )}
                 </div>

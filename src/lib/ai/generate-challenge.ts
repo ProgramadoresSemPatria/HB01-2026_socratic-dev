@@ -50,18 +50,42 @@ function parseJson(raw: string): Record<string, unknown> {
   return JSON.parse(text)
 }
 
+async function existingTitles(
+  kind: 'code' | 'design',
+  level: GenLevel,
+  stack: string,
+): Promise<string[]> {
+  let q = supabaseAdmin
+    .from('challenges')
+    .select('title')
+    .eq('kind', kind)
+    .eq('level', level)
+  if (kind === 'code') q = q.eq('stack', stack)
+  const { data } = await q
+  return (data ?? []).map((c) => String(c.title)).filter(Boolean)
+}
+
+function avoidLine(titles: string[]): string {
+  if (titles.length === 0) return ''
+  return `\n\nESTES desafios JÁ EXISTEM — gere um tema CLARAMENTE diferente (não repita nem só troque o nome):\n- ${titles.join('\n- ')}`
+}
+
 // Generates a fresh challenge with the AI and persists it. Returns the
 // Supabase insert result ({ data, error }). May throw on AI errors — callers
-// should wrap with aiErrorResponse.
+// should wrap with aiErrorResponse. Passes the existing titles so the AI
+// avoids generating near-duplicates.
 export async function generateChallenge(opts: {
   kind: 'code' | 'design'
   stack?: string
   level: GenLevel
 }) {
+  const stack = opts.stack === 'javascript' ? 'javascript' : 'typescript'
+  const avoid = avoidLine(await existingTitles(opts.kind, opts.level, stack))
+
   if (opts.kind === 'design') {
     const raw = await askClaude({
       system: DESIGN_SYSTEM,
-      user: `Gere um desafio de design system novo. nível: ${opts.level}.\n\n${DESIGN_LEVEL_GUIDE[opts.level]}`,
+      user: `Gere um desafio de system design (arquitetura) novo. nível: ${opts.level}.\n\n${DESIGN_LEVEL_GUIDE[opts.level]}${avoid}`,
       maxTokens: 2048,
       effort: 'medium',
     })
@@ -81,10 +105,9 @@ export async function generateChallenge(opts: {
       .single()
   }
 
-  const stack = opts.stack === 'javascript' ? 'javascript' : 'typescript'
   const raw = await askClaude({
     system: SYSTEM,
-    user: `Gere um desafio novo. stack: ${stack}. nível: ${opts.level}.\n\n${LEVEL_GUIDE[opts.level]}`,
+    user: `Gere um desafio novo. stack: ${stack}. nível: ${opts.level}.\n\n${LEVEL_GUIDE[opts.level]}${avoid}`,
     maxTokens: opts.level === 'advanced' ? 6000 : 3500,
     effort: opts.level === 'advanced' ? 'high' : 'medium',
   })

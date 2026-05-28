@@ -16,7 +16,7 @@ export function BriefingPanel({ challenge }: { challenge: Challenge }) {
       <div className='mb-6 flex items-center gap-2 font-mono text-[11px] text-muted-foreground/70'>
         <span className='rounded-full border border-white/[0.06] bg-white/[0.04] px-2 py-0.5'>
           {challenge.stack === 'design'
-            ? 'Design System'
+            ? 'System Design'
             : challenge.stack === 'javascript'
               ? 'JavaScript'
               : 'TypeScript'}

@@ -11,7 +11,7 @@ import {
   Layers,
   Lightbulb,
   Loader2,
-  Palette,
+  Network,
   Sparkles,
   TrendingUp,
   Trophy,
@@ -171,9 +171,9 @@ export default function DashboardPage() {
                 {genDesign ? (
                   <Loader2 className='size-4 animate-spin' />
                 ) : (
-                  <Palette className='size-4' />
+                  <Network className='size-4' />
                 )}
-                {genDesign ? 'Gerando…' : 'Design System'}
+                {genDesign ? 'Gerando…' : 'System Design'}
               </button>
               <Link
                 href='/onboarding'
@@ -555,7 +555,7 @@ function RecentChallenges({ items }: { items: SessionRow[] }) {
                   <div className='mt-2 flex items-center gap-3 font-mono text-[11px]'>
                     <span className='rounded-full border border-[#DFE5E9] bg-white px-2 py-0.5 text-[#6b6478]'>
                       {isDesign
-                        ? 'Design System'
+                        ? 'System Design'
                         : c.challenges?.stack === 'javascript'
                           ? 'JavaScript'
                           : 'TypeScript'}

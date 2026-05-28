@@ -46,7 +46,7 @@ const LEVEL_OPTIONS = [
 ]
 const TRACK_OPTIONS = [
   { value: 'code', label: 'Código' },
-  { value: 'design', label: 'Design System' },
+  { value: 'design', label: 'System Design' },
 ]
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
