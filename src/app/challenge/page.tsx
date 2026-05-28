@@ -247,7 +247,7 @@ export default function ChallengePage() {
   if (!user || !challenge) return null
 
   return (
-    <div className='relative flex h-screen flex-1 flex-col overflow-hidden'>
+    <div className='relative flex h-screen flex-col overflow-hidden'>
       <header className='z-30 flex h-14 shrink-0 items-center justify-between border-b border-[#DFE5E9] bg-white/80 px-4 backdrop-blur-xl'>
         <div className='flex items-center gap-4'>
           <Logo />
@@ -291,7 +291,7 @@ export default function ChallengePage() {
         </div>
       </header>
 
-      <div className='grid min-h-0 flex-1 lg:grid-cols-[360px_1fr_400px] lg:grid-rows-[minmax(0,1fr)]'>
+      <div className='grid min-h-0 flex-1 overflow-hidden lg:grid-cols-[360px_1fr_400px] lg:grid-rows-[minmax(0,1fr)]'>
         <aside className='min-h-0 overflow-y-auto border-r border-white/[0.06] bg-card/30'>
           <BriefingPanel challenge={challenge} />
         </aside>

@@ -4,9 +4,13 @@ export const anthropic = new Anthropic()
 
 type Effort = 'low' | 'medium' | 'high'
 
-// Single text completion via Claude Opus 4.7 with adaptive thinking.
-// Params are passed with a cast so we don't depend on the exact SDK type
-// version for `thinking: adaptive` / `output_config.effort`.
+// Sonnet 4.6 during the testing phase to keep credit usage low.
+// Swap back to 'claude-opus-4-7' for the highest-quality answers.
+const MODEL = 'claude-sonnet-4-6'
+
+// Single text completion with adaptive thinking. Params are passed with a cast
+// so we don't depend on the exact SDK type version for `thinking: adaptive` /
+// `output_config.effort`. Both work on Sonnet 4.6 and Opus 4.7.
 export async function askClaude(opts: {
   system: string
   user: string
@@ -14,7 +18,7 @@ export async function askClaude(opts: {
   effort?: Effort
 }): Promise<string> {
   const params = {
-    model: 'claude-opus-4-7',
+    model: MODEL,
     max_tokens: opts.maxTokens ?? 1024,
     system: opts.system,
     messages: [{ role: 'user', content: opts.user }],
