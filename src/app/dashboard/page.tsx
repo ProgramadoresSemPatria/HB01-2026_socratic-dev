@@ -4,6 +4,10 @@ import { Navbar } from '@/components/navbar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useUser } from '@/features/auth/hooks/use-user'
 import {
+  listSessionsForUser,
+  type SessionRow,
+} from '@/features/challenges/actions'
+import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
@@ -34,14 +38,6 @@ type Stats = {
   independence_score: number
   streak_days: number
   week_progress: { day: string; value: number }[]
-}
-
-type SessionRow = {
-  id: string
-  challenge_id: string
-  status: string
-  started_at: string
-  challenges: { title: string; stack: string; kind?: string } | null
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -107,11 +103,11 @@ export default function DashboardPage() {
     ;(async () => {
       const [s, sess] = await Promise.all([
         fetch(`/api/stats?user_id=${user.id}`).then((r) => r.json()),
-        fetch(`/api/sessions?user_id=${user.id}`).then((r) => r.json()),
+        listSessionsForUser(user.id),
       ])
       if (!active) return
       if (s && !s.error) setStats(s)
-      if (Array.isArray(sess)) setSessions(sess)
+      setSessions(sess)
       setLoaded(true)
     })()
     return () => {

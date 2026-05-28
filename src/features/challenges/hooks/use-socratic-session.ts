@@ -7,6 +7,7 @@ import {
 } from '@/features/hints/constants'
 import type { ChatMsg } from '@/lib/ai/types'
 import * as React from 'react'
+import { completeSession, startSession } from '../actions'
 import { loadDraft, saveDraft } from '../draft'
 
 export function useSocraticSession<TWork>(opts: {
@@ -53,12 +54,7 @@ export function useSocraticSession<TWork>(opts: {
     }
     setReady(true)
 
-    fetch('/api/sessions', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ user_id: user.id, challenge_id: challenge.id }),
-    })
-      .then((r) => (r.ok ? r.json() : null))
+    startSession({ userId: user.id, challengeId: challenge.id })
       .then((d) => d?.id && setSessionId(d.id))
       .catch(() => {})
 
@@ -143,14 +139,7 @@ export function useSocraticSession<TWork>(opts: {
 
   function complete(durationSeconds: number) {
     if (!sessionId) return
-    fetch(`/api/sessions/${sessionId}`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        status: 'completed',
-        duration_seconds: durationSeconds,
-      }),
-    }).catch(() => {})
+    completeSession({ id: sessionId, durationSeconds }).catch(() => {})
   }
 
   return {
