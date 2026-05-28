@@ -1,11 +1,12 @@
 import { aiErrorResponse, askClaude } from '@/lib/ai/client'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
-const SYSTEM = `Você é um tech lead fazendo code review socrático de uma submissão de um aluno.
-Avalie se o código resolve o briefing, cobre edge-cases e tem clareza.
-NÃO reescreva o código por completo. Aponte, de forma honesta e específica: o que está bom, o que falta, e os riscos.
-Termine com 1 ou 2 perguntas que levem o aluno a melhorar sozinho.
-Português do Brasil. Markdown curto com bullets.`
+const SYSTEM = `Você é um tech lead fazendo um code review socrático CURTO.
+Responda em NO MÁXIMO 5 bullets em markdown — direto, sem floreio. NÃO reescreva o código.
+- 1 a 2 bullets do que está bom.
+- 1 a 2 bullets do que falta ou pode melhorar.
+- 1 pergunta no final que faça o aluno pensar.
+Cada bullet com 1 ou 2 frases curtas. Português do Brasil. Sem cabeçalhos longos.`
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))

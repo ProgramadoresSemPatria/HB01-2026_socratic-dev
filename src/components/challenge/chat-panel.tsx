@@ -42,7 +42,7 @@ export function ChatPanel({
 
       <div
         ref={scrollRef}
-        className='flex-1 space-y-3 overflow-y-auto p-4 text-[13.5px]'
+        className='min-h-0 flex-1 space-y-3 overflow-y-auto p-4 text-[13.5px]'
       >
         {messages.map((m, i) => (
           <motion.div

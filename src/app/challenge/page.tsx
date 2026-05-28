@@ -289,7 +289,7 @@ export default function ChallengePage() {
       </header>
 
       <div className='grid min-h-0 flex-1 lg:grid-cols-[360px_1fr_400px] lg:grid-rows-[minmax(0,1fr)]'>
-        <aside className='overflow-y-auto border-r border-white/[0.06] bg-card/30'>
+        <aside className='min-h-0 overflow-y-auto border-r border-white/[0.06] bg-card/30'>
           <BriefingPanel challenge={challenge} />
         </aside>
 

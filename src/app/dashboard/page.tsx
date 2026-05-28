@@ -298,11 +298,20 @@ function StatCard({
 const WEEKS = 18
 const DOW_LABELS = ['', 'Seg', '', 'Qua', '', 'Sex', '']
 
+function localDateKey(input: Date | string): string {
+  const d = typeof input === 'string' ? new Date(input) : input
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 function ActivityHeatmap({ sessions }: { sessions: SessionRow[] }) {
   const counts: Record<string, number> = {}
   for (const s of sessions) {
-    const key = s.started_at?.slice(0, 10)
-    if (key) counts[key] = (counts[key] ?? 0) + 1
+    if (!s.started_at) continue
+    const key = localDateKey(s.started_at)
+    counts[key] = (counts[key] ?? 0) + 1
   }
   const max = Math.max(1, ...Object.values(counts))
 
@@ -315,8 +324,11 @@ function ActivityHeatmap({ sessions }: { sessions: SessionRow[] }) {
   for (let i = 0; i < WEEKS * 7; i++) {
     const d = new Date(start)
     d.setDate(start.getDate() + i)
-    const key = d.toISOString().slice(0, 10)
-    days.push({ key, count: counts[key] ?? 0, future: d > today })
+    days.push({
+      key: localDateKey(d),
+      count: counts[localDateKey(d)] ?? 0,
+      future: d > today,
+    })
   }
 
   return (
