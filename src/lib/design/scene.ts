@@ -45,17 +45,30 @@ export async function buildSceneElements(
   edges: { from: string; to: string; label?: string }[],
 ): Promise<readonly unknown[]> {
   const { convertToExcalidrawElements } = await import('@excalidraw/excalidraw')
-  const COLS = 3
   const W = 240
   const H = 104
-  const GAP_X = 140
-  const GAP_Y = 140
+  const GAP_X = 80
+  const GAP_Y = 150
+
+  // Group nodes into tiers and stack them top→bottom; center each tier.
+  const tiers = new Map<number, typeof nodes>()
+  for (const n of nodes) {
+    const t = TIER[n.type ?? ''] ?? 2
+    if (!tiers.has(t)) tiers.set(t, [])
+    tiers.get(t)!.push(n)
+  }
+  const sortedTiers = [...tiers.keys()].sort((a, b) => a - b)
+  const maxCols = Math.max(1, ...[...tiers.values()].map((r) => r.length))
 
   const pos = new Map<string, { x: number; y: number }>()
-  nodes.forEach((n, i) => {
-    pos.set(n.id, {
-      x: (i % COLS) * (W + GAP_X),
-      y: Math.floor(i / COLS) * (H + GAP_Y),
+  sortedTiers.forEach((t, rowIdx) => {
+    const row = tiers.get(t)!
+    const offset = ((maxCols - row.length) / 2) * (W + GAP_X)
+    row.forEach((n, colIdx) => {
+      pos.set(n.id, {
+        x: offset + colIdx * (W + GAP_X),
+        y: rowIdx * (H + GAP_Y),
+      })
     })
   })
 
@@ -112,7 +125,7 @@ export async function buildSceneElements(
     type: 'text',
     x: 0,
     y: -64,
-    text: 'Arquitetura sugerida — siga as setas pra entender o fluxo',
+    text: 'Comece no topo (👤) e siga as setas pra baixo até os dados',
     fontSize: 20,
   })
 
