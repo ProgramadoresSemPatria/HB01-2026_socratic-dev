@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import { DM_Mono, DM_Sans, Noto_Serif } from 'next/font/google'
 import './globals.css'
@@ -57,6 +58,7 @@ export default function RootLayout({
         className='flex min-h-full flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary'
       >
         {children}
+        <Analytics />
       </body>
     </html>
   )
