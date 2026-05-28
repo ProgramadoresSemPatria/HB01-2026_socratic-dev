@@ -13,11 +13,35 @@ export function levelLabel(level: string): string {
 }
 
 export function challengeLanguage(stack: string): RunnerLanguage {
-  return stack === 'javascript' ? 'js' : 'ts'
+  if (stack === 'javascript') return 'js'
+  if (stack === 'react') return 'react'
+  if (stack === 'python' || stack === 'py') return 'py'
+  return 'ts'
 }
 
 export function starterCode(challenge: Challenge): string {
   if (challenge.initial_code) return challenge.initial_code
+  if (challenge.stack === 'python' || challenge.stack === 'py') {
+    return [
+      `# ${challenge.title}`,
+      ``,
+      `def solucao():`,
+      `    # TODO: implemente sua solução aqui`,
+      `    pass`,
+      ``,
+    ].join('\n')
+  }
+  if (challenge.stack === 'react') {
+    return [
+      `// ${challenge.title}`,
+      ``,
+      `export default function App() {`,
+      `  // TODO: implemente seu componente aqui`,
+      `  return <div></div>`,
+      `}`,
+      ``,
+    ].join('\n')
+  }
   return [
     `// ${challenge.title}`,
     `//`,

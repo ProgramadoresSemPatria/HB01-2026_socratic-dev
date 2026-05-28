@@ -39,8 +39,20 @@ export async function generateChallenge(opts: {
   stack?: string
   level: GenLevel
 }) {
-  const stack = opts.stack === 'javascript' ? 'javascript' : 'typescript'
+  const stackMap: Record<string, string> = {
+    javascript: 'javascript',
+    typescript: 'typescript',
+    react: 'react',
+    python: 'python',
+  }
+  const stack = stackMap[opts.stack ?? ''] ?? 'typescript'
   const avoid = avoidLine(await existingTitles(opts.kind, opts.level, stack))
+  const noTestsNote =
+    stack === 'react'
+      ? '\n\nIMPORTANTE: tests_source deve ser "" (string vazia). initial_code deve ser um componente TSX com "export default function App()". Sem testes automáticos — o aluno vê o resultado no preview visual.'
+      : stack === 'python'
+        ? '\n\nIMPORTANTE: tests_source deve ser "" (string vazia). initial_code deve ser Python 3 válido (def + pass, sem export). Sem runner automático no browser nesta versão.'
+        : ''
 
   if (opts.kind === 'design') {
     const raw = await askClaude({
@@ -67,7 +79,7 @@ export async function generateChallenge(opts: {
 
   const raw = await askClaude({
     system: challengeSystem('code'),
-    user: `Gere um desafio novo. stack: ${stack}. nível: ${opts.level}.\n\n${levelGuide('code', opts.level)}${avoid}`,
+    user: `Gere um desafio novo. stack: ${stack}. nível: ${opts.level}.\n\n${levelGuide('code', opts.level)}${avoid}${noTestsNote}`,
     maxTokens: opts.level === 'advanced' ? 6000 : 3500,
     effort: opts.level === 'advanced' ? 'high' : 'medium',
   })

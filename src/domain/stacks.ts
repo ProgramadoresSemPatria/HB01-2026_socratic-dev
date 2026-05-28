@@ -1,5 +1,5 @@
 /** Languages we can execute in the in-browser runner. */
-export type RunnerLanguage = 'js' | 'ts' | 'react'
+export type RunnerLanguage = 'js' | 'ts' | 'react' | 'py'
 
 export type StackId = 'javascript' | 'typescript' | 'python' | 'react'
 export type StackUiId = 'js' | 'ts' | 'py' | 'react'
@@ -38,7 +38,7 @@ export const STACKS: readonly Stack[] = [
     uiId: 'py',
     label: 'Python',
     description: 'Backend, dados, scripts',
-    runnerLanguage: 'ts',
+    runnerLanguage: 'py',
     iconLabel: 'PY',
     gradient: 'from-mint/30 to-blue-400/20',
   },

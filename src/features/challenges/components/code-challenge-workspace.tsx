@@ -196,7 +196,7 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
 
     let passed = 0
     let total = 0
-    if (challenge.tests_source && language !== 'react') {
+    if (challenge.tests_source && language !== 'react' && language !== 'py') {
       const r = await runCode(
         { code, language, testsSource: challenge.tests_source },
         { timeoutMs: 5000 },
@@ -232,6 +232,15 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
     if (running || !challenge) return
     setShowPanel(true)
     if (language === 'react') return
+    if (language === 'py') {
+      setResult({
+        logs: [{ level: 'info', text: 'Python é avaliado pela IA ao submeter. Clique em "Submeter" para receber o feedback socrático.' }],
+        tests: [],
+        ok: false,
+        durationMs: 0,
+      })
+      return
+    }
     setRunning(true)
     setResult(null)
     const r = await runCode(
@@ -301,7 +310,7 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
           <div className='flex h-10 items-center justify-between border-b border-[#DFE5E9] bg-[#F7F9FA] px-4'>
             <div className='flex items-center gap-2 font-mono text-[12px] text-[#6b6478]'>
               <Code2Tag language={language} />
-              <span>solucao.{language === 'js' ? 'js' : 'ts'}</span>
+              <span>solucao.{language === 'js' ? 'js' : language === 'py' ? 'py' : language === 'react' ? 'tsx' : 'ts'}</span>
               <span className='ml-1 size-1 rounded-full bg-amber-400/70' />
               <span className='text-[11px] text-amber-400/70'>unsaved</span>
             </div>
@@ -316,7 +325,7 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
                 )}
               >
                 <Terminal className='size-3.5' />
-                {language === 'react' ? 'Preview' : 'Terminal'}
+                {language === 'react' ? 'Preview' : language === 'py' ? 'Console' : 'Terminal'}
               </Button>
               <Button
                 size='xs'
@@ -337,7 +346,7 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
           <div className='relative min-h-0 flex-1'>
             <MonacoEditor
               height='100%'
-              language={language === 'js' ? 'javascript' : 'typescript'}
+              language={language === 'js' ? 'javascript' : language === 'py' ? 'python' : 'typescript'}
               value={s.work}
               onChange={(v) => s.setWork(v ?? '')}
               theme='vs-dark'
@@ -404,9 +413,10 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
 }
 
 function Code2Tag({ language }: { language: RunnerLanguage }) {
+  const label = { js: 'JS', ts: 'TS', react: 'RX', py: 'PY' }[language]
   return (
     <span className='grid size-4 place-items-center rounded border border-iris/30 bg-iris/20 text-[8px] font-bold text-iris uppercase'>
-      {language === 'js' ? 'JS' : 'TS'}
+      {label}
     </span>
   )
 }

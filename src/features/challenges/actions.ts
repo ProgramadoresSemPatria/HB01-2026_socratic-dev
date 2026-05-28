@@ -90,7 +90,13 @@ export async function getNextChallenge(input: {
     input.level === 'intermediate' || input.level === 'advanced'
       ? input.level
       : 'beginner'
-  const stack = input.stack === 'javascript' ? 'javascript' : 'typescript'
+  const stackMap: Record<string, string> = {
+    javascript: 'javascript',
+    typescript: 'typescript',
+    react: 'react',
+    python: 'python',
+  }
+  const stack = stackMap[input.stack ?? ''] ?? 'typescript'
 
   let seenIds: string[] = []
   if (input.userId) {
