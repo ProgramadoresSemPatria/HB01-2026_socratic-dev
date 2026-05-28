@@ -2,10 +2,40 @@
 
 import { useUser } from '@/lib/auth/use-user'
 import { cn } from '@/lib/utils'
+import { Lightbulb } from 'lucide-react'
 import { motion, useMotionValueEvent, useScroll } from 'motion/react'
 import Link from 'next/link'
 import * as React from 'react'
 import { Logo } from './logo'
+
+function HintsChip({ userId }: { userId: string }) {
+  const [remaining, setRemaining] = React.useState<number | null>(null)
+  React.useEffect(() => {
+    let active = true
+    fetch(`/api/hints?user_id=${userId}`)
+      .then((r) => r.json())
+      .then((b) => {
+        if (active && typeof b?.remaining === 'number') setRemaining(b.remaining)
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [userId])
+  if (remaining === null) return null
+  return (
+    <span
+      title='Hints disponíveis'
+      className={cn(
+        'hidden h-9 items-center gap-1.5 rounded-full border border-[#DFE5E9] bg-white px-3 font-mono text-[12px] sm:inline-flex',
+        remaining <= 0 ? 'text-red-500' : 'text-[#6b6478]',
+      )}
+    >
+      <Lightbulb className='size-3.5 text-iris' />
+      {remaining}
+    </span>
+  )
+}
 
 const links = [
   { href: '#problema', label: 'Problema' },
@@ -63,6 +93,7 @@ export function Navbar() {
               >
                 Dashboard
               </Link>
+              <HintsChip userId={user.id} />
               <Link
                 href='/profile'
                 aria-label='Seu perfil'

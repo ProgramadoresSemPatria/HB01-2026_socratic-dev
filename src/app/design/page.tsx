@@ -8,6 +8,7 @@ import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { type Challenge } from '@/lib/challenge'
 import {
+  buildSceneElements,
   type ExcalidrawApi,
   exportScenePng,
   summarizeElements,
@@ -146,6 +147,40 @@ export default function DesignPage() {
         text: data.text || data.error || 'Hint indisponível.',
         hintLevel: level,
       })
+    } finally {
+      s.setThinking(false)
+    }
+  }
+
+  async function askSolve() {
+    if (s.thinking || !challenge) return
+    s.setThinking(true)
+    s.spendSolve()
+    try {
+      const res = await fetch('/api/solve', {
+        ...POST,
+        body: JSON.stringify({
+          kind: 'design',
+          title: challenge.title,
+          briefing: challenge.client_briefing,
+          work: summarizeElements(currentElements()),
+        }),
+      })
+      const data = await res.json()
+      if (Array.isArray(data.nodes) && data.nodes.length > 0) {
+        const elements = await buildSceneElements(data.nodes, data.edges ?? [])
+        apiRef.current?.updateScene({ elements })
+        s.setWork(elements)
+        s.pushMessage({
+          role: 'ai',
+          text: 'Desenhei a arquitetura no canvas. Estude o fluxo e por que cada peça está ali.',
+        })
+      } else {
+        s.pushMessage({
+          role: 'ai',
+          text: data.error || 'Não consegui resolver agora.',
+        })
+      }
     } finally {
       s.setThinking(false)
     }
@@ -311,6 +346,9 @@ export default function DesignPage() {
             sendUser={sendUser}
             askHint={askHint}
             hintsUsed={s.hintsUsed}
+            hintsRemaining={s.hintsRemaining}
+            onSolve={askSolve}
+            onBuy={s.buyHints}
           />
         </aside>
       </div>

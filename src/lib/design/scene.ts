@@ -12,6 +12,47 @@ export type ExcalidrawApi = {
   getSceneElements: () => readonly unknown[]
   getAppState: () => Record<string, unknown>
   getFiles: () => Record<string, unknown>
+  updateScene: (scene: { elements: readonly unknown[] }) => void
+}
+
+// Builds Excalidraw elements from an architecture graph (nodes + edges),
+// laid out in a grid. Used by "Resolver pra mim" to draw the solution.
+export async function buildSceneElements(
+  nodes: { id: string; label: string }[],
+  edges: { from: string; to: string }[],
+): Promise<readonly unknown[]> {
+  const { convertToExcalidrawElements } = await import('@excalidraw/excalidraw')
+  const COLS = 3
+  const W = 200
+  const H = 90
+  const GAP_X = 90
+  const GAP_Y = 80
+
+  const skeleton: unknown[] = nodes.map((n, i) => ({
+    type: 'rectangle',
+    id: n.id,
+    x: (i % COLS) * (W + GAP_X),
+    y: Math.floor(i / COLS) * (H + GAP_Y),
+    width: W,
+    height: H,
+    backgroundColor: '#f1f0fb',
+    label: { text: n.label },
+  }))
+
+  const ids = new Set(nodes.map((n) => n.id))
+  for (const e of edges) {
+    if (ids.has(e.from) && ids.has(e.to)) {
+      skeleton.push({
+        type: 'arrow',
+        x: 0,
+        y: 0,
+        start: { id: e.from },
+        end: { id: e.to },
+      })
+    }
+  }
+
+  return convertToExcalidrawElements(skeleton as never) as readonly unknown[]
 }
 
 export function summarizeElements(elements: readonly unknown[]): string {

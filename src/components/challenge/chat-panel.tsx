@@ -1,8 +1,9 @@
 'use client'
 
 import type { ChatMsg } from '@/lib/ai/types'
+import { SOLVE_COST } from '@/lib/hints'
 import { cn } from '@/lib/utils'
-import { Lightbulb, Send } from 'lucide-react'
+import { Lightbulb, Send, Sparkles, Wand2 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { FormattedText } from './formatted-text'
 
@@ -15,6 +16,9 @@ export function ChatPanel({
   sendUser,
   askHint,
   hintsUsed,
+  hintsRemaining,
+  onSolve,
+  onBuy,
 }: {
   messages: ChatMsg[]
   scrollRef: React.RefObject<HTMLDivElement | null>
@@ -24,7 +28,12 @@ export function ChatPanel({
   sendUser: () => void
   askHint: (level: 1 | 2 | 3) => void
   hintsUsed: number
+  hintsRemaining: number | null
+  onSolve: () => void
+  onBuy: () => void
 }) {
+  const noHints = hintsRemaining !== null && hintsRemaining <= 0
+  const cantSolve = hintsRemaining !== null && hintsRemaining < SOLVE_COST
   return (
     <>
       <div className='flex h-10 items-center justify-between border-b border-[#DFE5E9] bg-[#F7F9FA] px-4'>
@@ -104,19 +113,46 @@ export function ChatPanel({
       </div>
 
       <div className='border-t border-[#DFE5E9] px-3 pt-2 pb-1'>
-        <div className='mb-1.5 font-mono text-[10px] tracking-wider text-[#6b6478] uppercase'>
-          Preciso de uma pista
+        <div className='mb-1.5 flex items-center justify-between font-mono text-[10px] tracking-wider text-[#6b6478] uppercase'>
+          <span>Preciso de uma pista</span>
+          {hintsRemaining !== null && (
+            <span className={cn(noHints && 'font-semibold text-red-500')}>
+              {hintsRemaining} restantes
+            </span>
+          )}
         </div>
         <div className='flex gap-1.5'>
-          <HintBtn level={1} onClick={() => askHint(1)}>
+          <HintBtn level={1} disabled={noHints} onClick={() => askHint(1)}>
             Vago
           </HintBtn>
-          <HintBtn level={2} onClick={() => askHint(2)}>
+          <HintBtn level={2} disabled={noHints} onClick={() => askHint(2)}>
             Médio
           </HintBtn>
-          <HintBtn level={3} onClick={() => askHint(3)}>
+          <HintBtn level={3} disabled={noHints} onClick={() => askHint(3)}>
             Quase direto
           </HintBtn>
+        </div>
+        <div className='mt-1.5'>
+          {noHints ? (
+            <button
+              onClick={onBuy}
+              className='flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-iris/30 bg-iris/10 px-2.5 py-1.5 text-[11px] font-medium text-iris transition-colors hover:bg-iris/15'
+            >
+              <Sparkles className='size-3' /> Comprar +10 hints
+            </button>
+          ) : (
+            <button
+              onClick={onSolve}
+              disabled={cantSolve}
+              title='Revela a solução completa — último recurso'
+              className='flex w-full cursor-pointer items-center gap-1.5 rounded-lg border border-[#DFE5E9] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#1b1916] transition-colors hover:border-iris/40 hover:bg-iris/5 disabled:opacity-40'
+            >
+              <Wand2 className='size-3 text-iris' /> Resolver pra mim
+              <span className='ml-auto font-mono text-[9px] text-[#6b6478]'>
+                −{SOLVE_COST} hints
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -156,17 +192,20 @@ export function ChatPanel({
 function HintBtn({
   level,
   onClick,
+  disabled,
   children,
 }: {
   level: 1 | 2 | 3
   onClick: () => void
+  disabled?: boolean
   children: React.ReactNode
 }) {
   const cost = level * 4
   return (
     <button
       onClick={onClick}
-      className='group flex-1 cursor-pointer rounded-lg border border-[#DFE5E9] bg-white px-2.5 py-1.5 text-left transition-colors hover:border-amber-400/50 hover:bg-amber-50'
+      disabled={disabled}
+      className='group flex-1 cursor-pointer rounded-lg border border-[#DFE5E9] bg-white px-2.5 py-1.5 text-left transition-colors hover:border-amber-400/50 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-40'
     >
       <div className='flex items-center gap-1 text-[11px] font-medium text-[#1b1916]'>
         <Lightbulb className='size-3 text-amber-500' />

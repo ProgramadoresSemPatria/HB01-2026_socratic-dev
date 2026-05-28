@@ -5,7 +5,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { LEVEL_LABEL, type Challenge } from '@/lib/challenge'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
-import { ArrowRight, Code2, Network } from 'lucide-react'
+import {
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Code2,
+  Network,
+} from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import * as React from 'react'
@@ -57,6 +63,8 @@ function dedupe(list: Challenge[]): Challenge[] {
 export default function ChallengesLibraryPage() {
   const [challenges, setChallenges] = React.useState<Challenge[] | null>(null)
   const [filter, setFilter] = React.useState<Filter>('all')
+  const [page, setPage] = React.useState(0)
+  const PAGE = 9
 
   React.useEffect(() => {
     let active = true
@@ -76,6 +84,8 @@ export default function ChallengesLibraryPage() {
   const visible = unique.filter((c) =>
     filter === 'all' ? true : c.kind === filter,
   )
+  const totalPages = Math.max(1, Math.ceil(visible.length / PAGE))
+  const pageItems = visible.slice(page * PAGE, page * PAGE + PAGE)
 
   return (
     <div className='relative flex min-h-screen flex-1 flex-col bg-white'>
@@ -113,7 +123,10 @@ export default function ChallengesLibraryPage() {
               <button
                 key={f.id}
                 type='button'
-                onClick={() => setFilter(f.id)}
+                onClick={() => {
+                  setFilter(f.id)
+                  setPage(0)
+                }}
                 className={cn(
                   'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
                   filter === f.id
@@ -136,7 +149,7 @@ export default function ChallengesLibraryPage() {
                 Nenhum desafio nesse filtro ainda.
               </p>
             ) : (
-              visible.map((c, i) => {
+              pageItems.map((c, i) => {
                 const isDesign = c.kind === 'design'
                 const href = `${isDesign ? '/design' : '/challenge'}?id=${c.id}`
                 const Icon = isDesign ? Network : Code2
@@ -178,6 +191,30 @@ export default function ChallengesLibraryPage() {
               })
             )}
           </div>
+
+          {visible.length > PAGE && (
+            <div className='mt-8 flex items-center justify-center gap-2 font-mono text-[12px] text-[#6b6478]'>
+              <button
+                type='button'
+                disabled={page === 0}
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                className='grid size-8 place-items-center rounded-lg border border-[#DFE5E9] transition-colors hover:bg-[#F7F9FA] disabled:opacity-40'
+              >
+                <ChevronLeft className='size-4' />
+              </button>
+              <span>
+                {page + 1} / {totalPages}
+              </span>
+              <button
+                type='button'
+                disabled={page >= totalPages - 1}
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                className='grid size-8 place-items-center rounded-lg border border-[#DFE5E9] transition-colors hover:bg-[#F7F9FA] disabled:opacity-40'
+              >
+                <ChevronRight className='size-4' />
+              </button>
+            </div>
+          )}
         </div>
       </main>
     </div>

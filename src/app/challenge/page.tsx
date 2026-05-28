@@ -149,6 +149,38 @@ export default function ChallengePage() {
     }
   }
 
+  async function askSolve() {
+    if (s.thinking || !challenge) return
+    s.setThinking(true)
+    s.spendSolve()
+    try {
+      const res = await fetch('/api/solve', {
+        ...POST,
+        body: JSON.stringify({
+          kind: 'code',
+          title: challenge.title,
+          briefing: challenge.client_briefing,
+          work: s.work,
+        }),
+      })
+      const data = await res.json()
+      if (data.code) {
+        s.setWork(data.code)
+        s.pushMessage({
+          role: 'ai',
+          text: 'Apliquei a solução no editor. Rode os testes e estude por que ela funciona.',
+        })
+      } else {
+        s.pushMessage({
+          role: 'ai',
+          text: data.error || 'Não consegui resolver agora.',
+        })
+      }
+    } finally {
+      s.setThinking(false)
+    }
+  }
+
   async function submitReview() {
     if (!challenge || reviewing) return
     setReviewOpen(true)
@@ -356,6 +388,9 @@ export default function ChallengePage() {
             sendUser={sendUser}
             askHint={askHint}
             hintsUsed={s.hintsUsed}
+            hintsRemaining={s.hintsRemaining}
+            onSolve={askSolve}
+            onBuy={s.buyHints}
           />
         </aside>
       </div>
