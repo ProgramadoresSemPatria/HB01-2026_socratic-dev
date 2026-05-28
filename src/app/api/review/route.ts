@@ -8,49 +8,51 @@ Termine com 1 ou 2 perguntas que levem o aluno a melhorar sozinho.
 Português do Brasil. Markdown curto com bullets.`
 
 export async function POST(req: Request) {
+  const body = await req.json().catch(() => ({}))
+  const code: string = body.code ?? ''
+  const title: string = body.title ?? ''
+  const briefing: string = body.briefing ?? ''
+  const sessionId: string | undefined = body.session_id
+  const userId: string | undefined = body.user_id
+
+  if (!code) {
+    return Response.json({ error: 'code é obrigatório' }, { status: 400 })
+  }
+
+  const user = [
+    `Desafio: ${title}`,
+    `Briefing do cliente: ${briefing}`,
+    '',
+    'Código submetido:',
+    '```',
+    code,
+    '```',
+    '',
+    'Faça o review.',
+  ].join('\n')
+
+  let review: string | null = null
+  let aiError: unknown = null
   try {
-    const body = await req.json()
-    const code: string = body.code ?? ''
-    const title: string = body.title ?? ''
-    const briefing: string = body.briefing ?? ''
-    const sessionId: string | undefined = body.session_id
-    const userId: string | undefined = body.user_id
-
-    if (!code) {
-      return Response.json({ error: 'code é obrigatório' }, { status: 400 })
-    }
-
-    const user = [
-      `Desafio: ${title}`,
-      `Briefing do cliente: ${briefing}`,
-      '',
-      'Código submetido:',
-      '```',
-      code,
-      '```',
-      '',
-      'Faça o review.',
-    ].join('\n')
-
-    const review = await askClaude({
+    review = await askClaude({
       system: SYSTEM,
       user,
       maxTokens: 2048,
       effort: 'high',
     })
-
-    // Persist the submission + review when we have an authenticated session.
-    if (sessionId && userId) {
-      await supabaseAdmin.from('code_submissions').insert({
-        session_id: sessionId,
-        user_id: userId,
-        code,
-        review_response: review,
-      } as never)
-    }
-
-    return Response.json({ review })
   } catch (e) {
-    return aiErrorResponse(e)
+    aiError = e
   }
+
+  if (sessionId && userId) {
+    await supabaseAdmin.from('code_submissions').insert({
+      session_id: sessionId,
+      user_id: userId,
+      code,
+      review_response: review,
+    })
+  }
+
+  if (aiError) return aiErrorResponse(aiError)
+  return Response.json({ review })
 }

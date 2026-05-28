@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
     const { data, error } = await supabaseAdmin
       .from('challenges')
-      .insert(row as never)
+      .insert(row)
       .select()
       .single()
 

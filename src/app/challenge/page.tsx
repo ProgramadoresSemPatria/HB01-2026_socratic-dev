@@ -53,7 +53,7 @@ export default function ChallengePage() {
   const [messages, setMessages] = React.useState<ChatMsg[]>([])
   const [input, setInput] = React.useState('')
   const [thinking, setThinking] = React.useState(false)
-  const [independence, setIndependence] = React.useState(92)
+  const [independence, setIndependence] = React.useState(100)
   const [hintsUsed, setHintsUsed] = React.useState(0)
   const [reviewOpen, setReviewOpen] = React.useState(false)
   const [review, setReview] = React.useState<string | null>(null)
