@@ -27,7 +27,11 @@ type Profile = {
   preferred_level?: string | null
 }
 
-type Stats = { independence_score: number }
+type Stats = {
+  independence_score: number
+  total_completed: number
+  total_hints: number
+}
 
 const STACK_OPTIONS = [
   { value: 'javascript', label: 'JavaScript' },
@@ -147,7 +151,7 @@ export default function ProfilePage() {
                     <Stat
                       icon={Trophy}
                       label='Concluídos'
-                      value={String(profile?.total_challenges_completed ?? 0)}
+                      value={String(stats?.total_completed ?? 0)}
                     />
                     <Stat
                       icon={GaugeCircle}
@@ -157,7 +161,7 @@ export default function ProfilePage() {
                     <Stat
                       icon={Layers}
                       label='Hints usados'
-                      value={String(profile?.total_hints_used ?? 0)}
+                      value={String(stats?.total_hints ?? 0)}
                     />
                   </div>
 

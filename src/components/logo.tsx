@@ -9,33 +9,27 @@ interface LogoProps {
 
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox='0 0 32 32'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      className={cn('size-7', className)}
+    <div
+      className={cn(
+        'grid size-8 shrink-0 place-items-center rounded-xl bg-[#dad8ea]/55 text-[#1b1916]',
+        className,
+      )}
       aria-hidden
     >
-      <defs>
-        <linearGradient
-          id='logo-grad'
-          x1='0'
-          y1='0'
-          x2='32'
-          y2='32'
-          gradientUnits='userSpaceOnUse'
-        >
-          <stop offset='0%' stopColor='oklch(0.78 0.17 165)' />
-          <stop offset='55%' stopColor='oklch(0.68 0.22 285)' />
-          <stop offset='100%' stopColor='oklch(0.6 0.25 295)' />
-        </linearGradient>
-      </defs>
-      <path
-        d='M16 2.5C8.5 2.5 2.5 8.5 2.5 16S8.5 29.5 16 29.5 29.5 23.5 29.5 16 23.5 2.5 16 2.5Zm0 5.5c4.4 0 8 3.6 8 8 0 1.3-.3 2.5-.9 3.6L18 14.5l-5.1 5.1L9 15.7c0-.4 0-.5 0 0 0-4.4 3.6-7.7 7-7.7Z'
-        fill='url(#logo-grad)'
-      />
-      <circle cx='16' cy='16' r='2.6' fill='oklch(0.97 0.005 280)' />
-    </svg>
+      <svg
+        viewBox='0 0 24 24'
+        className='size-5'
+        fill='none'
+        stroke='currentColor'
+        strokeWidth='1.75'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+      >
+        <path d='M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8' />
+        <path d='M21 3v5h-5' />
+        <circle cx='12' cy='12' r='1.6' fill='currentColor' stroke='none' />
+      </svg>
+    </div>
   )
 }
 
@@ -44,8 +38,11 @@ export function Logo({ className, asLink = true, showText = true }: LogoProps) {
     <div className={cn('flex items-center gap-2.5', className)}>
       <LogoMark />
       {showText && (
-        <span className='font-heading text-[17px] font-semibold tracking-tight'>
-          Socratic<span className='text-muted-foreground'>.dev</span>
+        <span className='font-heading text-[17px] font-medium tracking-tight text-[#1b1916]'>
+          socratic
+          <span className='text-gradient font-serif font-normal italic'>
+            .dev
+          </span>
         </span>
       )}
     </div>
