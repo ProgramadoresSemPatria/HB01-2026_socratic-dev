@@ -11,7 +11,7 @@ export async function PATCH(
     return Response.json({ error: 'status is required' }, { status: 400 })
   }
 
-  const update: Record<string, string> = { status }
+  const update: { status: string; completed_at?: string } = { status }
   if (status === 'completed' || status === 'abandoned') {
     update.completed_at = new Date().toISOString()
   }

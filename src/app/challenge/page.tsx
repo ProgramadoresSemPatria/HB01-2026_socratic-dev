@@ -4,13 +4,15 @@ import { ReactPreview } from '@/components/challenge/react-preview'
 import { RunTerminal } from '@/components/challenge/run-terminal'
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
+import type { ChatMsg } from '@/lib/ai/types'
+import { useUser } from '@/lib/auth/use-user'
 import { runCode } from '@/lib/runner/run-code'
 import type { RunResult, RunnerLanguage } from '@/lib/runner/types'
+import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import {
   Brain,
   Building,
-  CheckCircle2,
   ChevronRight,
   Clock,
   GitPullRequestArrow,
@@ -25,6 +27,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import * as React from 'react'
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
@@ -36,63 +39,90 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ),
 })
 
-const language: RunnerLanguage = 'ts'
-
-const initialCode = `// Cliente: Padaria do Zé
-// "Quais produtos vencem em até 3 dias?"
-// Cada produto tem { nome, expiresAt } onde expiresAt é 'YYYY-MM-DD'.
-
-export function expiringProducts(produtos, hoje) {
-  // devolva apenas os produtos que vencem em até 3 dias a partir de 'hoje'
-
+type Challenge = {
+  id: string
+  title: string
+  description: string
+  stack: string
+  level: string
+  client_briefing: string
+  initial_code: string
+  tests_source: string
+  intro: string
 }
-`
 
-const testsSource = `const TRES_DIAS = 3 * 24 * 60 * 60 * 1000
-const hoje = new Date('2026-05-27').getTime()
-const produtos = [
-  { nome: 'Pão francês', expiresAt: '2026-05-29' },
-  { nome: 'Croissant', expiresAt: '2026-05-30' },
-  { nome: 'Bolo de cenoura', expiresAt: '2026-06-15' },
-  { nome: 'Torta', expiresAt: '2026-05-27' },
-]
-
-test('retorna os 3 que vencem em até 3 dias', () => {
-  expect(exports.expiringProducts(produtos, hoje).length).toBe(3)
-})
-
-test('exclui o que vence depois de 3 dias', () => {
-  const r = exports.expiringProducts(produtos, hoje)
-  expect(r.find((p) => p.nome === 'Bolo de cenoura')).toBe(undefined)
-})
-
-test('lista vazia devolve lista vazia', () => {
-  expect(exports.expiringProducts([], hoje).length).toBe(0)
-})
-`
-
-type ChatMsg = { role: 'user' | 'ai'; text: string; hintLevel?: 1 | 2 | 3 }
-
-const initialChat: ChatMsg[] = [
-  {
-    role: 'ai',
-    text: 'Olá. Antes de começar, leia o briefing à esquerda com calma. Que estrutura de dados o `findAll()` provavelmente devolve?',
-  },
-]
+const LEVEL_LABEL: Record<string, string> = {
+  beginner: 'Iniciante',
+  intermediate: 'Intermediário',
+}
 
 export default function ChallengePage() {
-  const [code, setCode] = React.useState(initialCode)
-  const [messages, setMessages] = React.useState<ChatMsg[]>(initialChat)
+  const router = useRouter()
+  const { user, loading: authLoading } = useUser()
+
+  const [challenge, setChallenge] = React.useState<Challenge | null>(null)
+  const [sessionId, setSessionId] = React.useState<string | null>(null)
+  const [code, setCode] = React.useState('')
+  const [messages, setMessages] = React.useState<ChatMsg[]>([])
   const [input, setInput] = React.useState('')
   const [thinking, setThinking] = React.useState(false)
   const [independence, setIndependence] = React.useState(92)
   const [hintsUsed, setHintsUsed] = React.useState(0)
   const [reviewOpen, setReviewOpen] = React.useState(false)
+  const [review, setReview] = React.useState<string | null>(null)
+  const [reviewing, setReviewing] = React.useState(false)
   const [elapsed, setElapsed] = React.useState(0)
   const [running, setRunning] = React.useState(false)
   const [result, setResult] = React.useState<RunResult | null>(null)
   const [showPanel, setShowPanel] = React.useState(false)
   const scrollRef = React.useRef<HTMLDivElement>(null)
+
+  const language = (challenge?.stack === 'javascript'
+    ? 'js'
+    : 'ts') as RunnerLanguage
+
+  // Auth guard
+  React.useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/login?next=/challenge')
+    }
+  }, [authLoading, user, router])
+
+  // Load the challenge from the DB + open a session
+  React.useEffect(() => {
+    if (!user) return
+    let active = true
+    ;(async () => {
+      const id =
+        typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('id')
+          : null
+
+      const query = supabase.from('challenges').select('*')
+      const { data } = id
+        ? await query.eq('id', id).single()
+        : await query.order('created_at', { ascending: true }).limit(1).single()
+
+      if (!active || !data) return
+      const ch = data as unknown as Challenge
+      setChallenge(ch)
+      setCode(ch.initial_code)
+      setMessages([{ role: 'ai', text: ch.intro }])
+
+      const res = await fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, challenge_id: ch.id }),
+      })
+      if (active && res.ok) {
+        const session = await res.json()
+        setSessionId(session.id)
+      }
+    })()
+    return () => {
+      active = false
+    }
+  }, [user])
 
   React.useEffect(() => {
     const t = setInterval(() => setElapsed((s) => s + 1), 1000)
@@ -106,75 +136,113 @@ export default function ChallengePage() {
     })
   }, [messages, thinking])
 
-  const aiQuestionBank: ChatMsg[] = [
-    {
-      role: 'ai',
-      text: 'Interessante. E qual método de array filtra elementos com base numa condição? Pense em três opções e me diz qual encaixa.',
-    },
-    {
-      role: 'ai',
-      text: 'Boa. Agora, como você compara duas datas em JavaScript? Não preciso do código — me explica a lógica.',
-    },
-    {
-      role: 'ai',
-      text: 'Hmm. Se eu pegar `hoje` e somar 3 dias, como represento isso? O que `Date` te oferece?',
-    },
-    {
-      role: 'ai',
-      text: 'Você quase chegou. Releia seu código: a condição dentro do filter retorna true ou false? Mostra a expressão.',
-    },
-  ]
-
-  function sendUser() {
-    if (!input.trim() || thinking) return
+  async function sendUser() {
+    if (!input.trim() || thinking || !challenge) return
     const text = input.trim()
-    setMessages((m) => [...m, { role: 'user', text }])
+    const next: ChatMsg[] = [...messages, { role: 'user', text }]
+    setMessages(next)
     setInput('')
     setThinking(true)
-    setTimeout(() => {
-      const next =
-        aiQuestionBank[
-          Math.min(
-            messages.filter((m) => m.role === 'user').length,
-            aiQuestionBank.length - 1,
-          )
-        ]
-      setMessages((m) => [...m, next])
+    try {
+      const res = await fetch('/api/tutor', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'reply',
+          messages: next,
+          code,
+          title: challenge.title,
+          briefing: challenge.client_briefing,
+        }),
+      })
+      const data = await res.json()
+      setMessages((m) => [
+        ...m,
+        {
+          role: 'ai',
+          text: data.text || data.error || 'Não consegui responder agora.',
+        },
+      ])
+    } finally {
       setThinking(false)
-    }, 1100)
+    }
   }
 
-  function askHint(level: 1 | 2 | 3) {
-    if (thinking) return
+  async function askHint(level: 1 | 2 | 3) {
+    if (thinking || !challenge) return
     setThinking(true)
     setHintsUsed((h) => h + 1)
     setIndependence((i) => Math.max(0, i - level * 4))
-    const hints: Record<number, string> = {
-      1: 'Hint nível 1 — Pense em métodos imutáveis de Array que retornam um subconjunto.',
-      2: 'Hint nível 2 — `Array.prototype.filter()` recebe uma callback que retorna boolean. Você precisa comparar a propriedade `expiresAt` de cada produto com uma data futura.',
-      3: 'Hint nível 3 — A condição é algo como `new Date(p.expiresAt) - Date.now() <= 3 * 24 * 60 * 60 * 1000`. Mas tente entender por que isso funciona antes de digitar.',
-    }
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/tutor', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'hint',
+          hintLevel: level,
+          messages,
+          code,
+          title: challenge.title,
+          briefing: challenge.client_briefing,
+        }),
+      })
+      const data = await res.json()
       setMessages((m) => [
         ...m,
-        { role: 'ai', text: hints[level], hintLevel: level },
+        {
+          role: 'ai',
+          text: data.text || data.error || 'Hint indisponível.',
+          hintLevel: level,
+        },
       ])
+      if (sessionId && user) {
+        fetch('/api/hints', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            user_id: user.id,
+            hint_level: level,
+          }),
+        }).catch(() => {})
+      }
+    } finally {
       setThinking(false)
-    }, 700)
+    }
   }
 
-  function submitReview() {
+  async function submitReview() {
+    if (!challenge || reviewing) return
     setReviewOpen(true)
+    setReviewing(true)
+    setReview(null)
+    try {
+      const res = await fetch('/api/review', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          code,
+          title: challenge.title,
+          briefing: challenge.client_briefing,
+          session_id: sessionId,
+          user_id: user?.id,
+        }),
+      })
+      const data = await res.json()
+      setReview(data.review || data.error || 'Não foi possível gerar o review.')
+    } finally {
+      setReviewing(false)
+    }
   }
 
   async function run() {
-    if (running) return
+    if (running || !challenge) return
     setShowPanel(true)
     if (language === 'react') return
     setRunning(true)
     setResult(null)
     const r = await runCode(
-      { code, language, testsSource },
+      { code, language, testsSource: challenge.tests_source },
       { timeoutMs: 5000 },
     )
     setResult(r)
@@ -184,6 +252,17 @@ export default function ChallengePage() {
   const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0')
   const seconds = String(elapsed % 60).padStart(2, '0')
 
+  if (authLoading || (!challenge && user)) {
+    return (
+      <div className='grid h-screen flex-1 place-items-center bg-background text-sm text-muted-foreground'>
+        <span className='flex items-center gap-2'>
+          <Loader2 className='size-4 animate-spin' /> Carregando desafio…
+        </span>
+      </div>
+    )
+  }
+  if (!user || !challenge) return null
+
   return (
     <div className='relative flex h-screen flex-1 flex-col overflow-hidden'>
       {/* Top bar */}
@@ -192,7 +271,7 @@ export default function ChallengePage() {
           <Logo />
           <div className='hidden items-center gap-2 border-l border-white/[0.06] pl-4 font-mono text-[12px] text-muted-foreground/80 sm:flex'>
             <Building className='size-3.5' />
-            Padaria do Zé · API de estoque
+            {challenge.title}
           </div>
         </div>
         <div className='flex items-center gap-2'>
@@ -220,6 +299,7 @@ export default function ChallengePage() {
           </div>
           <Button
             size='sm'
+            disabled={reviewing}
             className='h-8 gap-1.5 rounded-full border-transparent bg-foreground pr-3 pl-3 text-background hover:bg-foreground/90'
             onClick={submitReview}
           >
@@ -233,15 +313,15 @@ export default function ChallengePage() {
       <div className='grid min-h-0 flex-1 lg:grid-cols-[360px_1fr_400px] lg:grid-rows-[minmax(0,1fr)]'>
         {/* Briefing panel */}
         <aside className='overflow-y-auto border-r border-white/[0.06] bg-card/30'>
-          <BriefingPanel />
+          <BriefingPanel challenge={challenge} />
         </aside>
 
         {/* Editor */}
         <section className='relative flex min-h-0 flex-col'>
           <div className='flex h-10 items-center justify-between border-b border-white/[0.06] bg-white/[0.015] px-4'>
             <div className='flex items-center gap-2 font-mono text-[12px] text-muted-foreground/80'>
-              <Code2Tag />
-              <span>api-padaria.ts</span>
+              <Code2Tag language={language} />
+              <span>solucao.{language === 'js' ? 'js' : 'ts'}</span>
               <span className='ml-1 size-1 rounded-full bg-amber-400/70' />
               <span className='text-[11px] text-amber-400/70'>unsaved</span>
             </div>
@@ -277,7 +357,7 @@ export default function ChallengePage() {
           <div className='relative min-h-0 flex-1'>
             <MonacoEditor
               height='100%'
-              defaultLanguage='typescript'
+              language={language === 'js' ? 'javascript' : 'typescript'}
               value={code}
               onChange={(v) => setCode(v ?? '')}
               theme='vs-dark'
@@ -327,6 +407,8 @@ export default function ChallengePage() {
       <AnimatePresence>
         {reviewOpen && (
           <ReviewModal
+            review={review}
+            reviewing={reviewing}
             independence={independence}
             hintsUsed={hintsUsed}
             onClose={() => setReviewOpen(false)}
@@ -337,15 +419,15 @@ export default function ChallengePage() {
   )
 }
 
-function Code2Tag() {
+function Code2Tag({ language }: { language: RunnerLanguage }) {
   return (
-    <span className='grid size-4 place-items-center rounded border border-iris/30 bg-iris/20 text-[8px] font-bold text-iris'>
-      TS
+    <span className='grid size-4 place-items-center rounded border border-iris/30 bg-iris/20 text-[8px] font-bold text-iris uppercase'>
+      {language === 'js' ? 'JS' : 'TS'}
     </span>
   )
 }
 
-function BriefingPanel() {
+function BriefingPanel({ challenge }: { challenge: Challenge }) {
   return (
     <div className='p-6'>
       <div className='glass mb-5 inline-flex items-center gap-2 rounded-full px-2.5 py-1 font-mono text-[10px] tracking-wider text-muted-foreground/70 uppercase'>
@@ -354,61 +436,22 @@ function BriefingPanel() {
       </div>
 
       <h2 className='mb-3 font-heading text-2xl leading-tight font-semibold tracking-tight'>
-        API de controle de estoque para a Padaria do Zé
+        {challenge.title}
       </h2>
 
       <div className='mb-6 flex items-center gap-2 font-mono text-[11px] text-muted-foreground/70'>
         <span className='rounded-full border border-white/[0.06] bg-white/[0.04] px-2 py-0.5'>
-          TypeScript
+          {challenge.stack === 'javascript' ? 'JavaScript' : 'TypeScript'}
         </span>
         <span className='rounded-full border border-white/[0.06] bg-white/[0.04] px-2 py-0.5'>
-          Júnior
-        </span>
-        <span className='rounded-full border border-mint/20 bg-mint/10 px-2 py-0.5 text-mint'>
-          ~25min
+          {LEVEL_LABEL[challenge.level] ?? challenge.level}
         </span>
       </div>
 
       <div className='space-y-4 text-sm leading-relaxed'>
-        <p className='text-foreground/90'>
-          Seu Zé tem uma padaria de bairro. Hoje, joga pão fora todo dia porque
-          esquece o que está perto do vencimento.
+        <p className='whitespace-pre-line text-foreground/90'>
+          {challenge.client_briefing}
         </p>
-        <p className='text-muted-foreground'>
-          Ele te pediu uma função que retorne os produtos que{' '}
-          <span className='text-foreground'>vencem em até 3 dias</span> a partir
-          de hoje. Só isso. Sem frontend, sem nada chique.
-        </p>
-
-        <div className='mt-6'>
-          <div className='mb-2 font-mono text-[11px] tracking-wider text-muted-foreground/70 uppercase'>
-            Restrições
-          </div>
-          <ul className='space-y-1.5 text-[13px] text-foreground/90'>
-            <Constraint>
-              Receba a lista de produtos por parâmetro (sem acessar banco)
-            </Constraint>
-            <Constraint>
-              Função deve ser pura — sem efeitos colaterais
-            </Constraint>
-            <Constraint>Retorne o array vazio se não houver itens</Constraint>
-            <Constraint>Não importe libs de data (use só Date)</Constraint>
-          </ul>
-        </div>
-
-        <div className='mt-6'>
-          <div className='mb-2 font-mono text-[11px] tracking-wider text-muted-foreground/70 uppercase'>
-            Modelo
-          </div>
-          <pre className='overflow-x-auto rounded-xl border border-white/[0.06] bg-code p-3 font-mono text-[12px] leading-relaxed text-foreground/90'>
-            {`type Product = {
-  id: string
-  name: string
-  expiresAt: string  // ISO date
-  quantity: number
-}`}
-          </pre>
-        </div>
 
         <div className='mt-6 rounded-xl border border-iris/20 bg-iris/5 p-4'>
           <div className='mb-1.5 flex items-center gap-2 font-mono text-[11px] tracking-wider text-iris uppercase'>
@@ -422,15 +465,6 @@ function BriefingPanel() {
         </div>
       </div>
     </div>
-  )
-}
-
-function Constraint({ children }: { children: React.ReactNode }) {
-  return (
-    <li className='flex gap-2.5'>
-      <CheckCircle2 className='mt-0.5 size-4 shrink-0 text-mint' />
-      <span>{children}</span>
-    </li>
   )
 }
 
@@ -620,7 +654,9 @@ function FormattedText({ text }: { text: string }) {
             {p.slice(1, -1)}
           </code>
         ) : (
-          <span key={i}>{p}</span>
+          <span key={i} className='whitespace-pre-line'>
+            {p}
+          </span>
         ),
       )}
     </>
@@ -628,29 +664,18 @@ function FormattedText({ text }: { text: string }) {
 }
 
 function ReviewModal({
+  review,
+  reviewing,
   independence,
   hintsUsed,
   onClose,
 }: {
+  review: string | null
+  reviewing: boolean
   independence: number
   hintsUsed: number
   onClose: () => void
 }) {
-  const questions = [
-    {
-      q: 'Você usou `findAll()` e depois filtrou em memória. Em prod, com 100k produtos, isso escala?',
-      hint: 'Pense em como o SQL faria isso direto no banco.',
-    },
-    {
-      q: 'Sua condição compara datas com `>`. Para datas ISO string, isso é confiável? Em todos os fusos?',
-      hint: 'Tente com `2026-01-01T23:00:00Z` vs `2026-01-02T01:00:00-03:00`.',
-    },
-    {
-      q: 'Você retornou todos os campos do produto. O cliente disse que precisa de quais?',
-      hint: 'Releia o briefing. Menos é mais.',
-    },
-  ]
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -689,30 +714,30 @@ function ReviewModal({
             .
           </h2>
           <p className='text-muted-foreground'>
-            Três perguntas. Pra cada uma, escreva sua resposta antes de virar a
-            pista.
+            O tutor revisou seu código. Leia, responda mentalmente e melhore.
           </p>
         </div>
 
-        <div className='space-y-3 px-8 pb-6'>
-          {questions.map((q, i) => (
-            <ReviewQuestion key={i} index={i + 1} {...q} />
-          ))}
+        <div className='px-8 pb-6'>
+          {reviewing || !review ? (
+            <div className='flex items-center gap-2 py-8 text-sm text-muted-foreground'>
+              <Loader2 className='size-4 animate-spin' /> Gerando review…
+            </div>
+          ) : (
+            <div className='glass rounded-2xl p-5 text-[14px] leading-relaxed text-foreground/95'>
+              <FormattedText text={review} />
+            </div>
+          )}
         </div>
 
         <div className='border-t border-white/[0.06] bg-white/[0.015] px-8 py-6'>
-          <div className='mb-5 grid grid-cols-3 gap-3'>
+          <div className='mb-5 grid grid-cols-2 gap-3'>
             <Metric
               label='Independência'
               value={`${independence}%`}
               accent='mint'
             />
             <Metric label='Hints usados' value={String(hintsUsed)} />
-            <Metric
-              label='Conceitos novos'
-              value='filter · Date'
-              accent='iris'
-            />
           </div>
           <div className='flex gap-2'>
             <Button
@@ -734,52 +759,6 @@ function ReviewModal({
         </div>
       </motion.div>
     </motion.div>
-  )
-}
-
-function ReviewQuestion({
-  index,
-  q,
-  hint,
-}: {
-  index: number
-  q: string
-  hint: string
-}) {
-  const [open, setOpen] = React.useState(false)
-  return (
-    <div className='glass rounded-2xl p-4'>
-      <div className='flex gap-3'>
-        <div className='grid size-6 shrink-0 place-items-center rounded-full border border-white/[0.08] bg-white/[0.04] font-mono text-[11px] text-muted-foreground'>
-          {index}
-        </div>
-        <div className='flex-1'>
-          <p className='text-[14px] leading-relaxed text-foreground/95'>
-            <FormattedText text={q} />
-          </p>
-          <button
-            onClick={() => setOpen((v) => !v)}
-            className='mt-2 font-mono text-[11px] text-iris/80 transition-colors hover:text-iris'
-          >
-            {open ? 'esconder dica' : 'preciso de uma dica →'}
-          </button>
-          <AnimatePresence>
-            {open && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className='overflow-hidden'
-              >
-                <div className='mt-2 text-[13px] text-muted-foreground italic'>
-                  <FormattedText text={hint} />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-    </div>
   )
 }
 

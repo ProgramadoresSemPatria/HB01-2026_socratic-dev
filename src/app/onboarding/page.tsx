@@ -1,7 +1,6 @@
 'use client'
 
-import { Backdrop } from '@/components/backdrop'
-import { Navbar } from '@/components/navbar'
+import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ArrowLeft, ArrowRight, Check, Sparkles } from 'lucide-react'
@@ -74,11 +73,18 @@ export default function OnboardingPage() {
   const canNext = (step === 0 && stack) || (step === 1 && level) || step === 2
 
   return (
-    <div className='relative flex flex-1 flex-col'>
-      <Navbar />
-      <Backdrop variant='subtle' />
+    <div className='relative flex min-h-screen flex-1 flex-col bg-white'>
+      <header className='flex h-16 shrink-0 items-center justify-between px-6 sm:px-10'>
+        <Logo />
+        <Link
+          href='/'
+          className='text-sm text-[#6b6478] transition-colors hover:text-[#1b1916]'
+        >
+          Voltar ao site
+        </Link>
+      </header>
 
-      <main className='flex flex-1 flex-col pt-28 pb-16'>
+      <main className='flex flex-1 flex-col pt-6 pb-16'>
         <div className='mx-auto flex w-full max-w-3xl flex-1 flex-col px-4'>
           {/* Stepper */}
           <div className='mb-12 flex items-center gap-2'>
@@ -89,10 +95,10 @@ export default function OnboardingPage() {
                     'h-1 rounded-full transition-all duration-500',
                     step >= i
                       ? 'bg-linear-to-r from-iris to-mint'
-                      : 'bg-white/6',
+                      : 'bg-[#DFE5E9]',
                   )}
                 />
-                <div className='mt-2 font-mono text-[10px] tracking-wider text-muted-foreground/70 uppercase'>
+                <div className='mt-2 font-mono text-[10px] tracking-wider text-[#6b6478] uppercase'>
                   {['Stack', 'Nível', 'Pronto'][i]}
                 </div>
               </div>
@@ -117,19 +123,17 @@ export default function OnboardingPage() {
                     >
                       <div
                         className={cn(
-                          'grid size-12 place-items-center rounded-2xl border border-white/10 bg-linear-to-br font-mono text-sm font-bold',
+                          'grid size-12 place-items-center rounded-2xl border border-black/5 bg-linear-to-br font-mono text-sm font-bold text-[#1b1916]',
                           s.gradient,
                         )}
                       >
                         {s.icon}
                       </div>
                       <div className='flex-1'>
-                        <div className='font-heading text-lg font-semibold tracking-tight'>
+                        <div className='font-heading text-lg font-medium tracking-tight text-[#1b1916]'>
                           {s.name}
                         </div>
-                        <div className='text-sm text-muted-foreground'>
-                          {s.desc}
-                        </div>
+                        <div className='text-sm text-[#6b6478]'>{s.desc}</div>
                       </div>
                     </Tile>
                   ))}
@@ -161,7 +165,7 @@ export default function OnboardingPage() {
                                 'h-2 w-6 rounded-full',
                                 idx < l.intensity
                                   ? 'bg-linear-to-r from-iris to-mint'
-                                  : 'bg-white/8',
+                                  : 'bg-[#DFE5E9]',
                               )}
                             />
                           ))}
@@ -169,14 +173,14 @@ export default function OnboardingPage() {
                       </div>
                       <div className='flex-1'>
                         <div className='flex items-center gap-2'>
-                          <div className='font-heading text-lg font-semibold tracking-tight'>
+                          <div className='font-heading text-lg font-medium tracking-tight text-[#1b1916]'>
                             {l.name}
                           </div>
-                          <span className='rounded-full bg-white/4 px-2 py-0.5 font-mono text-[10px] tracking-wider text-muted-foreground/70 uppercase'>
+                          <span className='rounded-full border border-[#DFE5E9] bg-[#F7F9FA] px-2 py-0.5 font-mono text-[10px] tracking-wider text-[#6b6478] uppercase'>
                             {l.tag}
                           </span>
                         </div>
-                        <div className='mt-0.5 text-sm text-muted-foreground'>
+                        <div className='mt-0.5 text-sm text-[#6b6478]'>
                           {l.desc}
                         </div>
                       </div>
@@ -195,18 +199,18 @@ export default function OnboardingPage() {
                 transition={{ duration: 0.5 }}
                 className='text-center'
               >
-                <div className='glass mb-6 inline-flex items-center gap-2 rounded-full px-3 py-1 font-mono text-[11px] text-muted-foreground'>
+                <div className='mb-6 inline-flex items-center gap-2 rounded-full border border-[#DFE5E9] bg-white px-3 py-1 font-mono text-[11px] text-[#6b6478]'>
                   <span className='size-1 animate-pulse rounded-full bg-mint' />
                   Tudo pronto
                 </div>
-                <h1 className='mb-6 font-heading text-5xl leading-tight font-semibold tracking-[-0.035em] sm:text-6xl'>
+                <h1 className='mb-6 font-heading text-4xl leading-tight font-light tracking-[-0.035em] text-[#1b1916] sm:text-5xl'>
                   Hora de{' '}
                   <span className='text-gradient font-serif font-normal italic'>
                     pensar
                   </span>
                   .
                 </h1>
-                <p className='mx-auto mb-10 max-w-md text-lg text-muted-foreground'>
+                <p className='mx-auto mb-10 max-w-md text-lg text-[#2c2330]'>
                   Vou gerar um desafio real, com cliente fictício e tudo. Sem
                   resposta pronta. Sem cópia.
                 </p>
@@ -225,13 +229,13 @@ export default function OnboardingPage() {
                     variant='ghost'
                     size='lg'
                     onClick={() => setStep((s) => Math.max(0, s - 1) as Step)}
-                    className='rounded-full'
+                    className='rounded-full text-[#6b6478] hover:text-[#1b1916]'
                   >
                     <ArrowLeft className='size-4' /> Voltar
                   </Button>
                   <Button
                     size='xl'
-                    className='glow-iris group absolute left-1/2 h-12 -translate-x-1/2 rounded-full border-transparent bg-foreground pr-4 pl-5 text-[15px] text-background hover:bg-foreground/90'
+                    className='glow-iris group absolute left-1/2 h-12 -translate-x-1/2 rounded-full border-transparent bg-primary pr-4 pl-5 text-[15px] text-primary-foreground hover:bg-primary/90'
                     render={<Link href='/challenge' />}
                   >
                     <Sparkles className='size-4' />
@@ -256,7 +260,10 @@ export default function OnboardingPage() {
                 size='lg'
                 onClick={() => setStep((s) => Math.max(0, s - 1) as Step)}
                 disabled={step === 0}
-                className={cn('rounded-full', step === 0 && 'invisible')}
+                className={cn(
+                  'rounded-full text-[#6b6478] hover:text-[#1b1916]',
+                  step === 0 && 'invisible',
+                )}
               >
                 <ArrowLeft className='size-4' /> Voltar
               </Button>
@@ -264,7 +271,7 @@ export default function OnboardingPage() {
                 size='lg'
                 disabled={!canNext}
                 onClick={() => setStep((s) => Math.min(2, s + 1) as Step)}
-                className='rounded-full border-transparent bg-foreground pr-3 pl-4 text-background hover:bg-foreground/90 disabled:opacity-40'
+                className='rounded-full border-transparent bg-primary pr-3 pl-4 text-primary-foreground hover:bg-primary/90 disabled:opacity-40'
               >
                 Continuar <ArrowRight className='size-4' />
               </Button>
@@ -295,13 +302,11 @@ function StepShell({
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className='mb-8'>
-        <div className='mb-3 font-mono text-[11px] tracking-wider text-muted-foreground/70 uppercase'>
+        <div className='mb-3 font-mono text-[11px] font-semibold tracking-[0.08em] text-[#6b6478] uppercase'>
           {eyebrow}
         </div>
-        <h1 className='font-heading text-3xl leading-tight font-semibold tracking-[-0.03em] sm:text-4xl'>
-          {title}
-        </h1>
-        <p className='mt-2 text-muted-foreground'>{subtitle}</p>
+        <h2 className='type-h3'>{title}</h2>
+        <p className='type-body mt-3'>{subtitle}</p>
       </div>
       {children}
     </motion.div>
@@ -329,20 +334,20 @@ function Tile({
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.99 }}
       className={cn(
-        'glass flex w-full items-center gap-4 rounded-2xl p-5 text-left transition-all',
+        'shadow-soft flex w-full items-center gap-4 rounded-2xl border bg-white p-5 text-left transition-all',
         selected
-          ? 'border-iris/40 bg-white/6 ring-2 ring-iris/30'
-          : 'hover:bg-white/4',
+          ? 'border-primary/50 bg-primary/[0.04] ring-2 ring-primary/25'
+          : 'border-[#DFE5E9] hover:border-[#1b1916]/20',
       )}
     >
       {children}
       <div
         className={cn(
           'grid size-6 place-items-center rounded-full border transition-all',
-          selected ? 'border-iris bg-iris' : 'border-white/12 bg-white/2',
+          selected ? 'border-primary bg-primary' : 'border-[#DFE5E9] bg-white',
         )}
       >
-        {selected && <Check className='size-3.5 text-background' />}
+        {selected && <Check className='size-3.5 text-white' />}
       </div>
     </motion.button>
   )
@@ -350,11 +355,11 @@ function Tile({
 
 function SummaryItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className='glass rounded-2xl p-4'>
-      <div className='mb-1 font-mono text-[10px] tracking-wider text-muted-foreground/70 uppercase'>
+    <div className='rounded-2xl border border-[#DFE5E9] bg-white p-4'>
+      <div className='mb-1 font-mono text-[10px] tracking-wider text-[#6b6478] uppercase'>
         {label}
       </div>
-      <div className='font-heading text-base font-semibold tracking-tight'>
+      <div className='font-heading text-base font-medium tracking-tight text-[#1b1916]'>
         {value}
       </div>
     </div>
