@@ -1,22 +1,15 @@
+import { levelById } from '@/domain/levels'
 import { RunnerLanguage } from '@/domain/stacks'
-
-export type Challenge = {
-  id: string
-  title: string
-  description: string
-  stack: string
-  level: string
-  client_briefing: string
-  initial_code: string
-  tests_source: string
-  intro: string
-  kind: 'code' | 'design'
-}
+import type { Challenge } from './types'
 
 export const LEVEL_LABEL: Record<string, string> = {
   beginner: 'Iniciante',
   intermediate: 'Intermediário',
   advanced: 'Avançado',
+}
+
+export function levelLabel(level: string): string {
+  return levelById(level)?.label ?? LEVEL_LABEL[level] ?? level
 }
 
 export function challengeLanguage(stack: string): RunnerLanguage {

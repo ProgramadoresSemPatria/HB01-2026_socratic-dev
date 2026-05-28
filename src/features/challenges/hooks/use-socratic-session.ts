@@ -2,9 +2,9 @@
 
 import type { ChatMsg } from '@/lib/ai/types'
 import { useUser } from '@/lib/auth/use-user'
-import { loadDraft, saveDraft } from '@/lib/draft'
 import { SOLVE_COST, SOLVE_INDEPENDENCE_PENALTY } from '@/lib/hints'
 import * as React from 'react'
+import { loadDraft, saveDraft } from '../draft'
 
 export function useSocraticSession<TWork>(opts: {
   challenge: { id: string } | null

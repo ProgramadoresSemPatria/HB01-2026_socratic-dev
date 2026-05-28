@@ -1,5 +1,6 @@
-import { LEVEL_LABEL, type Challenge } from '@/lib/challenge'
 import { Building, Sparkles } from 'lucide-react'
+import type { Challenge } from '../types'
+import { levelLabel } from '../utils'
 
 function stackLabel(c: Challenge): string {
   if (c.kind === 'design') return 'System Design'
@@ -24,7 +25,7 @@ export function BriefingPanel({ challenge }: { challenge: Challenge }) {
           {stackLabel(challenge)}
         </span>
         <span className='rounded-full border border-[#DFE5E9] bg-white px-2 py-0.5'>
-          {LEVEL_LABEL[challenge.level] ?? challenge.level}
+          {levelLabel(challenge.level)}
         </span>
       </div>
 
