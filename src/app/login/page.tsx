@@ -28,22 +28,19 @@ export default function LoginPage() {
     setNotice(null)
     try {
       if (mode === 'signup') {
-        const { data, error } = await supabase.auth.signUp({ email, password })
-        if (error) throw error
-        if (!data.session) {
-          setNotice(
-            'Conta criada. Se o projeto exigir confirmação por e-mail, confirme e depois entre.',
-          )
-          setMode('login')
-          return
-        }
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+        const res = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email, password }),
         })
-        if (error) throw error
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Falha ao criar conta.')
       }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (error) throw error
       router.replace(next)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha na autenticação')

@@ -42,6 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang='pt-BR'
+      suppressHydrationWarning
       className={cn(
         'h-full antialiased',
         dmSans.variable,
@@ -51,7 +52,10 @@ export default function RootLayout({
         'font-sans',
       )}
     >
-      <body className='flex min-h-full flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary'>
+      <body
+        suppressHydrationWarning
+        className='flex min-h-full flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary'
+      >
         {children}
       </body>
     </html>

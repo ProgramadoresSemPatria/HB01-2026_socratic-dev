@@ -10,11 +10,16 @@ export function useUser() {
 
   useEffect(() => {
     let mounted = true
-    supabase.auth.getUser().then(({ data }) => {
-      if (!mounted) return
-      setUser(data.user)
-      setLoading(false)
-    })
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!mounted) return
+        setUser(data.session?.user ?? null)
+        setLoading(false)
+      })
+      .catch(() => {
+        if (mounted) setLoading(false)
+      })
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       setLoading(false)

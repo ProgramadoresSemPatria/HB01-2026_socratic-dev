@@ -187,13 +187,6 @@ export function HeroScene({ className }: { className?: string }) {
       ro.disconnect()
       canvas.removeEventListener('webglcontextlost', onLost)
       canvas.removeEventListener('webglcontextrestored', onRestored)
-      if (gl) {
-        gl.deleteProgram(prog)
-        gl.deleteShader(vs)
-        gl.deleteShader(fs)
-        gl.deleteBuffer(buf)
-        gl.getExtension('WEBGL_lose_context')?.loseContext()
-      }
     }
   }, [])
 

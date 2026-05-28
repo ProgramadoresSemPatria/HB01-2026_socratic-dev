@@ -50,7 +50,7 @@ export function Navbar() {
 
         <div className='flex items-center gap-1.5'>
           <Link
-            href='/dashboard'
+            href='/login'
             className='hidden rounded-md px-3 py-2 text-sm font-medium text-[#6b6478] transition-colors hover:text-[#1b1916] sm:inline-flex'
           >
             Entrar
