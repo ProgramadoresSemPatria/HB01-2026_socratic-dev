@@ -24,24 +24,24 @@ const LEVEL_GUIDE: Record<GenLevel, string> = {
     'Nível AVANÇADO, pegada de entrevista de BIG TECH (Google, Meta, Amazon): algoritmo ou estrutura de dados NÃO-trivial, exija complexidade de tempo/espaço ótima, e cubra muitos edge cases (entrada vazia, muito grande, duplicados, limites/overflow). Inspire-se em problemas estilo LeetCode Hard / entrevista FAANG, mas embrulhados num briefing de cliente realista. 4 a 6 testes, incluindo os casos de borda difíceis. O initial_code pode ter assinatura com a complexidade esperada no comentário.',
 }
 
-const DESIGN_SYSTEM = `Você gera desafios de DESIGN SYSTEM para uma plataforma de tutoria socrática, onde o aluno DESENHA um diagrama (arquitetura de tokens, hierarquia de componentes, variantes/estados) num canvas — não escreve código.
+const DESIGN_SYSTEM = `Você gera desafios de SYSTEM DESIGN (arquitetura de software) para uma plataforma de tutoria socrática, onde o aluno DESENHA a arquitetura num canvas — serviços, bancos de dados, filas, caches, APIs e como os dados fluem e são distribuídos. NÃO é design de UI/Figma e NÃO se escreve código.
 Responda APENAS com um objeto JSON válido (sem markdown, sem comentários), com exatamente estas chaves:
 { "title": string, "description": string, "client_briefing": string, "intro": string }
 
 Regras:
-- title: curto e concreto (ex.: "Tokens de tipografia escaláveis").
-- description: 1 frase do que o aluno deve DESENHAR.
-- client_briefing: 3 a 5 frases com um cliente fictício e os PASSOS do que desenhar (ex.: 1. tokens primitivos, 2. semânticos, 3. componentes), pedindo pra ligar com setas quem referencia quem.
+- title: curto e concreto (ex.: "Distribuir os dados de usuários entre serviços", "Arquitetura de um feed em tempo real").
+- description: 1 frase do que o aluno deve ARQUITETAR no canvas.
+- client_briefing: 3 a 5 frases com um cliente fictício, os requisitos (escala, latência, consistência) e os PASSOS do que desenhar (componentes/serviços, onde cada dado vive, como replica/particiona, o caminho de uma request), pedindo pra ligar com setas o fluxo dos dados.
 - intro: a primeira fala do tutor socrático — uma pergunta que faça o aluno pensar antes de desenhar. NUNCA a resposta.
 - Tudo em português do Brasil. Adeque a complexidade ao nível.`
 
 const DESIGN_LEVEL_GUIDE: Record<GenLevel, string> = {
   beginner:
-    'Nível INICIANTE: um único componente ou um conjunto pequeno de tokens. Conceitos básicos (variante vs estado, token primitivo vs semântico).',
+    'Nível INICIANTE: um serviço + um banco. Modelagem de dados simples, CRUD, onde guardar cada coisa. Sem distribuição complexa.',
   intermediate:
-    'Nível INTERMEDIÁRIO: arquitetura de tokens em camadas, temas (light/dark) ou a hierarquia de um grupo de componentes.',
+    'Nível INTERMEDIÁRIO: múltiplos serviços, cache, fila de mensagens, réplica de leitura. Trade-offs de consistência e latência.',
   advanced:
-    'Nível AVANÇADO: sistema completo — camadas de token, theming multi-marca, composição de componentes, escalabilidade e governança.',
+    'Nível AVANÇADO: alta escala — particionamento/sharding, distribuição e replicação de dados, consistência eventual, teorema CAP, multi-região e gargalos.',
 }
 
 function parseJson(raw: string): Record<string, unknown> {

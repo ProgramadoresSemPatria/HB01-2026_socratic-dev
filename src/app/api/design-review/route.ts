@@ -1,10 +1,10 @@
 import { aiErrorResponse, askClaude, askClaudeVision } from '@/lib/ai/client'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
-const SYSTEM = `Você é um staff design engineer revisando o diagrama de design system de um aluno (imagem + resumo).
+const SYSTEM = `Você é um staff engineer revisando o diagrama de ARQUITETURA (system design) de um aluno (imagem + resumo).
 Responda em NO MÁXIMO 5 bullets (markdown), direto, sem floreio. NÃO redesenhe por ele.
 - 1 a 2 bullets do que está bom.
-- 1 a 2 bullets do que falta ou está inconsistente (camadas de token primitivo→semântico→componente, nomenclatura, separação variante/estado, escalabilidade como dark mode).
+- 1 a 2 bullets do que falta ou tem risco (onde os dados vivem, gargalos, distribuição/particionamento, consistência vs latência, ponto único de falha).
 - 1 pergunta final que leve o aluno a melhorar sozinho.
 Cada bullet com 1 ou 2 frases curtas. Português do Brasil.`
 
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     `Briefing do cliente: ${brief}`,
     `Resumo do diagrama: ${summary}`,
     '',
-    'Revise o diagrama de design system.',
+    'Revise o diagrama de arquitetura.',
   ].join('\n')
 
   let review: string | null = null
