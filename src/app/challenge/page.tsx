@@ -253,6 +253,16 @@ export default function ChallengePage() {
     setReview(null)
     setSubmitTests(null)
 
+    const touched =
+      code.trim().length > 0 && code.trim() !== starterCode(challenge).trim()
+    if (!touched) {
+      setReview(
+        'Você ainda não escreveu uma solução — implemente algo no editor e submeta de novo.',
+      )
+      setReviewing(false)
+      return
+    }
+
     let passed = 0
     let total = 0
     if (challenge.tests_source && language !== 'react') {
