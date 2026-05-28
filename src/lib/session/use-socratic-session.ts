@@ -95,9 +95,10 @@ export function useSocraticSession<TWork>(opts: {
     setMessages((m) => [...m, msg])
   }
 
-  function applyHint(level: 1 | 2 | 3) {
-    setHintsUsed((h) => h + 1)
-    setIndependence((i) => Math.max(0, i - level * 4))
+  function spend(cost: number, level: 1 | 2 | 3, penalty: number) {
+    setHintsUsed((h) => h + cost)
+    setIndependence((i) => Math.max(0, i - penalty))
+    setHintsRemaining((r) => (r === null ? r : Math.max(0, r - cost)))
     if (sessionId && user) {
       fetch('/api/hints', {
         method: 'POST',
@@ -106,8 +107,35 @@ export function useSocraticSession<TWork>(opts: {
           session_id: sessionId,
           user_id: user.id,
           hint_level: level,
+          cost,
         }),
       }).catch(() => {})
+    }
+  }
+
+  function applyHint(level: 1 | 2 | 3) {
+    spend(1, level, level * 4)
+  }
+
+  // "Resolver pra mim" — expensive last resort.
+  function spendSolve() {
+    spend(SOLVE_COST, 3, SOLVE_INDEPENDENCE_PENALTY)
+  }
+
+  async function buyHints() {
+    if (!user) return
+    try {
+      await fetch('/api/hints/buy', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id }),
+      })
+      const b = await fetch(`/api/hints?user_id=${user.id}`).then((r) =>
+        r.json(),
+      )
+      if (typeof b?.remaining === 'number') setHintsRemaining(b.remaining)
+    } catch {
+      // ignore
     }
   }
 
