@@ -37,8 +37,15 @@ export function aiErrorResponse(e: unknown): Response {
       { status: 500 },
     )
   }
-  return Response.json(
-    { error: e instanceof Error ? e.message : 'Erro na IA' },
-    { status: 500 },
-  )
+  const msg = e instanceof Error ? e.message : 'Erro na IA'
+  if (/credit balance|too low|billing/i.test(msg)) {
+    return Response.json(
+      {
+        error:
+          'A conta da Anthropic está sem créditos. Adicione em console.anthropic.com → Plans & Billing.',
+      },
+      { status: 402 },
+    )
+  }
+  return Response.json({ error: msg }, { status: 500 })
 }

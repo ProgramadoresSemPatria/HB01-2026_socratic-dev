@@ -106,7 +106,10 @@ export default function ChallengePage() {
       if (!active || !data) return
       const ch = data as unknown as Challenge
       setChallenge(ch)
-      setCode(ch.initial_code || '')
+      setCode(
+        ch.initial_code ||
+          `// ${ch.title}\n// Leia o briefing à esquerda e implemente a solução.\n\nexport function solucao() {\n  // seu código aqui\n}\n`,
+      )
       setMessages([
         {
           role: 'ai',

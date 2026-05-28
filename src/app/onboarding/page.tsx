@@ -89,6 +89,16 @@ export default function OnboardingPage() {
     const dbStack = stack === 'js' ? 'javascript' : 'typescript'
     const dbLevel = level === 'mid' ? 'intermediate' : 'beginner'
 
+    // Save the choice on the user's profile (RLS allows updating your own row).
+    supabase
+      .from('profiles')
+      .update({ preferred_stack: dbStack, preferred_level: dbLevel } as never)
+      .eq('id', user.id)
+      .then(
+        () => {},
+        () => {},
+      )
+
     const byBoth = await supabase
       .from('challenges')
       .select('id')
