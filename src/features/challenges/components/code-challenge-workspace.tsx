@@ -280,7 +280,10 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
               {minutes}:{seconds}
             </span>
           </div>
-          <div className='glass hidden h-8 items-center gap-2 rounded-full px-3 text-[12px] md:flex'>
+          <div
+            className='glass hidden h-8 items-center gap-2 rounded-full px-3 text-[12px] md:flex'
+            title='Começa em 100. Cada hint custa. É o quanto você pensou sozinho.'
+          >
             <Brain className='size-3.5 opacity-70' />
             <span className='text-muted-foreground'>Independência:</span>
             <span

@@ -80,12 +80,14 @@ async function doGenerate(input: {
   kind: 'code' | 'design'
   stack?: string
   level: GenLevel
+  userPrompt?: string
 }): Promise<Challenge | { error: string }> {
   try {
     const { data, error } = await runGenerate({
       kind: input.kind,
       stack: input.stack,
       level: input.level,
+      userPrompt: input.userPrompt,
     })
     if (error) return { error: error.message }
     revalidatePath('/dashboard')
@@ -100,6 +102,7 @@ export async function generateChallenge(input: {
   kind: 'code' | 'design'
   stack?: string
   level: GenLevel
+  userPrompt?: string
 }): Promise<Challenge | { error: string }> {
   const a = await authActionUser(input.token)
   if ('error' in a) return a

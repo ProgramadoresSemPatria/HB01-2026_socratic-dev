@@ -276,7 +276,12 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
           </div>
           <div className='glass hidden h-8 items-center gap-2 rounded-full px-3 text-[12px] md:flex'>
             <Brain className='size-3.5 opacity-70' />
-            <span className='text-muted-foreground'>Independência:</span>
+            <span
+              className='text-muted-foreground'
+              title='Começa em 100. Cada hint custa. É o quanto você pensou sozinho.'
+            >
+              Independência:
+            </span>
             <span
               className={cn(
                 'font-semibold tabular-nums',

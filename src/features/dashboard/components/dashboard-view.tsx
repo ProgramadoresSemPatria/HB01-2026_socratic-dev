@@ -2,6 +2,7 @@
 
 import { Navbar } from '@/components/navbar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { CustomChallengeDialog } from '@/features/challenges/components/custom-challenge-dialog'
 import {
   getNextChallenge,
   listSessionsForUser,
@@ -24,6 +25,7 @@ import {
   Sparkles,
   TrendingUp,
   Trophy,
+  Wand2,
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
@@ -59,6 +61,7 @@ export function DashboardView({ user }: { user: User }) {
   const [loaded, setLoaded] = React.useState(false)
   const [genDesign, setGenDesign] = React.useState(false)
   const [genCode, setGenCode] = React.useState(false)
+  const [customOpen, setCustomOpen] = React.useState(false)
 
   async function startDesign() {
     if (genDesign || !user) return
@@ -166,6 +169,14 @@ export function DashboardView({ user }: { user: User }) {
             <div className='flex shrink-0 flex-col gap-2 self-start sm:flex-row md:self-auto'>
               <button
                 type='button'
+                onClick={() => setCustomOpen(true)}
+                className='inline-flex items-center justify-center gap-2 rounded-xl border border-iris/30 bg-iris/5 px-5 py-3 text-[15px] font-medium tracking-tight text-iris transition-colors hover:bg-iris/10'
+              >
+                <Wand2 className='size-4' />
+                Sob medida
+              </button>
+              <button
+                type='button'
                 onClick={startDesign}
                 disabled={genDesign}
                 className='inline-flex items-center justify-center gap-2 rounded-xl border border-[#1b1916]/20 px-5 py-3 text-[15px] font-medium tracking-tight text-[#1b1916] transition-colors hover:bg-[#1b1916]/5 disabled:opacity-60'
@@ -262,6 +273,17 @@ export function DashboardView({ user }: { user: User }) {
           )}
         </div>
       </main>
+      <CustomChallengeDialog
+        open={customOpen}
+        onClose={() => setCustomOpen(false)}
+        defaultLevel={
+          (user?.user_metadata?.preferred_level as
+            | 'beginner'
+            | 'intermediate'
+            | 'advanced'
+            | undefined) ?? 'intermediate'
+        }
+      />
     </div>
   )
 }
