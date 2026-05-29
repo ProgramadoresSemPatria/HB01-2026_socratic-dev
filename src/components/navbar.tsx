@@ -1,7 +1,7 @@
 'use client'
 
-import { apiFetch } from '@/lib/api/client'
-import { useUser } from '@/lib/auth/use-user'
+import { useUser } from '@/features/auth/hooks/use-user'
+import { buyHints, getHintBalance } from '@/features/hints/actions'
 import { cn } from '@/lib/utils'
 import { Lightbulb, Plus } from 'lucide-react'
 import { motion, useMotionValueEvent, useScroll } from 'motion/react'
@@ -9,18 +9,15 @@ import Link from 'next/link'
 import * as React from 'react'
 import { Logo } from './logo'
 
-function HintsChip() {
+function HintsChip({ userId }: { userId: string }) {
   const [remaining, setRemaining] = React.useState<number | null>(null)
   const [buying, setBuying] = React.useState(false)
 
   const refresh = React.useCallback(() => {
-    apiFetch('/api/hints')
-      .then((r) => r.json())
-      .then((b) => {
-        if (typeof b?.remaining === 'number') setRemaining(b.remaining)
-      })
+    getHintBalance(userId)
+      .then((b) => setRemaining(b.remaining))
       .catch(() => {})
-  }, [])
+  }, [userId])
 
   React.useEffect(() => {
     refresh()
@@ -30,10 +27,7 @@ function HintsChip() {
     if (buying) return
     setBuying(true)
     try {
-      await apiFetch('/api/hints/buy', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-      })
+      await buyHints(userId)
       refresh()
     } finally {
       setBuying(false)
@@ -122,7 +116,7 @@ export function Navbar() {
               >
                 Dashboard
               </Link>
-              <HintsChip />
+              <HintsChip userId={user.id} />
               <Link
                 href='/profile'
                 aria-label='Seu perfil'
@@ -134,12 +128,6 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link
-                href='/login'
-                className='hidden rounded-md px-3 py-2 text-sm font-medium text-[#6b6478] transition-colors hover:text-[#1b1916] sm:inline-flex'
-              >
-                Entrar
-              </Link>
               <Link
                 href='/onboarding'
                 className='inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium tracking-tight text-primary-foreground transition-colors hover:bg-primary/90'

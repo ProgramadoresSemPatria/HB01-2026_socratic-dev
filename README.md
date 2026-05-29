@@ -110,40 +110,40 @@ ANTHROPIC_API_KEY=               # chave da API da Anthropic
 
 ## Arquitetura
 
+O projeto foi reorganizado para uma estrutura feature-based, separando melhor responsabilidades de UI, domínio, integrações e lógica de aplicação.
+
 ```
 src/
-├─ app/
-│  ├─ page.tsx              Landing
-│  ├─ onboarding/           Escolha de trilha → gera/reaproveita desafio
-│  ├─ challenge/            Workspace de CÓDIGO (Monaco + runner + chat)
-│  ├─ design/               Workspace de SYSTEM DESIGN (Excalidraw + chat)
-│  ├─ challenges/           Biblioteca de desafios (paginada, dedupe)
-│  ├─ dashboard/            Progresso (heatmap, independência, histórico)
-│  ├─ profile/              Preferências (trilha, stack, nível)
-│  └─ api/
-│     ├─ next-challenge/     Reaproveita do pool ou gera (alavanca de velocidade)
-│     ├─ generate-challenge/ Geração via IA
-│     ├─ tutor/              Diálogo socrático (domain: code | design)
-│     ├─ solve/              "Resolver pra mim" (aplica no editor/canvas)
-│     ├─ design-review/      Análise por VISÃO do diagrama
-│     ├─ review/             Avaliação de submissão de código
-│     ├─ hints/ + hints/buy  Economia de hints
-│     └─ sessions/ stats/ profile/ signup/
-├─ components/
-│  ├─ landing/  challenge/  design/  ui/  navbar, footer, logo…
-├─ lib/
-│  ├─ ai/        client (Claude texto+visão), generate-challenge
-│  ├─ session/   useSocraticSession (máquina de estado compartilhada)
-│  ├─ runner/    execução de código em Web Worker
-│  ├─ design/    scene (build/summarize/export do Excalidraw)
-│  └─ auth/ challenge/ hints/ draft/ supabase…
-└─ supabase/migrations/     001–009
+├─ app/                 Rotas do App Router e entrypoints mínimos
+│  ├─ api/              Apenas rotas HTTP ainda expostas
+│  ├─ challenge/
+│  ├─ challenges/
+│  ├─ dashboard/
+│  ├─ design/
+│  ├─ login/
+│  ├─ onboarding/
+│  ├─ profile/
+│  └─ page.tsx
+├─ components/          Componentes compartilhados
+│  └─ ui/
+├─ domain/              Constantes e regras de domínio
+├─ features/            Módulos por feature
+│  ├─ auth/
+│  ├─ challenges/
+│  ├─ dashboard/
+│  ├─ design/
+│  ├─ hints/
+│  ├─ landing/
+│  ├─ onboarding/
+│  ├─ profile/
+│  └─ runner/
+├─ hooks/               Hooks compartilhados
+└─ lib/                 Integrações e infraestrutura
+   ├─ ai/
+   ├─ api/
+   └─ supabase/
 ```
 
-**Banco** (`public`): `profiles`, `challenges`, `sessions`, `hints_used`, `code_submissions` — com RLS.
-
-**Reuso central:** um hook `useSocraticSession` extrai a máquina de estado (chat, hints, independência,
-tempo, sessão, draft) usada pelas duas trilhas — `/challenge` e `/design` só montam `sendUser`/`askHint`/`submit` em cima dela.
 
 ## Deploy
 

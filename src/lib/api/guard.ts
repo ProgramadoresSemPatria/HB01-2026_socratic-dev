@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/supabase/server'
 import type { User } from '@supabase/supabase-js'
 
 export async function getAuthUser(req: Request): Promise<User | null> {

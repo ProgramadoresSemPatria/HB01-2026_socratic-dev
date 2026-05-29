@@ -1,5 +1,6 @@
-import { FREE_DAILY_HINTS, type HintBalance } from '@/lib/hints'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { FREE_DAILY_HINTS } from '@/features/hints/constants'
+import type { HintBalance } from '@/features/hints/types'
+import { supabaseAdmin } from '@/lib/supabase/server'
 
 export async function getBalance(userId: string): Promise<HintBalance> {
   const startOfDay = new Date()

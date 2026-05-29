@@ -1,7 +1,8 @@
 'use client'
 
 import { Logo } from '@/components/logo'
-import { supabase } from '@/lib/supabase'
+import { signUp } from '@/features/auth/actions'
+import { supabase } from '@/lib/supabase/client'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
@@ -42,13 +43,8 @@ function LoginForm() {
     setNotice(null)
     try {
       if (mode === 'signup') {
-        const res = await fetch('/api/signup', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error || 'Falha ao criar conta.')
+        const result = await signUp({ email, password })
+        if ('error' in result) throw new Error(result.error)
       }
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
