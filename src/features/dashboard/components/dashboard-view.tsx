@@ -8,6 +8,7 @@ import {
   type SessionRow,
 } from '@/features/challenges/actions'
 import { getDashboardStats } from '@/features/dashboard/actions'
+import { getAccessToken } from '@/lib/api/client'
 import type { Stats } from '@/features/dashboard/types'
 import { activityLevel } from '@/features/dashboard/utils'
 import type { User } from '@supabase/supabase-js'
@@ -57,6 +58,7 @@ export function DashboardView({ user }: { user: User }) {
   const [sessions, setSessions] = React.useState<SessionRow[]>([])
   const [loaded, setLoaded] = React.useState(false)
   const [genDesign, setGenDesign] = React.useState(false)
+  const [genCode, setGenCode] = React.useState(false)
 
   async function startDesign() {
     if (genDesign || !user) return
@@ -68,7 +70,7 @@ export function DashboardView({ user }: { user: User }) {
       const data = await getNextChallenge({
         kind: 'design',
         level: level as 'beginner' | 'intermediate' | 'advanced',
-        userId: user.id,
+        token: await getAccessToken(),
       })
       if (!('error' in data) && data?.id) router.push(`/design?id=${data.id}`)
       else setGenDesign(false)
@@ -77,13 +79,39 @@ export function DashboardView({ user }: { user: User }) {
     }
   }
 
+  async function startCode() {
+    if (genCode || !user) return
+    const meta = user.user_metadata as
+      | { preferred_stack?: string; preferred_level?: string }
+      | undefined
+    if (!meta?.preferred_stack || !meta?.preferred_level) {
+      router.push('/onboarding')
+      return
+    }
+    setGenCode(true)
+    try {
+      const data = await getNextChallenge({
+        kind: 'code',
+        stack: meta.preferred_stack,
+        level: meta.preferred_level as 'beginner' | 'intermediate' | 'advanced',
+        token: await getAccessToken(),
+      })
+      if (!('error' in data) && data?.id)
+        router.push(`/challenge?id=${data.id}`)
+      else setGenCode(false)
+    } catch {
+      setGenCode(false)
+    }
+  }
+
   React.useEffect(() => {
     if (!user) return
     let active = true
     ;(async () => {
+      const token = await getAccessToken()
       const [s, sess] = await Promise.all([
-        getDashboardStats(user.id),
-        listSessionsForUser(user.id),
+        getDashboardStats(token),
+        listSessionsForUser(token),
       ])
       if (!active) return
       if (s && !('error' in s)) setStats(s)
@@ -149,14 +177,22 @@ export function DashboardView({ user }: { user: User }) {
                 )}
                 {genDesign ? 'Gerando…' : 'System Design'}
               </button>
-              <Link
-                href='/onboarding'
-                className='group inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-[15px] font-medium tracking-tight text-primary-foreground transition-colors hover:bg-primary/90'
+              <button
+                type='button'
+                onClick={startCode}
+                disabled={genCode}
+                className='group inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-[15px] font-medium tracking-tight text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60'
               >
-                <Sparkles className='size-4' />
-                Novo desafio
-                <ArrowRight className='size-4 transition-transform group-hover:translate-x-0.5' />
-              </Link>
+                {genCode ? (
+                  <Loader2 className='size-4 animate-spin' />
+                ) : (
+                  <Sparkles className='size-4' />
+                )}
+                {genCode ? 'Gerando…' : 'Novo desafio'}
+                {!genCode && (
+                  <ArrowRight className='size-4 transition-transform group-hover:translate-x-0.5' />
+                )}
+              </button>
             </div>
           </motion.div>
 

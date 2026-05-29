@@ -51,9 +51,6 @@ function LoginForm() {
         password,
       })
       if (error) throw error
-      // Honor an explicit ?next (came from a gated page). Otherwise route by
-      // state: already onboarded → dashboard (no surprise challenge); not yet
-      // → onboarding to pick prefs + the first challenge.
       const onboarded = !!(
         data.user?.user_metadata as { preferred_level?: string } | undefined
       )?.preferred_level

@@ -4,14 +4,12 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
   CheckCircle2,
-  ChevronRight,
   GitPullRequestArrow,
   Loader2,
   X,
   XCircle,
 } from 'lucide-react'
 import { motion } from 'motion/react'
-import Link from 'next/link'
 import { FormattedText } from './formatted-text'
 
 function formatTime(seconds: number): string {
@@ -28,6 +26,7 @@ export function ReviewModal({
   elapsed,
   tests,
   onClose,
+  onComplete,
 }: {
   review: string | null
   reviewing: boolean
@@ -36,6 +35,7 @@ export function ReviewModal({
   elapsed: number
   tests: { passed: number; total: number } | null
   onClose: () => void
+  onComplete?: () => void
 }) {
   return (
     <motion.div
@@ -112,10 +112,11 @@ export function ReviewModal({
             </Button>
             <Button
               size='lg'
+              onClick={onComplete}
               className='flex-1 cursor-pointer rounded-xl border-transparent bg-primary text-primary-foreground hover:bg-primary/90'
-              render={<Link href='/dashboard' />}
             >
-              Ver progresso <ChevronRight className='size-4' />
+              <CheckCircle2 className='size-4' />
+              Concluir
             </Button>
           </div>
         </div>

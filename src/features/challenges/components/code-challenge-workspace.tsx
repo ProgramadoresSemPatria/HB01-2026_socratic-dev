@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { useSocraticSession } from '../hooks/use-socratic-session'
 import type { Challenge } from '../types'
@@ -42,6 +43,7 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
 const POST = { method: 'POST', headers: { 'content-type': 'application/json' } }
 
 export function CodeChallengeWorkspace({ user }: { user: User }) {
+  const router = useRouter()
   const [challenge, setChallenge] = React.useState<Challenge | null>(null)
 
   const s = useSocraticSession<string>({
@@ -405,6 +407,10 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
             elapsed={s.elapsed}
             tests={submitTests}
             onClose={() => setReviewOpen(false)}
+            onComplete={() => {
+              s.complete(s.elapsed)
+              router.push('/dashboard')
+            }}
           />
         )}
       </AnimatePresence>

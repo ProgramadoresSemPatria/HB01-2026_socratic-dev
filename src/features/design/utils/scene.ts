@@ -129,8 +129,22 @@ export async function buildSceneElements(
         [0, 0],
         [ex - sx, ey - sy],
       ],
-      ...(e.label ? { label: { text: e.label } } : {}),
     })
+    if (e.label) {
+      const dx = ex - sx
+      const dy = ey - sy
+      const len = Math.hypot(dx, dy) || 1
+      const off = 22
+      const px = (dy / len) * off
+      const py = (-dx / len) * off
+      skeleton.push({
+        type: 'text',
+        x: (sx + ex) / 2 + px - 40,
+        y: (sy + ey) / 2 + py - 8,
+        text: e.label,
+        fontSize: 12,
+      })
+    }
   }
 
   skeleton.unshift({

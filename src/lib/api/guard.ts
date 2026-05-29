@@ -1,13 +1,19 @@
 import { supabaseAdmin } from '@/lib/supabase/server'
 import type { User } from '@supabase/supabase-js'
 
-export async function getAuthUser(req: Request): Promise<User | null> {
-  const authz = req.headers.get('authorization') ?? ''
-  const token = /^bearer\s+/i.test(authz) ? authz.replace(/^bearer\s+/i, '') : ''
+export async function getUserFromToken(
+  token: string | null | undefined,
+): Promise<User | null> {
   if (!token) return null
   const { data, error } = await supabaseAdmin.auth.getUser(token)
   if (error || !data.user) return null
   return data.user
+}
+
+export async function getAuthUser(req: Request): Promise<User | null> {
+  const authz = req.headers.get('authorization') ?? ''
+  const token = /^bearer\s+/i.test(authz) ? authz.replace(/^bearer\s+/i, '') : ''
+  return getUserFromToken(token)
 }
 
 export async function requireUser(
@@ -16,6 +22,14 @@ export async function requireUser(
   const user = await getAuthUser(req)
   if (!user) return jsonError('Não autenticado.', 401)
   return { user }
+}
+
+export async function authActionUser(
+  token: string | null | undefined,
+): Promise<{ userId: string } | { error: string }> {
+  const user = await getUserFromToken(token)
+  if (!user) return { error: 'Não autenticado.' }
+  return { userId: user.id }
 }
 
 export function jsonError(message: string, status: number): Response {
@@ -52,9 +66,9 @@ export function tooMany(): Response {
 }
 
 export const CAPS = {
-  text: 20_000, // code / diagram summary / single field
-  transcript: 40_000, // whole chat transcript
-  imageBase64: 8_000_000, // ~6 MB decoded PNG
+  text: 20_000,
+  transcript: 40_000,
+  imageBase64: 8_000_000,
 } as const
 
 export function tooLarge(): Response {

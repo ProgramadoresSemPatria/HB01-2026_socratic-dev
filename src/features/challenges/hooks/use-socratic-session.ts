@@ -10,6 +10,7 @@ import {
   SOLVE_INDEPENDENCE_PENALTY,
 } from '@/features/hints/constants'
 import type { ChatMsg } from '@/lib/ai/types'
+import { getAccessToken } from '@/lib/api/client'
 import * as React from 'react'
 import { completeSession, startSession } from '../actions'
 import { loadDraft, saveDraft } from '../draft'
@@ -59,13 +60,14 @@ export function useSocraticSession<TWork>(opts: {
     }
     setReady(true)
 
-    startSession({ userId: user.id, challengeId: challenge.id })
-      .then((d) => d?.id && setSessionId(d.id))
-      .catch(() => {})
-
-    getHintBalance(user.id)
-      .then((b) => setHintsRemaining(b.remaining))
-      .catch(() => {})
+    getAccessToken().then((token) => {
+      startSession({ token, challengeId: challenge.id })
+        .then((d) => d?.id && setSessionId(d.id))
+        .catch(() => {})
+      getHintBalance(token)
+        .then((b) => setHintsRemaining(b.remaining))
+        .catch(() => {})
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [challenge, user])
 
@@ -99,9 +101,6 @@ export function useSocraticSession<TWork>(opts: {
     setMessages((m) => [...m, msg])
   }
 
-  // Optimistic local decrement only. The server is the source of truth for
-  // hint balance — every tutor/solve call returns `remaining`, which the
-  // caller pipes through `syncRemaining` to overwrite this local prediction.
   function spend(cost: number, penalty: number) {
     setHintsUsed((h) => h + cost)
     setIndependence((i) => Math.max(0, i - penalty))
@@ -122,8 +121,9 @@ export function useSocraticSession<TWork>(opts: {
   async function buyHints() {
     if (!user) return
     try {
-      await buyHintsAction(user.id)
-      const b = await getHintBalance(user.id)
+      const token = await getAccessToken()
+      await buyHintsAction(token)
+      const b = await getHintBalance(token)
       setHintsRemaining(b.remaining)
     } catch {
       // ignore
@@ -132,7 +132,11 @@ export function useSocraticSession<TWork>(opts: {
 
   function complete(durationSeconds: number) {
     if (!sessionId) return
-    completeSession({ id: sessionId, durationSeconds }).catch(() => {})
+    getAccessToken()
+      .then((token) =>
+        completeSession({ token, id: sessionId, durationSeconds }),
+      )
+      .catch(() => {})
   }
 
   return {

@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { levelById, levelByUiId } from '@/domain/levels'
 import { stackById, stackByUiId } from '@/domain/stacks'
 import { getNextChallenge } from '@/features/challenges/actions'
+import { getAccessToken } from '@/lib/api/client'
 import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { User } from '@supabase/supabase-js'
@@ -138,7 +139,14 @@ export function OnboardingFlow({ user }: { user: User }) {
         }
       | undefined
 
-    // Restore saved preferences using the registries (no translation tables).
+    const onboarded =
+      !!meta?.preferred_level &&
+      (meta?.preferred_track === 'design' || !!meta?.preferred_stack)
+    if (onboarded) {
+      router.replace('/dashboard')
+      return
+    }
+
     if (meta?.preferred_track) setTrack(meta.preferred_track)
     const restoredStack = meta?.preferred_stack
       ? stackById(meta.preferred_stack)?.uiId
@@ -167,18 +175,19 @@ export function OnboardingFlow({ user }: { user: User }) {
       },
     })
     try {
+      const token = await getAccessToken()
       const result = await getNextChallenge(
         trk === 'design'
           ? {
               kind: 'design',
               level: dbLevel as 'beginner' | 'intermediate' | 'advanced',
-              userId: user.id,
+              token,
             }
           : {
               kind: 'code',
               stack: dbStack,
               level: dbLevel as 'beginner' | 'intermediate' | 'advanced',
-              userId: user.id,
+              token,
             },
       )
       if ('error' in result || !result?.id) {

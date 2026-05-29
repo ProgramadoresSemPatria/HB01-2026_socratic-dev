@@ -26,12 +26,14 @@ import {
   Wand2,
 } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
+import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { DesignCanvas } from './design-canvas'
 
 const POST = { method: 'POST', headers: { 'content-type': 'application/json' } }
 
 export function DesignChallengeWorkspace({ user }: { user: User }) {
+  const router = useRouter()
   const [challenge, setChallenge] = React.useState<Challenge | null>(null)
   const apiRef = React.useRef<ExcalidrawApi | null>(null)
   const saveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -226,7 +228,6 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
       })
       const data = await res.json()
       setReview(data.review || data.error || 'Não foi possível gerar o review.')
-      s.complete(s.elapsed)
     } finally {
       setReviewing(false)
     }
@@ -364,6 +365,10 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
             elapsed={s.elapsed}
             tests={null}
             onClose={() => setReviewOpen(false)}
+            onComplete={() => {
+              s.complete(s.elapsed)
+              router.push('/dashboard')
+            }}
           />
         )}
       </AnimatePresence>

@@ -6,6 +6,7 @@ import { signOut } from '@/features/auth/hooks/use-user'
 import { getDashboardStats } from '@/features/dashboard/actions'
 import type { Stats } from '@/features/dashboard/types'
 import { getProfile, type Profile } from '@/features/profile/actions'
+import { getAccessToken } from '@/lib/api/client'
 import { supabase } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import {
@@ -87,9 +88,10 @@ export function ProfileView({ user }: { user: User }) {
     if (!user) return
     let active = true
     ;(async () => {
+      const token = await getAccessToken()
       const [p, s] = await Promise.all([
-        getProfile(user.id),
-        getDashboardStats(user.id),
+        getProfile(token),
+        getDashboardStats(token),
       ])
       if (!active) return
       if (p) setProfile(p)

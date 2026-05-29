@@ -4,34 +4,48 @@ import {
   generateChallenge as runGenerate,
   type GenLevel,
 } from '@/lib/ai/generate-challenge'
+import { authActionUser } from '@/lib/api/guard'
+import { rateLimit } from '@/lib/api/guard'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { Challenge } from './types'
 
 export async function startSession(args: {
-  userId: string
+  token: string
   challengeId: string
 }): Promise<{ id: string } | null> {
+  const a = await authActionUser(args.token)
+  if ('error' in a) return null
   const { data } = await supabaseAdmin
     .from('sessions')
-    .insert({ user_id: args.userId, challenge_id: args.challengeId })
+    .insert({ user_id: a.userId, challenge_id: args.challengeId })
     .select()
     .single()
   return data ? { id: (data as { id: string }).id } : null
 }
 
 export async function completeSession(args: {
+  token: string
   id: string
   status?: 'completed' | 'abandoned'
   durationSeconds?: number
 }): Promise<void> {
+  const a = await authActionUser(args.token)
+  if ('error' in a) return
+  const { data: own } = await supabaseAdmin
+    .from('sessions')
+    .select('user_id')
+    .eq('id', args.id)
+    .maybeSingle()
+  if (!own || (own as { user_id: string }).user_id !== a.userId) return
+
   const status = args.status ?? 'completed'
   const update =
     typeof args.durationSeconds === 'number'
       ? {
           status,
           completed_at: new Date().toISOString(),
-          duration_seconds: args.durationSeconds,
+          duration_seconds: Math.max(0, Math.floor(args.durationSeconds)),
         }
       : { status, completed_at: new Date().toISOString() }
   await supabaseAdmin.from('sessions').update(update).eq('id', args.id)
@@ -48,19 +62,21 @@ export type SessionRow = {
 }
 
 export async function listSessionsForUser(
-  userId: string,
+  token: string,
 ): Promise<SessionRow[]> {
+  const a = await authActionUser(token)
+  if ('error' in a) return []
   const { data } = await supabaseAdmin
     .from('sessions')
     .select(
       'id, challenge_id, status, started_at, challenges(title, stack, kind)',
     )
-    .eq('user_id', userId)
+    .eq('user_id', a.userId)
     .order('started_at', { ascending: false })
   return (data ?? []) as unknown as SessionRow[]
 }
 
-export async function generateChallenge(input: {
+async function doGenerate(input: {
   kind: 'code' | 'design'
   stack?: string
   level: GenLevel
@@ -79,12 +95,32 @@ export async function generateChallenge(input: {
   }
 }
 
-export async function getNextChallenge(input: {
-  userId?: string
+export async function generateChallenge(input: {
+  token: string
   kind: 'code' | 'design'
   stack?: string
   level: GenLevel
 }): Promise<Challenge | { error: string }> {
+  const a = await authActionUser(input.token)
+  if ('error' in a) return a
+  if (!rateLimit(`generate:${a.userId}`, 10, 60_000)) {
+    return { error: 'Muitas requisições. Aguarde um momento.' }
+  }
+  return doGenerate(input)
+}
+
+export async function getNextChallenge(input: {
+  token: string
+  kind: 'code' | 'design'
+  stack?: string
+  level: GenLevel
+}): Promise<Challenge | { error: string }> {
+  const a = await authActionUser(input.token)
+  if ('error' in a) return a
+  if (!rateLimit(`next-challenge:${a.userId}`, 20, 60_000)) {
+    return { error: 'Muitas requisições. Aguarde um momento.' }
+  }
+
   const kind = input.kind
   const level: GenLevel =
     input.level === 'intermediate' || input.level === 'advanced'
@@ -98,14 +134,11 @@ export async function getNextChallenge(input: {
   }
   const stack = stackMap[input.stack ?? ''] ?? 'typescript'
 
-  let seenIds: string[] = []
-  if (input.userId) {
-    const { data: seen } = await supabaseAdmin
-      .from('sessions')
-      .select('challenge_id')
-      .eq('user_id', input.userId)
-    seenIds = [...new Set((seen ?? []).map((s) => s.challenge_id))]
-  }
+  const { data: seen } = await supabaseAdmin
+    .from('sessions')
+    .select('challenge_id')
+    .eq('user_id', a.userId)
+  const seenIds = [...new Set((seen ?? []).map((s) => s.challenge_id))]
 
   let query = supabaseAdmin
     .from('challenges')
@@ -120,5 +153,5 @@ export async function getNextChallenge(input: {
     return pool[Math.floor(Math.random() * pool.length)] as unknown as Challenge
   }
 
-  return generateChallenge({ kind, stack, level })
+  return doGenerate({ kind, stack, level })
 }
