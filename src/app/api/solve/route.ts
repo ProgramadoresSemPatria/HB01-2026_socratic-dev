@@ -38,22 +38,39 @@ export async function POST(req: Request) {
     const body = await req.json()
     const kind: ChallengeKind = body.kind === 'design' ? 'design' : 'code'
     const work: string = body.work ?? ''
+    const tests: string = body.tests ?? ''
     const sessionId: string | undefined = body.session_id
 
     if (work.length > CAPS.text) return tooLarge()
+    if (tests.length > CAPS.text) return tooLarge()
     if (!sessionId) return jsonError('session_id é obrigatório.', 400)
 
     const balance = await getBalance(userId)
     if (balance.remaining < SOLVE_COST)
       return jsonError('Hints insuficientes para resolver.', 429)
 
-    const user = [
+    const codeParts = [
       `Desafio: ${body.title ?? ''}`,
       `Briefing: ${body.briefing ?? ''}`,
+      `Código atual do aluno:\n${work}`,
+    ]
+    if (tests) {
+      codeParts.push(
+        '',
+        'TESTES OBRIGATÓRIOS (sua solução PRECISA passar em todos):',
+        '```',
+        tests,
+        '```',
+      )
+    }
+    const user =
       kind === 'design'
-        ? `Diagrama atual (resumo): ${work}`
-        : `Código atual do aluno:\n${work}`,
-    ].join('\n')
+        ? [
+            `Desafio: ${body.title ?? ''}`,
+            `Briefing: ${body.briefing ?? ''}`,
+            `Diagrama atual (resumo): ${work}`,
+          ].join('\n')
+        : codeParts.join('\n')
 
     if (kind === 'design') {
       const raw = await askClaude({

@@ -2,12 +2,14 @@
 
 import { Navbar } from '@/components/navbar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { CustomChallengeDialog } from '@/features/challenges/components/custom-challenge-dialog'
 import {
   getNextChallenge,
   listSessionsForUser,
   type SessionRow,
 } from '@/features/challenges/actions'
 import { getDashboardStats } from '@/features/dashboard/actions'
+import { getAccessToken } from '@/lib/api/client'
 import type { Stats } from '@/features/dashboard/types'
 import { activityLevel } from '@/features/dashboard/utils'
 import type { User } from '@supabase/supabase-js'
@@ -20,6 +22,7 @@ import {
   Lightbulb,
   Loader2,
   Network,
+  PenLine,
   Sparkles,
   TrendingUp,
   Trophy,
@@ -38,7 +41,7 @@ import {
 const STATUS_LABEL: Record<string, string> = {
   completed: 'Concluído',
   in_progress: 'Em andamento',
-  abandoned: 'Abandonado',
+  abandoned: 'Reprovado',
 }
 
 const IRIS = 'oklch(0.55 0.24 285)'
@@ -57,6 +60,8 @@ export function DashboardView({ user }: { user: User }) {
   const [sessions, setSessions] = React.useState<SessionRow[]>([])
   const [loaded, setLoaded] = React.useState(false)
   const [genDesign, setGenDesign] = React.useState(false)
+  const [genCode, setGenCode] = React.useState(false)
+  const [customOpen, setCustomOpen] = React.useState(false)
 
   async function startDesign() {
     if (genDesign || !user) return
@@ -68,7 +73,7 @@ export function DashboardView({ user }: { user: User }) {
       const data = await getNextChallenge({
         kind: 'design',
         level: level as 'beginner' | 'intermediate' | 'advanced',
-        userId: user.id,
+        token: await getAccessToken(),
       })
       if (!('error' in data) && data?.id) router.push(`/design?id=${data.id}`)
       else setGenDesign(false)
@@ -77,13 +82,39 @@ export function DashboardView({ user }: { user: User }) {
     }
   }
 
+  async function startCode() {
+    if (genCode || !user) return
+    const meta = user.user_metadata as
+      | { preferred_stack?: string; preferred_level?: string }
+      | undefined
+    if (!meta?.preferred_stack || !meta?.preferred_level) {
+      router.push('/onboarding')
+      return
+    }
+    setGenCode(true)
+    try {
+      const data = await getNextChallenge({
+        kind: 'code',
+        stack: meta.preferred_stack,
+        level: meta.preferred_level as 'beginner' | 'intermediate' | 'advanced',
+        token: await getAccessToken(),
+      })
+      if (!('error' in data) && data?.id)
+        router.push(`/challenge?id=${data.id}`)
+      else setGenCode(false)
+    } catch {
+      setGenCode(false)
+    }
+  }
+
   React.useEffect(() => {
     if (!user) return
     let active = true
     ;(async () => {
+      const token = await getAccessToken()
       const [s, sess] = await Promise.all([
-        getDashboardStats(user.id),
-        listSessionsForUser(user.id),
+        getDashboardStats(token),
+        listSessionsForUser(token),
       ])
       if (!active) return
       if (s && !('error' in s)) setStats(s)
@@ -107,7 +138,7 @@ export function DashboardView({ user }: { user: User }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className='mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between'
+            className='mb-10 flex flex-col gap-6'
           >
             <div className='min-w-0'>
               <div className='mb-2 font-mono text-[11px] tracking-[0.08em] text-[#6b6478] uppercase'>
@@ -135,12 +166,20 @@ export function DashboardView({ user }: { user: User }) {
                 </>
               )}
             </div>
-            <div className='flex shrink-0 flex-col gap-2 self-start sm:flex-row md:self-auto'>
+            <div className='flex flex-col gap-2 self-start sm:flex-row'>
+              <button
+                type='button'
+                onClick={() => setCustomOpen(true)}
+                className='inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-iris/30 bg-iris/5 px-5 py-3 text-[15px] font-medium tracking-tight text-iris transition-colors hover:bg-iris/10'
+              >
+                <PenLine className='size-4' />
+                Sob medida
+              </button>
               <button
                 type='button'
                 onClick={startDesign}
                 disabled={genDesign}
-                className='inline-flex items-center justify-center gap-2 rounded-xl border border-[#1b1916]/20 px-5 py-3 text-[15px] font-medium tracking-tight text-[#1b1916] transition-colors hover:bg-[#1b1916]/5 disabled:opacity-60'
+                className='inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#1b1916]/20 px-5 py-3 text-[15px] font-medium tracking-tight text-[#1b1916] transition-colors hover:bg-[#1b1916]/5 disabled:cursor-not-allowed disabled:opacity-60'
               >
                 {genDesign ? (
                   <Loader2 className='size-4 animate-spin' />
@@ -149,14 +188,22 @@ export function DashboardView({ user }: { user: User }) {
                 )}
                 {genDesign ? 'Gerando…' : 'System Design'}
               </button>
-              <Link
-                href='/onboarding'
-                className='group inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-[15px] font-medium tracking-tight text-primary-foreground transition-colors hover:bg-primary/90'
+              <button
+                type='button'
+                onClick={startCode}
+                disabled={genCode}
+                className='group inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-[15px] font-medium tracking-tight text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60'
               >
-                <Sparkles className='size-4' />
-                Novo desafio
-                <ArrowRight className='size-4 transition-transform group-hover:translate-x-0.5' />
-              </Link>
+                {genCode ? (
+                  <Loader2 className='size-4 animate-spin' />
+                ) : (
+                  <Sparkles className='size-4' />
+                )}
+                {genCode ? 'Gerando…' : 'Novo desafio'}
+                {!genCode && (
+                  <ArrowRight className='size-4 transition-transform group-hover:translate-x-0.5' />
+                )}
+              </button>
             </div>
           </motion.div>
 
@@ -226,6 +273,17 @@ export function DashboardView({ user }: { user: User }) {
           )}
         </div>
       </main>
+      <CustomChallengeDialog
+        open={customOpen}
+        onClose={() => setCustomOpen(false)}
+        defaultLevel={
+          (user?.user_metadata?.preferred_level as
+            | 'beginner'
+            | 'intermediate'
+            | 'advanced'
+            | undefined) ?? 'intermediate'
+        }
+      />
     </div>
   )
 }

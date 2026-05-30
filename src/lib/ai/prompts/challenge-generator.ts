@@ -7,7 +7,7 @@ Responda APENAS com um objeto JSON válido (sem markdown, sem comentários), com
 
 Regras:
 - title: curto e concreto. description: 1 frase do que implementar.
-- client_briefing: 2 a 4 frases, com um cliente fictício e o FORMATO dos dados de entrada.
+- client_briefing: a PRIMEIRA LINHA deve seguir EXATAMENTE o formato "Cliente: {Nome} ({Cargo}) — {Empresa fictícia}" (ex.: "Cliente: Maria Souza (PM) — Logística Brasil"). Depois pule uma linha em branco e escreva o briefing real em 2 a 4 frases, com o FORMATO dos dados de entrada. Inclua o nome da pessoa pelo menos uma vez no briefing pra ele parecer um pedido vindo dela.
 - intro: a primeira fala do tutor socrático — uma pergunta que faça o aluno pensar. NUNCA a resposta.
 - initial_code: a(s) assinatura(s) da(s) função(ões) com "export", corpo vazio e comentários. SEM a solução. Código válido na linguagem da stack.
 - tests_source: testes no formato test('nome', () => { expect(exports.NOME(args)).toBe(valor) }). Use exports.<funcao> para acessar a solução do aluno. Cubra os edge cases adequados ao nível.
@@ -20,7 +20,7 @@ Responda APENAS com um objeto JSON válido (sem markdown, sem comentários), com
 Regras:
 - title: curto e concreto (ex.: "Distribuir os dados de usuários entre serviços", "Arquitetura de um feed em tempo real").
 - description: 1 frase do que o aluno deve ARQUITETAR no canvas.
-- client_briefing: 3 a 5 frases com um cliente fictício, os requisitos (escala, latência, consistência) e os PASSOS do que desenhar (componentes/serviços, onde cada dado vive, como replica/particiona, o caminho de uma request), pedindo pra ligar com setas o fluxo dos dados.
+- client_briefing: a PRIMEIRA LINHA deve seguir EXATAMENTE o formato "Cliente: {Nome} ({Cargo}) — {Empresa fictícia}" (ex.: "Cliente: Rafael Lima (CTO) — Fintech Pix"). Depois pule uma linha em branco e escreva 3 a 5 frases com os requisitos (escala, latência, consistência) e os PASSOS do que desenhar (componentes/serviços, onde cada dado vive, como replica/particiona, o caminho de uma request), pedindo pra ligar com setas o fluxo dos dados. Inclua o nome do cliente pelo menos uma vez no briefing.
 - intro: a primeira fala do tutor socrático — uma pergunta que faça o aluno pensar antes de desenhar. NUNCA a resposta.
 - Tudo em português do Brasil. Adeque a complexidade ao nível.`
 

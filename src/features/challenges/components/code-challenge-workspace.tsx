@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { useSocraticSession } from '../hooks/use-socratic-session'
 import type { Challenge } from '../types'
@@ -42,6 +43,7 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
 const POST = { method: 'POST', headers: { 'content-type': 'application/json' } }
 
 export function CodeChallengeWorkspace({ user }: { user: User }) {
+  const router = useRouter()
   const [challenge, setChallenge] = React.useState<Challenge | null>(null)
 
   const s = useSocraticSession<string>({
@@ -62,6 +64,7 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
     passed: number
     total: number
   } | null>(null)
+  const [outcome, setOutcome] = React.useState<'pass' | 'fail'>('pass')
 
   const language: RunnerLanguage = challenge
     ? challengeLanguage(challenge.stack)
@@ -154,6 +157,7 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
           title: challenge.title,
           briefing: challenge.client_briefing,
           work: s.work,
+          tests: challenge.tests_source,
           session_id: s.sessionId,
         }),
       })
@@ -187,9 +191,11 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
     const touched =
       code.trim().length > 0 && code.trim() !== starterCode(challenge).trim()
     if (!touched) {
+      setOutcome('fail')
       setReview(
         'Você ainda não escreveu uma solução — implemente algo no editor e submeta de novo.',
       )
+      s.complete(s.elapsed, 'abandoned')
       setReviewing(false)
       return
     }
@@ -207,6 +213,8 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
     }
     setSubmitTests({ passed, total })
     const solved = total === 0 || passed === total
+    setOutcome(solved ? 'pass' : 'fail')
+    s.complete(s.elapsed, solved ? 'completed' : 'abandoned')
 
     try {
       const res = await apiFetch('/api/review', {
@@ -222,7 +230,6 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
       })
       const data = await res.json()
       setReview(data.review || data.error || 'Não foi possível gerar o review.')
-      if (solved) s.complete(s.elapsed)
     } finally {
       setReviewing(false)
     }
@@ -273,7 +280,10 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
               {minutes}:{seconds}
             </span>
           </div>
-          <div className='glass hidden h-8 items-center gap-2 rounded-full px-3 text-[12px] md:flex'>
+          <div
+            className='glass hidden h-8 items-center gap-2 rounded-full px-3 text-[12px] md:flex'
+            title='Começa em 100. Cada hint custa. É o quanto você pensou sozinho.'
+          >
             <Brain className='size-3.5 opacity-70' />
             <span className='text-muted-foreground'>Independência:</span>
             <span
@@ -404,7 +414,10 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
             hintsUsed={s.hintsUsed}
             elapsed={s.elapsed}
             tests={submitTests}
+            outcome={outcome}
+            sessionId={s.sessionId}
             onClose={() => setReviewOpen(false)}
+            onComplete={() => router.push('/dashboard')}
           />
         )}
       </AnimatePresence>

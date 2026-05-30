@@ -2,22 +2,25 @@
 
 import { useUser } from '@/features/auth/hooks/use-user'
 import { buyHints, getHintBalance } from '@/features/hints/actions'
+import { getAccessToken } from '@/lib/api/client'
 import { cn } from '@/lib/utils'
 import { Lightbulb, Plus } from 'lucide-react'
 import { motion, useMotionValueEvent, useScroll } from 'motion/react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import * as React from 'react'
 import { Logo } from './logo'
 
-function HintsChip({ userId }: { userId: string }) {
+function HintsChip() {
   const [remaining, setRemaining] = React.useState<number | null>(null)
   const [buying, setBuying] = React.useState(false)
 
   const refresh = React.useCallback(() => {
-    getHintBalance(userId)
+    getAccessToken()
+      .then((t) => getHintBalance(t))
       .then((b) => setRemaining(b.remaining))
       .catch(() => {})
-  }, [userId])
+  }, [])
 
   React.useEffect(() => {
     refresh()
@@ -27,7 +30,7 @@ function HintsChip({ userId }: { userId: string }) {
     if (buying) return
     setBuying(true)
     try {
-      await buyHints(userId)
+      await buyHints(await getAccessToken())
       refresh()
     } finally {
       setBuying(false)
@@ -71,6 +74,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = React.useState(false)
   const { scrollY } = useScroll()
   const { user, loading } = useUser()
+  const isHome = usePathname() === '/'
 
   useMotionValueEvent(scrollY, 'change', (v) => {
     setScrolled(v > 12)
@@ -89,17 +93,19 @@ export function Navbar() {
       <div className='container-main flex h-[72px] items-center justify-between'>
         <Logo size='lg' />
 
-        <nav className='hidden items-center gap-1 md:flex'>
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className='rounded-md px-3 py-2 text-sm font-medium text-[#6b6478] transition-colors hover:text-[#1b1916]'
-            >
-              {l.label}
-            </Link>
-          ))}
-        </nav>
+        {isHome && (
+          <nav className='hidden items-center gap-1 md:flex'>
+            {links.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className='rounded-md px-3 py-2 text-sm font-medium text-[#6b6478] transition-colors hover:text-[#1b1916]'
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+        )}
 
         <div className='flex items-center gap-2'>
           {!loading && user ? (
@@ -116,7 +122,7 @@ export function Navbar() {
               >
                 Dashboard
               </Link>
-              <HintsChip userId={user.id} />
+              <HintsChip />
               <Link
                 href='/profile'
                 aria-label='Seu perfil'
@@ -128,12 +134,6 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link
-                href='/login'
-                className='hidden rounded-md px-3 py-2 text-sm font-medium text-[#6b6478] transition-colors hover:text-[#1b1916] sm:inline-flex'
-              >
-                Entrar
-              </Link>
               <Link
                 href='/onboarding'
                 className='inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium tracking-tight text-primary-foreground transition-colors hover:bg-primary/90'

@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { levelById, levelByUiId } from '@/domain/levels'
 import { stackById, stackByUiId } from '@/domain/stacks'
 import { getNextChallenge } from '@/features/challenges/actions'
+import { getAccessToken } from '@/lib/api/client'
 import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { User } from '@supabase/supabase-js'
@@ -129,10 +130,7 @@ export function OnboardingFlow({ user }: { user: User }) {
   const [starting, setStarting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
-  const started = React.useRef(false)
-
   React.useEffect(() => {
-    if (started.current) return
     const meta = user.user_metadata as
       | {
           preferred_track?: string
@@ -141,18 +139,14 @@ export function OnboardingFlow({ user }: { user: User }) {
         }
       | undefined
 
-    // Already onboarded → go straight to dashboard. No surprise challenge
-    // generation on every visit (this was annoying users on each login).
     const onboarded =
       !!meta?.preferred_level &&
       (meta?.preferred_track === 'design' || !!meta?.preferred_stack)
     if (onboarded) {
-      started.current = true
       router.replace('/dashboard')
       return
     }
 
-    // Restore saved preferences using the registries (no translation tables).
     if (meta?.preferred_track) setTrack(meta.preferred_track)
     const restoredStack = meta?.preferred_stack
       ? stackById(meta.preferred_stack)?.uiId
@@ -181,18 +175,19 @@ export function OnboardingFlow({ user }: { user: User }) {
       },
     })
     try {
+      const token = await getAccessToken()
       const result = await getNextChallenge(
         trk === 'design'
           ? {
               kind: 'design',
               level: dbLevel as 'beginner' | 'intermediate' | 'advanced',
-              userId: user.id,
+              token,
             }
           : {
               kind: 'code',
               stack: dbStack,
               level: dbLevel as 'beginner' | 'intermediate' | 'advanced',
-              userId: user.id,
+              token,
             },
       )
       if ('error' in result || !result?.id) {
@@ -201,7 +196,6 @@ export function OnboardingFlow({ user }: { user: User }) {
             'A IA não conseguiu gerar o desafio agora. Tente de novo.',
         )
         setStarting(false)
-        started.current = false
         return
       }
       router.push(
@@ -212,7 +206,6 @@ export function OnboardingFlow({ user }: { user: User }) {
     } catch {
       setError('Falha ao falar com a IA. Verifique a conexão e tente de novo.')
       setStarting(false)
-      started.current = false
     }
   }
 

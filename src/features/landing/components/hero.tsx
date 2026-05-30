@@ -45,12 +45,6 @@ export function Hero() {
               Comece um desafio
               <ArrowRight className='size-4 transition-transform group-hover:translate-x-0.5' />
             </Link>
-            <Link
-              href='#exemplo'
-              className='inline-flex items-center justify-center rounded-xl border border-[#1b1916]/20 px-6 py-3.5 text-base font-medium tracking-tight text-[#1b1916] transition-colors duration-300 hover:bg-[#1b1916]/5'
-            >
-              Falar com o tutor
-            </Link>
           </div>
         </div>
       </motion.div>

@@ -1,3 +1,4 @@
+import { StepTrail } from './anim/step-trail'
 import { Reveal } from './reveal'
 
 const steps = [
@@ -25,7 +26,15 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id='metodo' className='px-6 py-16 sm:px-10 lg:px-16 lg:py-24'>
+    <section
+      id='metodo'
+      className='relative overflow-hidden px-6 py-16 sm:px-10 lg:px-16 lg:py-24'
+      style={{
+        background:
+          'radial-gradient(80% 60% at 50% 100%, rgba(218,216,234,0.28) 0%, transparent 70%), #ffffff',
+      }}
+    >
+      <div className='grid-pattern pointer-events-none absolute inset-0 opacity-20' />
       <div className='mx-auto max-w-[860px] text-center'>
         <Reveal>
           <span className='text-[13px] font-semibold tracking-[0.08em] text-[#6b6478] uppercase'>
@@ -37,7 +46,8 @@ export function HowItWorks() {
         </Reveal>
       </div>
 
-      <div className='mt-12 grid gap-y-10 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4 lg:gap-8'>
+      <div className='relative mt-12 grid gap-y-10 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4 lg:gap-8'>
+        <StepTrail />
         {steps.map((s, i) => (
           <Reveal key={s.n} delay={(i % 4) * 0.08} className='relative'>
             <div className='font-heading text-5xl font-light tracking-tight text-[#dad8ea]'>

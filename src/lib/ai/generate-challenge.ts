@@ -38,6 +38,7 @@ export async function generateChallenge(opts: {
   kind: 'code' | 'design'
   stack?: string
   level: GenLevel
+  userPrompt?: string
 }) {
   const stackMap: Record<string, string> = {
     javascript: 'javascript',
@@ -47,6 +48,9 @@ export async function generateChallenge(opts: {
   }
   const stack = stackMap[opts.stack ?? ''] ?? 'typescript'
   const avoid = avoidLine(await existingTitles(opts.kind, opts.level, stack))
+  const userTheme = opts.userPrompt?.trim()
+    ? `\n\nO ALUNO PEDIU especificamente um desafio sobre o seguinte tema (siga isto à risca, é o coração do pedido):\n"""\n${opts.userPrompt.trim().slice(0, 800)}\n"""`
+    : ''
   const noTestsNote =
     stack === 'react'
       ? '\n\nIMPORTANTE: tests_source deve ser "" (string vazia). initial_code deve ser um componente TSX com "export default function App()". Sem testes automáticos — o aluno vê o resultado no preview visual.'
@@ -57,7 +61,7 @@ export async function generateChallenge(opts: {
   if (opts.kind === 'design') {
     const raw = await askClaude({
       system: challengeSystem('design'),
-      user: `Gere um desafio de system design (arquitetura) novo. nível: ${opts.level}.\n\n${levelGuide('design', opts.level)}${avoid}`,
+      user: `Gere um desafio de system design (arquitetura) novo. nível: ${opts.level}.\n\n${levelGuide('design', opts.level)}${userTheme}${avoid}`,
       maxTokens: 2048,
       effort: 'medium',
     })
@@ -79,7 +83,7 @@ export async function generateChallenge(opts: {
 
   const raw = await askClaude({
     system: challengeSystem('code'),
-    user: `Gere um desafio novo. stack: ${stack}. nível: ${opts.level}.\n\n${levelGuide('code', opts.level)}${avoid}${noTestsNote}`,
+    user: `Gere um desafio novo. stack: ${stack}. nível: ${opts.level}.\n\n${levelGuide('code', opts.level)}${userTheme}${avoid}${noTestsNote}`,
     maxTokens: opts.level === 'advanced' ? 6000 : 3500,
     effort: opts.level === 'advanced' ? 'high' : 'medium',
   })

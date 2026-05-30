@@ -33,12 +33,6 @@ export function FinalCta() {
                 Quero ser desafiado
                 <ArrowRight className='size-4 transition-transform group-hover:translate-x-0.5' />
               </Link>
-              <Link
-                href='/dashboard'
-                className='inline-flex items-center justify-center rounded-xl border border-[#1b1916]/20 px-6 py-3.5 text-base font-medium tracking-tight text-[#1b1916] transition-colors duration-300 hover:bg-[#1b1916]/5'
-              >
-                Ver dashboard de demo
-              </Link>
             </div>
           </div>
         </div>

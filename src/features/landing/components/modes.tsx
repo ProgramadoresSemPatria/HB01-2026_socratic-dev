@@ -1,6 +1,7 @@
 import { ArrowRight, Code2, Network } from 'lucide-react'
 import Link from 'next/link'
 import { Reveal } from './reveal'
+import { SectionBackdrop } from './section-backdrop'
 
 const modes = [
   {
@@ -31,8 +32,9 @@ const modes = [
 
 export function Modes() {
   return (
-    <section className='px-6 py-16 sm:px-10 lg:px-16 lg:py-24'>
-      <div className='mx-auto max-w-[860px] text-center'>
+    <section className='relative overflow-hidden px-6 py-16 sm:px-10 lg:px-16 lg:py-24'>
+      <SectionBackdrop variant='warm' />
+      <div className='relative mx-auto max-w-[860px] text-center'>
         <Reveal>
           <span className='text-[13px] font-semibold tracking-[0.08em] text-[#6b6478] uppercase'>
             Dois modos
@@ -52,7 +54,7 @@ export function Modes() {
         </Reveal>
       </div>
 
-      <div className='mx-auto mt-12 grid max-w-[980px] gap-4 lg:mt-16 lg:grid-cols-2'>
+      <div className='relative mx-auto mt-12 grid max-w-[980px] gap-4 lg:mt-16 lg:grid-cols-2'>
         {modes.map((m, i) => (
           <Reveal key={m.title} delay={i * 0.1} className='h-full'>
             <div className='shadow-soft hover:shadow-soft-lg relative flex h-full flex-col rounded-2xl border border-[#DFE5E9] bg-white p-7 transition-shadow sm:p-8'>
@@ -79,7 +81,7 @@ export function Modes() {
               </ul>
               <Link
                 href='/onboarding'
-                className='group/cta mt-7 inline-flex items-center gap-1.5 text-[15px] font-medium text-iris'
+                className='group/cta mt-7 inline-flex cursor-pointer items-center gap-1.5 text-[15px] font-medium text-iris'
               >
                 {m.cta}
                 <ArrowRight className='size-4 transition-transform group-hover/cta:translate-x-0.5' />

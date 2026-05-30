@@ -1,5 +1,6 @@
 'use server'
 
+import { authActionUser } from '@/lib/api/guard'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import type { Stats } from './types'
 
@@ -52,8 +53,11 @@ function buildWeekProgress(
 }
 
 export async function getDashboardStats(
-  userId: string,
+  token: string,
 ): Promise<Stats | { error: string }> {
+  const a = await authActionUser(token)
+  if ('error' in a) return { error: 'Não autenticado.' }
+  const userId = a.userId
   const [sessionsResult, hintsResult, weekResult] = await Promise.all([
     supabaseAdmin
       .from('sessions')
@@ -71,9 +75,9 @@ export async function getDashboardStats(
       .gte('started_at', getDateDaysAgo(7)),
   ])
 
-  if (sessionsResult.error) return { error: sessionsResult.error.message }
-  if (hintsResult.error) return { error: hintsResult.error.message }
-  if (weekResult.error) return { error: weekResult.error.message }
+  if (sessionsResult.error || hintsResult.error || weekResult.error) {
+    return { error: 'Não foi possível carregar as estatísticas.' }
+  }
 
   const sessions = sessionsResult.data
   const hints = hintsResult.data

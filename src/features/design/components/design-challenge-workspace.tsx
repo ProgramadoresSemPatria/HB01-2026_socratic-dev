@@ -26,12 +26,14 @@ import {
   Wand2,
 } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
+import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { DesignCanvas } from './design-canvas'
 
 const POST = { method: 'POST', headers: { 'content-type': 'application/json' } }
 
 export function DesignChallengeWorkspace({ user }: { user: User }) {
+  const router = useRouter()
   const [challenge, setChallenge] = React.useState<Challenge | null>(null)
   const apiRef = React.useRef<ExcalidrawApi | null>(null)
   const saveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -45,6 +47,8 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
     initialWork: [],
     initialMessages: [{ role: 'ai', text: intro }],
   })
+
+  const [outcome, setOutcome] = React.useState<'pass' | 'fail'>('pass')
 
   const [reviewOpen, setReviewOpen] = React.useState(false)
   const [review, setReview] = React.useState<string | null>(null)
@@ -173,6 +177,10 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
       if (Array.isArray(data.nodes) && data.nodes.length > 0) {
         const elements = await buildSceneElements(data.nodes, data.edges ?? [])
         apiRef.current?.updateScene({ elements })
+        apiRef.current?.scrollToContent(elements, {
+          fitToContent: true,
+          animate: true,
+        })
         s.setWork(elements)
         s.pushMessage({
           role: 'ai',
@@ -197,12 +205,16 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
 
     const elements = currentElements()
     if (elements.length === 0) {
+      setOutcome('fail')
       setReview(
         'Você ainda não desenhou nada — comece o diagrama e submeta de novo.',
       )
+      s.complete(s.elapsed, 'abandoned')
       setReviewing(false)
       return
     }
+    setOutcome('pass')
+    s.complete(s.elapsed, 'completed')
 
     const summary = summarizeElements(elements)
     let imageBase64: string | null = null
@@ -226,7 +238,6 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
       })
       const data = await res.json()
       setReview(data.review || data.error || 'Não foi possível gerar o review.')
-      s.complete(s.elapsed)
     } finally {
       setReviewing(false)
     }
@@ -269,7 +280,12 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
           </div>
           <div className='glass hidden h-8 items-center gap-2 rounded-full px-3 text-[12px] md:flex'>
             <Brain className='size-3.5 opacity-70' />
-            <span className='text-muted-foreground'>Independência:</span>
+            <span
+              className='text-muted-foreground'
+              title='Começa em 100. Cada hint custa. É o quanto você pensou sozinho.'
+            >
+              Independência:
+            </span>
             <span
               className={cn(
                 'font-semibold tabular-nums',
@@ -363,7 +379,10 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
             hintsUsed={s.hintsUsed}
             elapsed={s.elapsed}
             tests={null}
+            outcome={outcome}
+            sessionId={s.sessionId}
             onClose={() => setReviewOpen(false)}
+            onComplete={() => router.push('/dashboard')}
           />
         )}
       </AnimatePresence>
