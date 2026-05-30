@@ -19,6 +19,7 @@ import {
   Trophy,
 } from 'lucide-react'
 import { motion } from 'motion/react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
@@ -127,9 +128,24 @@ export function ProfileView({ user }: { user: User }) {
                 transition={{ duration: 0.5 }}
                 className='relative z-10 flex items-center gap-4'
               >
-                <div className='grid size-14 shrink-0 place-items-center rounded-2xl bg-primary font-mono text-xl font-semibold text-primary-foreground uppercase ring-4 ring-white/50'>
-                  {(user?.email?.[0] ?? 'u').toUpperCase()}
-                </div>
+                {(user?.user_metadata as { avatar_url?: string } | undefined)
+                  ?.avatar_url ? (
+                  <div className='relative size-14 shrink-0 overflow-hidden rounded-2xl ring-4 ring-white/50'>
+                    <Image
+                      src={
+                        (user.user_metadata as { avatar_url?: string })
+                          .avatar_url!
+                      }
+                      alt='Seu avatar'
+                      fill
+                      className='object-cover'
+                    />
+                  </div>
+                ) : (
+                  <div className='grid size-14 shrink-0 place-items-center rounded-2xl bg-primary font-mono text-xl font-semibold text-primary-foreground uppercase ring-4 ring-white/50'>
+                    {(user?.email?.[0] ?? 'u').toUpperCase()}
+                  </div>
+                )}
                 <div className='min-w-0'>
                   <div className='mb-1 font-mono text-[11px] tracking-[0.08em] text-[#6b6478] uppercase'>
                     Seu perfil

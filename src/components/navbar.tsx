@@ -6,6 +6,7 @@ import { getAccessToken } from '@/lib/api/client'
 import { cn } from '@/lib/utils'
 import { Lightbulb, Plus } from 'lucide-react'
 import { motion, useMotionValueEvent, useScroll } from 'motion/react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
@@ -127,9 +128,26 @@ export function Navbar() {
                 href='/profile'
                 aria-label='Seu perfil'
                 title={user.email ?? 'Seu perfil'}
-                className='grid size-9 place-items-center rounded-full bg-primary font-mono text-[13px] font-semibold text-primary-foreground uppercase ring-1 ring-primary/20 transition-transform hover:scale-105'
+                className='grid size-9 shrink-0 overflow-hidden rounded-full ring-1 ring-primary/20 transition-transform hover:scale-105'
               >
-                {(user.email?.[0] ?? 'u').toUpperCase()}
+                {(user.user_metadata as { avatar_url?: string } | undefined)
+                  ?.avatar_url ? (
+                  <Image
+                    src={
+                      (
+                        user.user_metadata as { avatar_url?: string }
+                      ).avatar_url!
+                    }
+                    alt='Seu avatar'
+                    width={36}
+                    height={36}
+                    className='size-full object-cover'
+                  />
+                ) : (
+                  <span className='grid size-full place-items-center bg-primary font-mono text-[13px] font-semibold text-primary-foreground uppercase'>
+                    {(user.email?.[0] ?? 'u').toUpperCase()}
+                  </span>
+                )}
               </Link>
             </>
           ) : (
