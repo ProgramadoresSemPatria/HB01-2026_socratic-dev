@@ -7,6 +7,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { Reveal } from './reveal'
+import { SectionBackdrop } from './section-backdrop'
 
 const features = [
   {
@@ -43,8 +44,12 @@ const features = [
 
 export function Features() {
   return (
-    <section id='recursos' className='px-6 py-16 sm:px-10 lg:px-16 lg:py-24'>
-      <div className='mx-auto max-w-[860px] text-center'>
+    <section
+      id='recursos'
+      className='relative overflow-hidden px-6 py-16 sm:px-10 lg:px-16 lg:py-24'
+    >
+      <SectionBackdrop variant='paper' />
+      <div className='relative mx-auto max-w-[860px] text-center'>
         <Reveal>
           <h2 className='type-h2'>Feito para quem quer pensar, não copiar.</h2>
         </Reveal>
@@ -56,7 +61,7 @@ export function Features() {
         </Reveal>
       </div>
 
-      <div className='mt-12 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3'>
+      <div className='relative mt-12 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3'>
         {features.map((f, i) => (
           <Reveal
             key={f.title}

@@ -26,13 +26,20 @@ const guarantees = [
 
 export function Trust() {
   return (
-    <section className='px-6 py-16 sm:px-10 lg:px-16 lg:py-20'>
-      <div className='mx-auto mb-12 max-w-[720px] text-center'>
+    <section
+      className='relative overflow-hidden px-6 py-16 sm:px-10 lg:px-16 lg:py-20'
+      style={{
+        background:
+          'radial-gradient(70% 50% at 50% 0%, rgba(218,216,234,0.22) 0%, transparent 70%), #ffffff',
+      }}
+    >
+      <div className='grid-pattern pointer-events-none absolute inset-0 opacity-15' />
+      <div className='relative mx-auto mb-12 max-w-[720px] text-center'>
         <Reveal>
           <h2 className='type-h2'>O método, sem atalhos.</h2>
         </Reveal>
       </div>
-      <div className='grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4'>
+      <div className='relative grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4'>
         {guarantees.map((g, i) => (
           <Reveal key={g.title} delay={(i % 4) * 0.07}>
             <div className='flex flex-col items-center gap-3 text-center'>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { CaseVisual, type CaseKind } from './case-visual'
 import { Reveal } from './reveal'
+import { SectionBackdrop } from './section-backdrop'
 
 type Tag = { label: string; dot: string }
 type Case = {
@@ -153,8 +154,9 @@ export function UseCases() {
   const [lead, ...rest] = cases
 
   return (
-    <section className='px-6 py-16 sm:px-10 lg:px-16 lg:py-24'>
-      <div className='mx-auto max-w-[860px] text-center'>
+    <section className='relative overflow-hidden px-6 py-16 sm:px-10 lg:px-16 lg:py-24'>
+      <SectionBackdrop variant='mist' />
+      <div className='relative mx-auto max-w-[860px] text-center'>
         <Reveal>
           <span className='text-[13px] font-semibold tracking-[0.08em] text-[#6b6478] uppercase'>
             Para todo tipo de desafio
@@ -163,7 +165,7 @@ export function UseCases() {
         </Reveal>
       </div>
 
-      <div className='mt-12 flex flex-col gap-[40px] lg:mt-16'>
+      <div className='relative mt-12 flex flex-col gap-[40px] lg:mt-16'>
         <Reveal>
           <Card c={lead} />
         </Reveal>
