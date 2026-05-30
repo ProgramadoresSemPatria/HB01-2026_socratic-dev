@@ -16,6 +16,10 @@ export type ExcalidrawApi = {
   getAppState: () => Record<string, unknown>
   getFiles: () => Record<string, unknown>
   updateScene: (scene: { elements: readonly unknown[] }) => void
+  scrollToContent: (
+    target?: readonly unknown[],
+    opts?: { fitToContent?: boolean; animate?: boolean },
+  ) => void
 }
 
 type ShapeKind = 'rectangle' | 'ellipse' | 'diamond'
@@ -28,14 +32,14 @@ type Spec = {
 }
 
 const SPEC: Record<string, Spec> = {
-  client:   { shape: 'ellipse',   emoji: '👤', bg: '#e7f0ff', w: 200, h: 90 },
-  gateway:  { shape: 'rectangle', emoji: '🚪', bg: '#fff1e6', w: 210, h: 90 },
-  service:  { shape: 'rectangle', emoji: '⚙️', bg: '#f1f0fb', w: 220, h: 90 },
-  external: { shape: 'rectangle', emoji: '☁️', bg: '#eef0f2', w: 200, h: 90 },
-  queue:    { shape: 'rectangle', emoji: '📨', bg: '#eafaf5', w: 200, h: 90 },
-  cache:    { shape: 'diamond',   emoji: '⚡', bg: '#fff7d6', w: 140, h: 140 },
-  database: { shape: 'ellipse',   emoji: '🗄️', bg: '#e8f8ee', w: 180, h: 130 },
-  storage:  { shape: 'ellipse',   emoji: '📦', bg: '#f3eefe', w: 180, h: 120 },
+  client:   { shape: 'ellipse',   emoji: '👤', bg: '#e7f0ff', w: 260, h: 110 },
+  gateway:  { shape: 'rectangle', emoji: '🚪', bg: '#fff1e6', w: 270, h: 110 },
+  service:  { shape: 'rectangle', emoji: '⚙️', bg: '#f1f0fb', w: 290, h: 110 },
+  external: { shape: 'rectangle', emoji: '☁️', bg: '#eef0f2', w: 260, h: 110 },
+  queue:    { shape: 'rectangle', emoji: '📨', bg: '#eafaf5', w: 260, h: 110 },
+  cache:    { shape: 'diamond',   emoji: '⚡', bg: '#fff7d6', w: 180, h: 180 },
+  database: { shape: 'ellipse',   emoji: '🗄️', bg: '#e8f8ee', w: 240, h: 150 },
+  storage:  { shape: 'ellipse',   emoji: '📦', bg: '#f3eefe', w: 240, h: 140 },
 }
 
 const TIER: Record<string, number> = {
@@ -145,16 +149,20 @@ export async function buildSceneElements(
       backgroundColor: s.bg,
       label: {
         text: `${s.emoji} ${n.label}`,
-        fontSize: 16,
+        fontSize: 20,
       },
     })
     if (n.note) {
+      const noteWidth = 280
       skeleton.push({
         type: 'text',
-        x: p.x + s.w / 2 - 110,
-        y: p.y + s.h + 6,
+        x: p.x + s.w / 2 - noteWidth / 2,
+        y: p.y + s.h + 10,
+        width: noteWidth,
+        height: 22,
         text: n.note,
-        fontSize: 12,
+        fontSize: 14,
+        textAlign: 'center',
       })
     }
   }

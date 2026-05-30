@@ -177,6 +177,10 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
       if (Array.isArray(data.nodes) && data.nodes.length > 0) {
         const elements = await buildSceneElements(data.nodes, data.edges ?? [])
         apiRef.current?.updateScene({ elements })
+        apiRef.current?.scrollToContent(elements, {
+          fitToContent: true,
+          animate: true,
+        })
         s.setWork(elements)
         s.pushMessage({
           role: 'ai',

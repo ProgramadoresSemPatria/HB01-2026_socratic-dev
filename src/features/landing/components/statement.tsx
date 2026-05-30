@@ -1,6 +1,6 @@
 import { Reveal } from './reveal'
 import { StatementBg } from './statement-bg'
-import { StatementDecor } from './statement-decor'
+import { StatementCanvas } from './statement-canvas'
 
 export function Statement() {
   return (
@@ -9,7 +9,6 @@ export function Statement() {
       className='relative overflow-hidden px-6 py-20 text-center sm:px-10 sm:py-24 lg:py-32'
     >
       <StatementBg />
-      <StatementDecor />
       <div className='relative mx-auto flex max-w-[760px] flex-col items-center gap-6'>
         <Reveal>
           <h2 className='type-h2 text-pretty'>
@@ -26,6 +25,11 @@ export function Statement() {
             primeira tela em branco, trava. A ferramenta mais poderosa da
             história da computação está ensinando uma geração a não pensar.
           </p>
+        </Reveal>
+      </div>
+      <div className='relative'>
+        <Reveal delay={0.2}>
+          <StatementCanvas />
         </Reveal>
       </div>
     </section>
