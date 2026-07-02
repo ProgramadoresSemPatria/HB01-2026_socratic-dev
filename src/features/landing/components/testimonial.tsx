@@ -26,8 +26,8 @@ export function Testimonial() {
   return (
     <section id='manifesto' className='p-3 md:p-6'>
       <Reveal>
-        <figure className='bg-ink rounded-lg px-6 py-12 lg:px-[60px] lg:py-[64px]'>
-          <blockquote className='type-quote text-background! mb-10 max-w-[820px] lg:mb-14'>
+        <figure className='bg-ink dark:border-border dark:bg-card rounded-lg px-6 py-12 lg:px-[60px] lg:py-[64px] dark:border'>
+          <blockquote className='type-quote text-background! dark:text-foreground! mb-10 max-w-[820px] lg:mb-14'>
             {t.quote}
           </blockquote>
           <figcaption className='flex flex-col gap-6 md:flex-row md:items-center md:justify-between'>
@@ -36,15 +36,15 @@ export function Testimonial() {
                 Σ
               </span>
               <div>
-                <p className='text-background text-xl font-normal tracking-[-0.56px] lg:text-[28px]'>
+                <p className='text-background dark:text-foreground text-xl font-normal tracking-[-0.56px] lg:text-[28px]'>
                   {t.name}
                 </p>
-                <p className='font-mono text-background/50 mt-1 text-xs tracking-wide'>
+                <p className='text-background/50 dark:text-foreground/50 mt-1 font-mono text-xs tracking-wide'>
                   {t.role}
                 </p>
               </div>
             </div>
-            <div className='font-mono text-background/50 text-xs tracking-wide'>
+            <div className='text-background/50 dark:text-foreground/50 font-mono text-xs tracking-wide'>
               {t.footnote}
             </div>
           </figcaption>

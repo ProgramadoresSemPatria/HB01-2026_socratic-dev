@@ -346,16 +346,16 @@ export function DashboardView({ user }: { user: User }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7, ease: EASE }}
-                className='mt-14 rounded-lg bg-ink px-6 py-12 lg:px-14 lg:py-14'
+                className='bg-ink dark:border-border dark:bg-card mt-14 rounded-lg px-6 py-12 lg:px-14 lg:py-14 dark:border'
               >
-                <blockquote className='max-w-[720px] font-serif text-2xl font-light italic leading-snug text-background lg:text-[32px]'>
+                <blockquote className='text-background dark:text-foreground max-w-[720px] font-serif text-2xl leading-snug font-light italic lg:text-[32px]'>
                   &ldquo;{t.quote}&rdquo;
                 </blockquote>
                 <figcaption className='mt-8 flex items-center gap-3'>
-                  <span className='grid size-10 shrink-0 place-items-center rounded-full bg-lime font-heading text-lg font-light text-ink dark:text-background'>
+                  <span className='bg-lime text-ink dark:text-background font-heading grid size-10 shrink-0 place-items-center rounded-full text-lg font-light'>
                     Σ
                   </span>
-                  <span className='font-mono text-xs tracking-wide text-background/50'>
+                  <span className='text-background/50 dark:text-foreground/50 font-mono text-xs tracking-wide'>
                     {t.quoteBy}
                   </span>
                 </figcaption>
