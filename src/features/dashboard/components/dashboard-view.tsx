@@ -331,9 +331,9 @@ export function DashboardView({ user }: { user: User }) {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25, duration: 0.6, ease: EASE }}
-                className='mb-14 border-t border-border pt-10'
+                className='mb-10 border-t border-border pt-8'
               >
-                <div className='grid gap-12 lg:grid-cols-[1.7fr_1fr] lg:gap-0'>
+                <div className='grid gap-10 lg:grid-cols-[1.7fr_1fr] lg:gap-0'>
                   <ActivityHeatmap sessions={sessions} />
                   <IndependenceRing score={score} />
                 </div>
@@ -394,8 +394,8 @@ function DashboardSkeleton() {
           </div>
         ))}
       </div>
-      <div className='mb-14 border-t border-border pt-10'>
-        <div className='grid gap-12 lg:grid-cols-[1.7fr_1fr] lg:gap-0'>
+      <div className='mb-10 border-t border-border pt-8'>
+        <div className='grid gap-10 lg:grid-cols-[1.7fr_1fr] lg:gap-0'>
           <div className='lg:pr-10'>
             <Skeleton className='h-3 w-24' />
             <Skeleton className='mt-3 h-6 w-56 max-w-full' />
@@ -410,7 +410,7 @@ function DashboardSkeleton() {
           </div>
         </div>
       </div>
-      <div className='border-t border-border pt-10'>
+      <div className='border-t border-border pt-8'>
         <Skeleton className='h-3 w-20' />
         <Skeleton className='mt-3 h-6 w-48 max-w-full' />
         <div className='mt-8'>
@@ -537,13 +537,13 @@ function IndependenceRing({ score }: { score: number }) {
   const t = useT(copy)
   const data = [{ name: 'indep', value: score, fill: 'var(--chart-1)' }]
   return (
-    <div className='flex flex-col border-t border-border pt-10 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-12'>
+    <div className='border-border flex flex-col items-start border-t pt-8 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-12'>
       <p className='eyebrow'>{t.scoreEyebrow}</p>
       <h2 className='type-h4 mt-2'>{t.scoreTitle}</h2>
-      <div className='relative grid min-h-[220px] flex-1 place-items-center'>
+      <div className='relative mx-auto mt-5 size-[170px]'>
         <ResponsiveContainer width='100%' height='100%'>
           <RadialBarChart
-            innerRadius='70%'
+            innerRadius='76%'
             outerRadius='100%'
             data={data}
             startAngle={90}
@@ -559,16 +559,14 @@ function IndependenceRing({ score }: { score: number }) {
           </RadialBarChart>
         </ResponsiveContainer>
         <div className='pointer-events-none absolute inset-0 grid place-items-center'>
-          <div className='text-center'>
-            <div className='font-heading text-5xl font-light tracking-tight text-ink tabular-nums'>
-              {score}%
-            </div>
-            <div className='mt-1 font-mono text-[11px] text-muted-foreground'>
-              {t.scoreCaption}
-            </div>
-          </div>
+          <span className='font-heading text-ink text-4xl font-light tracking-tight tabular-nums'>
+            {score}%
+          </span>
         </div>
       </div>
+      <p className='text-muted-foreground mx-auto mt-4 max-w-[220px] text-center font-mono text-[11px]'>
+        {t.scoreCaption}
+      </p>
     </div>
   )
 }
@@ -588,7 +586,7 @@ function RecentChallenges({ items }: { items: SessionRow[] }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: 0.1, duration: 0.6, ease: EASE }}
-      className='border-t border-border pt-10'
+      className='border-t border-border pt-8'
     >
       <div className='flex items-end justify-between gap-4'>
         <div>

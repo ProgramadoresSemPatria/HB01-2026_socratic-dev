@@ -416,14 +416,7 @@ export function OnboardingFlow({ user }: { user: User }) {
               </div>
 
               <div className='pb-4'>
-                <AnimatePresence mode='wait'>
-                  <motion.div
-                    key={step}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.25, ease: 'easeOut' }}
-                  >
+                <div>
                     {step === 0 && (
                       <div className='space-y-8'>
                         <div className='grid gap-4 sm:grid-cols-2'>
@@ -465,29 +458,34 @@ export function OnboardingFlow({ user }: { user: User }) {
                         {track === 'code' && (
                           <div>
                             <p className='eyebrow mb-4'>{t.language}</p>
-                            <div className='grid gap-4 sm:grid-cols-2'>
+                            <div className='flex flex-wrap gap-2'>
                               {t.stacks.map((s) => (
-                                <Tile
+                                <button
                                   key={s.id}
-                                  selected={stack === s.id}
+                                  type='button'
                                   onClick={() => setStack(s.id)}
+                                  aria-pressed={stack === s.id}
                                   className={cn(
-                                    s.chip,
-                                    'flex items-center gap-4 p-5 pr-11',
+                                    'flex cursor-pointer items-center gap-2.5 rounded-full border px-4 py-2.5 transition-colors duration-200',
+                                    stack === s.id
+                                      ? 'border-ink bg-ink text-background'
+                                      : 'border-border text-muted-foreground hover:border-ink hover:text-ink',
                                   )}
                                 >
-                                  <span className='font-mono text-lg tracking-tight text-ink/50'>
+                                  <span
+                                    className={cn(
+                                      'font-mono text-[11px]',
+                                      stack === s.id
+                                        ? 'text-background/60'
+                                        : 'text-muted-foreground/70',
+                                    )}
+                                  >
                                     {s.icon}
                                   </span>
-                                  <span className='flex-1'>
-                                    <span className='block font-heading text-lg font-light tracking-tight text-ink'>
-                                      {s.name}
-                                    </span>
-                                    <span className='block text-sm text-muted-foreground'>
-                                      {s.desc}
-                                    </span>
+                                  <span className='text-sm font-medium'>
+                                    {s.name}
                                   </span>
-                                </Tile>
+                                </button>
                               ))}
                             </div>
                           </div>
@@ -567,8 +565,7 @@ export function OnboardingFlow({ user }: { user: User }) {
                         />
                       </div>
                     )}
-                  </motion.div>
-                </AnimatePresence>
+                </div>
 
                 {error && (
                   <div className='mt-6 rounded-lg bg-destructive/5 px-4 py-3 text-sm text-destructive'>
