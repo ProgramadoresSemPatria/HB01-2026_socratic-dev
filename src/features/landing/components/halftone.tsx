@@ -1,0 +1,222 @@
+'use client'
+
+import * as React from 'react'
+
+type HalftoneProps = {
+  draw: (ctx: CanvasRenderingContext2D, w: number, h: number) => void
+  active?: boolean
+  mode?: 'dots' | 'dashes'
+  spacing?: number
+  flow?: number
+  interactive?: boolean
+  color?: string
+  className?: string
+}
+
+function hash(x: number, y: number) {
+  let h = x * 374761393 + y * 668265263
+  h = (h ^ (h >> 13)) * 1274126177
+  return ((h ^ (h >> 16)) >>> 0) / 4294967295
+}
+
+function smoothstep(v: number) {
+  const t = Math.min(1, Math.max(0, v))
+  return t * t * (3 - 2 * t)
+}
+
+export function Halftone({
+  draw,
+  active = false,
+  mode = 'dots',
+  spacing = 8,
+  flow = 12,
+  interactive = false,
+  color = '#1b1916',
+  className,
+}: HalftoneProps) {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null)
+  const maskRef = React.useRef<{
+    data: Uint8ClampedArray
+    w: number
+    h: number
+    scale: number
+  } | null>(null)
+  const sizeRef = React.useRef({ w: 0, h: 0, dpr: 1 })
+  const activeRef = React.useRef(active)
+  const activeSinceRef = React.useRef(0)
+  const rafRef = React.useRef(0)
+  const reducedRef = React.useRef(false)
+  const mouseRef = React.useRef({ tx: -9999, ty: -9999, x: -9999, y: -9999 })
+
+  const sample = React.useCallback((sx: number, sy: number) => {
+    const mask = maskRef.current!
+    const { w, h } = sizeRef.current
+    if (sx < 0 || sy < 0 || sx >= w || sy >= h) return 0
+    const mx = Math.floor((sx / w) * mask.w)
+    const my = Math.floor((sy / h) * mask.h)
+    return mask.data[(my * mask.w + mx) * 4 + 3] / 255
+  }, [])
+
+  const render = React.useCallback(
+    (t: number) => {
+      const canvas = canvasRef.current
+      if (!canvas || !maskRef.current) return
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      const { w, h, dpr } = sizeRef.current
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      ctx.clearRect(0, 0, w, h)
+      ctx.fillStyle = color
+
+      const isActive = activeRef.current
+      const since = isActive ? (t - activeSinceRef.current) / 900 : 1
+      const cw = mode === 'dashes' ? Math.max(4, spacing * 0.55) : spacing
+
+      const m = mouseRef.current
+      if (interactive) {
+        m.x += (m.tx - m.x) * 0.14
+        m.y += (m.ty - m.y) * 0.14
+      }
+
+      for (let y = spacing / 2; y < h; y += spacing) {
+        for (let x = cw / 2; x < w; x += cw) {
+          const rnd = hash(Math.round(x / cw), Math.round(y / spacing))
+          if (rnd < 0.06) continue
+
+          let sx = x
+          let sy = y
+          let boost = 1
+
+          if (isActive && !reducedRef.current) {
+            sx += Math.sin(t * 0.0011 + y * 0.016 + x * 0.004) * flow
+            sy +=
+              Math.cos(t * 0.00085 + x * 0.012 - y * 0.007) * flow * 0.8
+
+            if (interactive) {
+              const dx = x - m.x
+              const dy = y - m.y
+              const d = Math.hypot(dx, dy)
+              const inf = Math.max(0, 1 - d / 170)
+              if (inf > 0) {
+                const push = inf * inf * 30
+                sx += (dx / (d || 1)) * push
+                sy += (dy / (d || 1)) * push
+                boost = 1 + inf * 0.8
+              }
+            }
+          }
+
+          const a = sample(sx, sy)
+          if (a < 0.05) continue
+
+          const wave = isActive
+            ? 0.8 + 0.2 * Math.sin(t / 1300 - (x + y) / 210)
+            : 0.9
+          const reveal = isActive
+            ? smoothstep(since * 2.4 - (x / w) * 1.3 - rnd * 0.15)
+            : 1
+          const v = a * wave * reveal * boost
+          if (v <= 0.02) continue
+
+          if (mode === 'dashes') {
+            const dh = Math.min(spacing * 0.78, v * spacing * 0.85)
+            ctx.fillRect(x - cw / 2, y - dh / 2, cw * 0.96, dh)
+          } else {
+            const r = Math.min(spacing * 0.62, v * spacing * 0.48)
+            ctx.beginPath()
+            ctx.ellipse(x, y, r * 0.68, r, 0, 0, Math.PI * 2)
+            ctx.fill()
+          }
+        }
+      }
+    },
+    [color, flow, interactive, mode, sample, spacing],
+  )
+
+  const loop = React.useCallback(
+    (t: number) => {
+      render(t)
+      if (activeRef.current && !reducedRef.current) {
+        rafRef.current = requestAnimationFrame(loop)
+      }
+    },
+    [render],
+  )
+
+  React.useEffect(() => {
+    reducedRef.current = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+  }, [])
+
+  React.useEffect(() => {
+    if (!interactive) return
+    const onMove = (e: PointerEvent) => {
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const rect = canvas.getBoundingClientRect()
+      mouseRef.current.tx = e.clientX - rect.left
+      mouseRef.current.ty = e.clientY - rect.top
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [interactive])
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const measure = () => {
+      const parent = canvas.parentElement
+      if (!parent) return
+      const w = parent.clientWidth
+      const h = parent.clientHeight
+      if (!w || !h) return
+      const dpr = Math.min(2, window.devicePixelRatio || 1)
+      sizeRef.current = { w, h, dpr }
+      canvas.width = w * dpr
+      canvas.height = h * dpr
+      canvas.style.width = `${w}px`
+      canvas.style.height = `${h}px`
+
+      const scale = 0.5
+      const off = document.createElement('canvas')
+      off.width = Math.max(1, Math.floor(w * scale))
+      off.height = Math.max(1, Math.floor(h * scale))
+      const octx = off.getContext('2d')
+      if (!octx) return
+      octx.scale(scale, scale)
+      draw(octx, w, h)
+      maskRef.current = {
+        data: octx.getImageData(0, 0, off.width, off.height).data,
+        w: off.width,
+        h: off.height,
+        scale,
+      }
+      render(performance.now())
+    }
+
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(canvas.parentElement!)
+    return () => ro.disconnect()
+  }, [draw, render])
+
+  React.useEffect(() => {
+    activeRef.current = active
+    cancelAnimationFrame(rafRef.current)
+    if (active) {
+      activeSinceRef.current = performance.now()
+      if (reducedRef.current) {
+        render(performance.now())
+      } else {
+        rafRef.current = requestAnimationFrame(loop)
+      }
+    } else {
+      render(performance.now())
+    }
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [active, loop, render])
+
+  return <canvas ref={canvasRef} aria-hidden className={className} />
+}

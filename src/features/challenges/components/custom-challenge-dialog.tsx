@@ -82,7 +82,7 @@ const copy = {
     cancel: 'Cancelar',
     generate: 'Gerar meu desafio',
   },
-} as const
+}
 
 export function CustomChallengeDialog({
   open,

@@ -57,7 +57,7 @@ const copy = {
     canvasLabel: 'Canvas — desenhe sua arquitetura',
     askAnalysis: 'Pedir análise',
   },
-} as const
+}
 
 export function DesignChallengeWorkspace({ user }: { user: User }) {
   const router = useRouter()

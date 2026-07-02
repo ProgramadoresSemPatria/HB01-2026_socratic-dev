@@ -45,7 +45,7 @@ const copy = {
     inputHelp: 'enter para enviar · shift+enter quebra linha',
     hintCost: (cost: number) => `-${cost} pts indep.`,
   },
-} as const
+}
 
 function TutorAvatar() {
   return (

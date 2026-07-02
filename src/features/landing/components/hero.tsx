@@ -4,6 +4,7 @@ import { useT } from '@/lib/i18n'
 import { ArrowRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
+import { Halftone } from './halftone'
 
 const copy = {
   en: {
@@ -22,12 +23,24 @@ const copy = {
   },
 } as const
 
-const ARCS = [
-  'M 640 340 A 300 300 0 0 1 940 40',
-  'M 700 340 A 240 240 0 0 1 940 100',
-  'M 760 340 A 180 180 0 0 1 940 160',
-  'M 820 340 A 120 120 0 0 1 940 220',
-]
+function paintAmbient(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  const blob = (
+    x: number,
+    y: number,
+    r: number,
+    a: number,
+  ) => {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r)
+    g.addColorStop(0, `rgba(0,0,0,${a})`)
+    g.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, w, h)
+  }
+  blob(w * 0.9, h * 0.85, w * 0.42, 0.95)
+  blob(w * 0.06, h * 0.9, w * 0.32, 0.7)
+  blob(w * 0.95, h * 0.08, w * 0.22, 0.5)
+  blob(w * 0.03, h * 0.12, w * 0.16, 0.35)
+}
 
 export function Hero() {
   const t = useT(copy)
@@ -38,60 +51,31 @@ export function Hero() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className='bg-ink relative flex min-h-[460px] items-center justify-center overflow-hidden rounded-lg lg:min-h-[587px]'
+        className='from-pastel-greige via-pastel-mist/70 to-pastel-lavender/60 relative flex min-h-[520px] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br lg:min-h-[600px]'
       >
-        <div
-          aria-hidden
-          className='pointer-events-none absolute -top-40 -left-32 size-[520px] rounded-full opacity-25 blur-3xl'
-          style={{
-            background:
-              'radial-gradient(circle, #691df2 0%, transparent 70%)',
-          }}
-        />
-        <div
-          aria-hidden
-          className='pointer-events-none absolute -right-32 -bottom-48 size-[520px] rounded-full opacity-15 blur-3xl'
-          style={{
-            background:
-              'radial-gradient(circle, #a6e40e 0%, transparent 70%)',
-          }}
-        />
-        <svg
-          viewBox='0 0 960 340'
-          fill='none'
-          aria-hidden
-          className='pointer-events-none absolute right-0 bottom-0 hidden h-[340px] w-[960px] lg:block'
-        >
-          {ARCS.map((d, i) => (
-            <motion.path
-              key={d}
-              d={d}
-              stroke='white'
-              strokeOpacity={0.1}
-              strokeWidth={1.2}
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{
-                duration: 1.6,
-                delay: 0.4 + i * 0.18,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-            />
-          ))}
-        </svg>
+        <div className='pointer-events-none absolute inset-0 opacity-45 mix-blend-multiply'>
+          <Halftone
+            draw={paintAmbient}
+            active
+            interactive
+            spacing={10}
+            flow={18}
+            className='absolute inset-0'
+          />
+        </div>
 
-        <div className='relative z-10 mx-auto max-w-[1000px] px-6 py-14 text-center sm:px-10 lg:px-16 lg:py-20'>
-          <p className='eyebrow mb-6 text-white/50'>{t.eyebrow}</p>
-          <h1 className='font-heading mx-auto mb-6 max-w-[900px] text-[40px] leading-[1.02] font-light tracking-[-0.04em] text-white sm:text-[64px] lg:mb-8 lg:text-[84px]'>
+        <div className='relative z-10 mx-auto max-w-[1000px] px-6 py-16 text-center sm:px-10 lg:px-16 lg:py-24'>
+          <p className='eyebrow mb-6'>{t.eyebrow}</p>
+          <h1 className='type-display mx-auto mb-6 max-w-[900px] lg:mb-8'>
             {t.title}
           </h1>
-          <p className='mx-auto mb-9 max-w-[644px] text-[16px] leading-[1.45] tracking-[-0.18px] text-white/75 lg:mb-11 lg:text-[19px]'>
+          <p className='type-body mx-auto mb-9 max-w-[644px] lg:mb-11'>
             {t.sub}
           </p>
           <div className='flex flex-col justify-center gap-3 sm:flex-row'>
             <Link
               href='/onboarding'
-              className='text-ink hover:bg-paper group inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-base font-medium tracking-tight transition-colors duration-300'
+              className='bg-ink hover:bg-primary group inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-base font-medium tracking-tight text-white transition-colors duration-300'
             >
               {t.primary}
               <ArrowRight className='size-4 transition-transform group-hover:translate-x-0.5' />

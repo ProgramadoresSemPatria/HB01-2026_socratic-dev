@@ -18,7 +18,7 @@ const copy = {
     noExport: 'exporte um componente (export default) para ver o preview',
     closePreview: 'Fechar preview',
   },
-} as const
+}
 
 type Copy = (typeof copy)['en' | 'pt']
 

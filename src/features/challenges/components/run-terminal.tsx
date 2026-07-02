@@ -34,7 +34,7 @@ const copy = {
       'Código executado sem erros. Este desafio ainda não tem testes definidos — escreva um ',
     noOutputPost: ' para ver a saída aqui.',
   },
-} as const
+}
 
 export function RunTerminal({
   result,

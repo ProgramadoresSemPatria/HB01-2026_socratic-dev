@@ -19,7 +19,7 @@ const copy = {
     independence: 'Independência:',
     submit: 'Submeter',
   },
-} as const
+}
 
 export function WorkspaceHeader({
   title,

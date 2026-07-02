@@ -2,8 +2,8 @@
 
 import { useT } from '@/lib/i18n'
 import Link from 'next/link'
-import { motion } from 'motion/react'
 import { useState } from 'react'
+import { Halftone } from './halftone'
 import { Reveal } from './reveal'
 
 const copy = {
@@ -75,9 +75,105 @@ const copy = {
   },
 } as const
 
-type Shape =
-  | { kind: 'path'; d: string; o?: number }
-  | { kind: 'dot'; cx: number; cy: number; r: number; o?: number }
+type Painter = (ctx: CanvasRenderingContext2D, w: number, h: number) => void
+
+function rr(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  ctx.beginPath()
+  ctx.roundRect(x, y, w, h, r)
+  ctx.fill()
+}
+
+function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  ctx.beginPath()
+  ctx.arc(x, y, r, 0, Math.PI * 2)
+  ctx.fill()
+}
+
+const paintApi: Painter = (ctx) => {
+  rr(ctx, 70, 50, 230, 190, 18)
+  ctx.lineWidth = 14
+  ctx.beginPath()
+  ctx.moveTo(300, 145)
+  ctx.lineTo(400, 145)
+  ctx.moveTo(452, 145)
+  ctx.lineTo(520, 145)
+  ctx.stroke()
+  dot(ctx, 426, 145, 26)
+  dot(ctx, 566, 145, 46)
+  ctx.globalAlpha = 0.6
+  rr(ctx, 380, 240, 110, 60, 12)
+  rr(ctx, 520, 240, 110, 60, 12)
+}
+
+const paintUi: Painter = (ctx) => {
+  rr(ctx, 70, 60, 230, 160, 16)
+  rr(ctx, 250, 150, 250, 180, 16)
+  ctx.globalAlpha = 0.6
+  rr(ctx, 540, 80, 120, 120, 14)
+}
+
+const paintAlgo: Painter = (ctx) => {
+  ctx.beginPath()
+  ctx.moveTo(70, 320)
+  ctx.bezierCurveTo(250, 315, 430, 190, 620, 55)
+  ctx.lineTo(620, 320)
+  ctx.closePath()
+  ctx.fill()
+  ctx.fillRect(70, 322, 550, 10)
+}
+
+const paintDebug: Painter = (ctx) => {
+  ctx.lineWidth = 24
+  ctx.beginPath()
+  ctx.arc(450, 185, 105, 0, Math.PI * 2)
+  ctx.stroke()
+  ctx.lineWidth = 18
+  ctx.beginPath()
+  ctx.arc(450, 185, 48, 0, Math.PI * 2)
+  ctx.stroke()
+  dot(ctx, 450, 185, 18)
+  ctx.fillRect(438, 40, 24, 56)
+  ctx.fillRect(438, 274, 24, 56)
+  ctx.fillRect(305, 173, 56, 24)
+  ctx.fillRect(539, 173, 56, 24)
+  ctx.lineWidth = 20
+  ctx.globalAlpha = 0.6
+  ctx.beginPath()
+  ctx.moveTo(80, 70)
+  ctx.lineTo(185, 145)
+  ctx.lineTo(120, 230)
+  ctx.lineTo(235, 300)
+  ctx.stroke()
+}
+
+const paintDesign: Painter = (ctx) => {
+  rr(ctx, 80, 62, 135, 72, 12)
+  rr(ctx, 80, 240, 135, 72, 12)
+  rr(ctx, 300, 150, 135, 72, 12)
+  ctx.beginPath()
+  ctx.ellipse(565, 130, 55, 22, 0, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.fillRect(510, 130, 110, 110)
+  ctx.beginPath()
+  ctx.ellipse(565, 240, 55, 22, 0, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.lineWidth = 14
+  ctx.beginPath()
+  ctx.moveTo(215, 100)
+  ctx.lineTo(300, 175)
+  ctx.moveTo(215, 275)
+  ctx.lineTo(300, 200)
+  ctx.moveTo(435, 186)
+  ctx.lineTo(505, 186)
+  ctx.stroke()
+}
 
 type ArenaKey = 'api' | 'ui' | 'algo' | 'debug' | 'design'
 
@@ -86,134 +182,31 @@ type Arena = {
   href: string
   fill: string
   soon?: boolean
-  shapes: Shape[]
+  paint: Painter
 }
 
 const arenas: Arena[] = [
-  {
-    key: 'api',
-    href: '/onboarding',
-    fill: 'bg-pastel-greige',
-    shapes: [
-      { kind: 'path', d: 'M120 80h180M120 140h180M120 200h180', o: 0.5 },
-      { kind: 'dot', cx: 120, cy: 80, r: 7, o: 0.4 },
-      { kind: 'dot', cx: 120, cy: 140, r: 7, o: 0.4 },
-      { kind: 'dot', cx: 120, cy: 200, r: 7, o: 0.4 },
-      { kind: 'path', d: 'M300 56h150a14 14 0 0 1 14 14v160a14 14 0 0 1-14 14H300a14 14 0 0 1-14-14V70a14 14 0 0 1 14-14Z', o: 0.55 },
-      { kind: 'path', d: 'M330 96h90M330 126h64M330 156h78M330 186h50', o: 0.4 },
-      { kind: 'path', d: 'M464 140h106', o: 0.5 },
-      { kind: 'path', d: 'M622 140a26 26 0 1 1-52 0 26 26 0 0 1 52 0Z', o: 0.55 },
-      { kind: 'path', d: 'M588 140h16M596 132v16', o: 0.5 },
-    ],
-  },
-  {
-    key: 'ui',
-    href: '/onboarding',
-    fill: 'bg-pastel-sage',
-    shapes: [
-      { kind: 'path', d: 'M104 60h272a14 14 0 0 1 14 14v172a14 14 0 0 1-14 14H104a14 14 0 0 1-14-14V74a14 14 0 0 1 14-14Z', o: 0.55 },
-      { kind: 'path', d: 'M90 104h300', o: 0.45 },
-      { kind: 'dot', cx: 116, cy: 82, r: 5, o: 0.5 },
-      { kind: 'dot', cx: 138, cy: 82, r: 5, o: 0.5 },
-      { kind: 'path', d: 'M128 136h94a8 8 0 0 1 8 8v48a8 8 0 0 1-8 8h-94a8 8 0 0 1-8-8v-48a8 8 0 0 1 8-8Z', o: 0.45 },
-      { kind: 'path', d: 'M258 136h94a8 8 0 0 1 8 8v78a8 8 0 0 1-8 8h-94a8 8 0 0 1-8-8v-78a8 8 0 0 1 8-8Z', o: 0.45 },
-      { kind: 'path', d: 'M434 120h152a14 14 0 0 1 14 14v92a14 14 0 0 1-14 14H434a14 14 0 0 1-14-14v-92a14 14 0 0 1 14-14Z', o: 0.55 },
-      { kind: 'path', d: 'M450 156h120M450 184h84', o: 0.4 },
-      { kind: 'path', d: 'M520 268l14 34 10-14 17 8', o: 0.6 },
-    ],
-  },
-  {
-    key: 'algo',
-    href: '/onboarding',
-    fill: 'bg-pastel-mist',
-    shapes: [
-      { kind: 'path', d: 'M110 280V70M110 280h480', o: 0.55 },
-      { kind: 'path', d: 'M110 278c140 0 260-8 470-180', o: 0.6 },
-      { kind: 'path', d: 'M110 278c90-6 180-70 240-200', o: 0.35 },
-      { kind: 'path', d: 'M110 278c180-2 360-24 470-60', o: 0.35 },
-      { kind: 'dot', cx: 350, cy: 196, r: 6, o: 0.45 },
-      { kind: 'path', d: 'M470 90h96M470 120h64', o: 0.4 },
-    ],
-  },
-  {
-    key: 'debug',
-    href: '/onboarding',
-    fill: 'bg-pastel-sand',
-    soon: true,
-    shapes: [
-      { kind: 'path', d: 'M100 90l90 60-50 60 110 30-40 60', o: 0.55 },
-      { kind: 'path', d: 'M490 170a70 70 0 1 1-140 0 70 70 0 0 1 140 0Z', o: 0.5 },
-      { kind: 'path', d: 'M456 170a36 36 0 1 1-72 0 36 36 0 0 1 72 0Z', o: 0.4 },
-      { kind: 'path', d: 'M420 84v40M420 216v40M334 170h40M466 170h40', o: 0.5 },
-      { kind: 'dot', cx: 420, cy: 170, r: 7, o: 0.5 },
-    ],
-  },
-  {
-    key: 'design',
-    href: '/onboarding',
-    fill: 'bg-pastel-lavender',
-    shapes: [
-      { kind: 'path', d: 'M120 70h100a10 10 0 0 1 10 10v44a10 10 0 0 1-10 10H120a10 10 0 0 1-10-10V80a10 10 0 0 1 10-10Z', o: 0.55 },
-      { kind: 'path', d: 'M120 210h100a10 10 0 0 1 10 10v44a10 10 0 0 1-10 10H120a10 10 0 0 1-10-10v-44a10 10 0 0 1 10-10Z', o: 0.55 },
-      { kind: 'path', d: 'M330 140h100a10 10 0 0 1 10 10v44a10 10 0 0 1-10 10H330a10 10 0 0 1-10-10v-44a10 10 0 0 1 10-10Z', o: 0.55 },
-      { kind: 'path', d: 'M612 150a52 20 0 1 1-104 0 52 20 0 0 1 104 0Z', o: 0.55 },
-      { kind: 'path', d: 'M508 150v60c0 11 23 20 52 20s52-9 52-20v-60', o: 0.45 },
-      { kind: 'path', d: 'M230 102c40 10 60 40 90 56M230 242c40-10 60-40 90-56M440 172h68', o: 0.5 },
-    ],
-  },
+  { key: 'api', href: '/onboarding', fill: 'bg-pastel-greige', paint: paintApi },
+  { key: 'ui', href: '/onboarding', fill: 'bg-pastel-sage', paint: paintUi },
+  { key: 'algo', href: '/onboarding', fill: 'bg-pastel-mist', paint: paintAlgo },
+  { key: 'debug', href: '/onboarding', fill: 'bg-pastel-sand', soon: true, paint: paintDebug },
+  { key: 'design', href: '/onboarding', fill: 'bg-pastel-lavender', paint: paintDesign },
 ]
 
-function Motif({ shapes, active }: { shapes: Shape[]; active: boolean }) {
+function Scene({ paint, active }: { paint: Painter; active: boolean }) {
   return (
-    <motion.div
-      className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ease-out ${active ? 'opacity-60' : 'opacity-[0.13]'}`}
-      animate={active ? { y: [0, -6, 0] } : { y: 0 }}
-      transition={
-        active
-          ? { duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1.4 }
-          : { duration: 0.3 }
-      }
+    <div
+      className={`pointer-events-none absolute -top-8 -left-10 h-[380px] w-[700px] mix-blend-multiply transition-opacity duration-500 ease-out ${active ? 'opacity-80' : 'opacity-[0.15]'}`}
     >
-      <svg
-        key={active ? 'draw' : 'idle'}
-        viewBox='0 0 700 360'
-        fill='none'
-        aria-hidden
-        className='text-ink absolute -top-6 left-0 h-[300px] w-[640px] max-w-none mix-blend-multiply'
-        strokeWidth='1.2'
-        stroke='currentColor'
-      >
-        {shapes.map((s, i) =>
-          s.kind === 'path' ? (
-            <motion.path
-              key={i}
-              d={s.d}
-              opacity={s.o ?? 0.5}
-              initial={active ? { pathLength: 0 } : false}
-              animate={{ pathLength: 1 }}
-              transition={{
-                duration: 1.1,
-                delay: 0.15 + i * 0.09,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-            />
-          ) : (
-            <motion.circle
-              key={i}
-              cx={s.cx}
-              cy={s.cy}
-              r={s.r}
-              fill='currentColor'
-              stroke='none'
-              opacity={s.o ?? 0.5}
-              initial={active ? { scale: 0, opacity: 0 } : false}
-              animate={{ scale: 1, opacity: s.o ?? 0.5 }}
-              transition={{ duration: 0.4, delay: 0.4 + i * 0.09 }}
-            />
-          ),
-        )}
-      </svg>
-    </motion.div>
+      <Halftone
+        draw={paint}
+        active={active}
+        interactive
+        spacing={9}
+        flow={14}
+        className='absolute inset-0'
+      />
+    </div>
   )
 }
 
@@ -264,7 +257,7 @@ export function UseCases() {
             const cardClass = `group group/link focus-visible:ring-ink/30 relative block h-[460px] overflow-hidden rounded-lg transition-all duration-500 ease-out focus:outline-none focus-visible:ring-2 ${arena.fill}`
             const inner = (
               <>
-                <Motif shapes={arena.shapes} active={isActive} />
+                <Scene paint={arena.paint} active={isActive} />
 
                 <div
                   className={`pointer-events-none absolute bottom-[14px] left-[42px] transition-opacity duration-300 ${isActive ? 'opacity-0' : 'opacity-100'}`}
@@ -335,9 +328,7 @@ export function UseCases() {
           const at = t.arenas[arena.key]
           const body = (
             <>
-              <div className='opacity-[0.12]'>
-                <Motif shapes={arena.shapes} active={false} />
-              </div>
+              <Scene paint={arena.paint} active={false} />
               <div className='relative flex flex-col gap-3'>
                 <p className='eyebrow text-ink/60'>{at.eyebrow}</p>
                 <h3 className='text-ink font-heading text-[24px] leading-[1.1] font-light'>

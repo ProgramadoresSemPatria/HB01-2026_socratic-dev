@@ -18,7 +18,7 @@ const copy = {
     houseRuleBody:
       'O tutor não vai te dar a resposta. Ele faz perguntas. Se você quiser um hint direto, paga em pontos de independência.',
   },
-} as const
+}
 
 function stackLabel(c: Challenge): string {
   if (c.kind === 'design') return 'System Design'

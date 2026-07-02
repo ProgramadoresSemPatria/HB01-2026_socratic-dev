@@ -54,7 +54,7 @@ const copy = {
       'Python é avaliado pela IA ao submeter. Clique em "Submeter" para receber o feedback socrático.',
     run: 'Rodar',
   },
-} as const
+}
 
 function EditorLoading() {
   const t = useT(copy)

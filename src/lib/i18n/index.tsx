@@ -47,7 +47,7 @@ export function useLocale() {
   return React.useContext(LocaleContext)
 }
 
-export function useT<T>(copy: Record<Locale, T>): T {
+export function useT<T extends Record<Locale, unknown>>(copy: T): T[Locale] {
   const { locale } = useLocale()
-  return copy[locale]
+  return copy[locale] as T[Locale]
 }

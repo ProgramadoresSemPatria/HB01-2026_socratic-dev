@@ -9,7 +9,7 @@ import type { ExcalidrawApi } from '../utils/scene'
 const copy = {
   en: { loadingCanvas: 'Loading canvas…' },
   pt: { loadingCanvas: 'Carregando canvas…' },
-} as const
+}
 
 function CanvasLoading() {
   const t = useT(copy)

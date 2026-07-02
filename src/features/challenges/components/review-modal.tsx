@@ -86,7 +86,7 @@ const copy = {
     testsNotSolved: (passed: number, total: number) =>
       `Passou ${passed}/${total} testes — ainda não resolvido. Use o review pra fechar o que falta.`,
   },
-} as const
+}
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)
