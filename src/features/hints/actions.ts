@@ -7,10 +7,11 @@ import type { HintBalance } from './types'
 
 const BONUS_PACK_SIZE = 10
 const EMPTY: HintBalance = {
-  usedToday: 0,
+  usedThisWeek: 0,
   freeLimit: 0,
   bonus: 0,
   remaining: 0,
+  resetsAt: '',
 }
 
 export async function getHintBalance(token: string): Promise<HintBalance> {

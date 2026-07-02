@@ -6,6 +6,7 @@ import { runCode } from '@/features/runner/run-code'
 import type { RunResult } from '@/features/runner/types'
 import { apiFetch } from '@/lib/api/client'
 import { useT } from '@/lib/i18n'
+import { useIsDark } from '@/lib/theme'
 import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { User } from '@supabase/supabase-js'
@@ -91,6 +92,7 @@ const POST = { method: 'POST', headers: { 'content-type': 'application/json' } }
 export function CodeChallengeWorkspace({ user }: { user: User }) {
   const router = useRouter()
   const t = useT(copy)
+  const isDark = useIsDark()
   const [challenge, setChallenge] = React.useState<Challenge | null>(null)
 
   const s = useSocraticSession<string>({
@@ -372,7 +374,7 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
               language={language === 'js' ? 'javascript' : language === 'py' ? 'python' : 'typescript'}
               value={s.work}
               onChange={(v) => s.setWork(v ?? '')}
-              theme='vs-dark'
+              theme={isDark ? 'vs-dark' : 'light'}
               options={{
                 fontSize: 14,
                 fontFamily: 'var(--font-mono)',

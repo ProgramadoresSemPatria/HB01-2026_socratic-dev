@@ -118,7 +118,7 @@ function nodeSize(n: PlacedNode): { w: number; h: number; fontSize: number } {
     const maxLen = Math.max(...lines.map((l) => l.length))
     const textW = maxLen * fontSize * 0.62 + 24
     const w = Math.round(Math.min(460, Math.max(comp.width, textW)))
-    const labelH = lines.length * fontSize * 1.3 + 8
+    const labelH = lines.length * fontSize * 1.3 + 16
     return { w, h: Math.round(comp.height + labelH), fontSize }
   }
   const s = SPEC[n.kind]
@@ -171,7 +171,7 @@ function stampSkeleton(
     width: estW,
     height: estH,
     x: b.x + b.w / 2 - estW / 2,
-    y: offY + comp.height + 6,
+    y: offY + comp.height + 12,
     groupIds: g,
   })
   return out
@@ -835,6 +835,7 @@ export async function exportScenePng(api: ExcalidrawApi): Promise<string | null>
     appState: {
       ...api.getAppState(),
       exportBackground: true,
+      exportWithDarkMode: false,
       viewBackgroundColor: '#ffffff',
     },
     files: api.getFiles(),

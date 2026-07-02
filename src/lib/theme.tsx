@@ -21,7 +21,7 @@ const ThemeContext = React.createContext<{
 }>({ theme: 'system', setTheme: () => {} })
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = React.useState<ThemeSetting>('system')
+  const [theme, setThemeState] = React.useState<ThemeSetting>('dark')
 
   React.useEffect(() => {
     const stored = window.localStorage.getItem(THEME_KEY)
@@ -29,7 +29,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setThemeState(stored)
       apply(stored)
     } else {
-      apply('system')
+      apply('dark')
     }
   }, [])
 
@@ -59,4 +59,17 @@ export function useTheme() {
   return React.useContext(ThemeContext)
 }
 
-export const themeInitScript = `(function(){try{var t=localStorage.getItem('${THEME_KEY}');var d=t==='dark'||((!t||t==='system')&&matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})()`
+export function useIsDark(): boolean {
+  const [dark, setDark] = React.useState(true)
+  React.useEffect(() => {
+    const el = document.documentElement
+    const sync = () => setDark(el.classList.contains('dark'))
+    sync()
+    const mo = new MutationObserver(sync)
+    mo.observe(el, { attributes: true, attributeFilter: ['class'] })
+    return () => mo.disconnect()
+  }, [])
+  return dark
+}
+
+export const themeInitScript = `(function(){try{var t=localStorage.getItem('${THEME_KEY}');var d=t?(t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme: dark)').matches)):true;if(d)document.documentElement.classList.add('dark')}catch(e){document.documentElement.classList.add('dark')}})()`

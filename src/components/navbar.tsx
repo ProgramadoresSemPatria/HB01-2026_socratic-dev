@@ -22,7 +22,7 @@ const copy = {
     cta: 'Start a challenge',
     profile: 'Your profile',
     avatar: 'Your avatar',
-    hintsAvailable: 'Available hints',
+    hintsAvailable: 'Available hints — 35 free per week, resets Sunday 23:59',
     buyHints: 'Buy +10 hints',
   },
   pt: {
@@ -33,7 +33,7 @@ const copy = {
     cta: 'Comece um desafio',
     profile: 'Seu perfil',
     avatar: 'Seu avatar',
-    hintsAvailable: 'Hints disponíveis',
+    hintsAvailable: 'Hints disponíveis — 35 grátis por semana, reseta domingo 23:59',
     buyHints: 'Comprar +10 hints',
   },
 } as const
