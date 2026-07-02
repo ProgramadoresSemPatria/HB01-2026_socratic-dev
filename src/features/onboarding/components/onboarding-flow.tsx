@@ -22,7 +22,7 @@ import {
   Loader2,
   Sparkles,
 } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { motion } from 'motion/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'

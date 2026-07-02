@@ -160,112 +160,115 @@ export function ReviewModal({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 24, scale: 0.97 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className='shadow-soft-lg relative flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-border bg-card'
+        className='shadow-soft-lg border-border bg-card relative flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border'
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className='absolute top-4 right-4 z-10 grid size-8 cursor-pointer place-items-center rounded-full border border-border bg-card text-muted-foreground transition-colors duration-200 hover:bg-muted hover:text-ink'
+          className='border-border bg-card text-muted-foreground hover:bg-muted hover:text-ink absolute top-4 right-4 z-10 grid size-8 cursor-pointer place-items-center rounded-full border transition-colors duration-200'
           aria-label={t.close}
         >
           <X className='size-4' />
         </button>
 
-        <div className='shrink-0 px-8 pt-10 pb-7'>
-          <div
-            className={cn(
-              'mb-5 inline-flex items-center gap-2 rounded-full px-3 py-1 font-mono text-[11px]',
-              passed
-                ? 'bg-lime text-ink dark:text-background'
-                : 'bg-warning/10 text-warning-foreground',
-            )}
-          >
-            <GitPullRequestArrow className='size-3' strokeWidth={1.5} />
-            {passed ? t.badgePass : t.badgeFail}
-          </div>
-          <h2 className='type-h3 max-w-[24ch] text-balance'>
-            {passed ? (
-              <>
-                {t.headPassPre}
-                <span className='font-serif italic text-primary'>
-                  {t.headPassWord}
-                </span>
-                {t.headPassPost}
-              </>
-            ) : (
-              <>
-                {t.headFailPre}
-                <span className='font-serif italic text-primary'>
-                  {t.headFailWord}
-                </span>
-                {t.headFailPost}
-              </>
-            )}
-          </h2>
-          <p className='mt-3 text-[14px] leading-relaxed text-muted-foreground'>
-            {passed ? t.subPass : t.subFail}
-          </p>
-        </div>
+        <div className='grid min-h-0 flex-1 lg:grid-cols-[300px_1fr]'>
+          <aside className='border-border flex shrink-0 flex-col gap-7 border-b p-7 lg:border-r lg:border-b-0'>
+            <div>
+              <div
+                className={cn(
+                  'mb-5 inline-flex items-center gap-2 rounded-full px-3 py-1 font-mono text-[11px]',
+                  passed
+                    ? 'bg-lime text-ink dark:text-background'
+                    : 'bg-warning/10 text-warning-foreground',
+                )}
+              >
+                <GitPullRequestArrow className='size-3' strokeWidth={1.5} />
+                {passed ? t.badgePass : t.badgeFail}
+              </div>
+              <h2 className='type-h4 text-balance'>
+                {passed ? (
+                  <>
+                    {t.headPassPre}
+                    <span className='text-primary font-serif italic'>
+                      {t.headPassWord}
+                    </span>
+                    {t.headPassPost}
+                  </>
+                ) : (
+                  <>
+                    {t.headFailPre}
+                    <span className='text-primary font-serif italic'>
+                      {t.headFailWord}
+                    </span>
+                    {t.headFailPost}
+                  </>
+                )}
+              </h2>
+              <p className='text-muted-foreground mt-2.5 text-[13px] leading-relaxed'>
+                {passed ? t.subPass : t.subFail}
+              </p>
+            </div>
 
-        <div className='shrink-0 border-t border-border px-8 py-6'>
-          <div className='flex items-end'>
-            <div className='pr-6 sm:pr-10' title={t.independenceHint}>
+            <div title={t.independenceHint}>
               <div className='flex items-baseline'>
-                <span className='font-heading text-[72px] leading-[0.85] font-light tracking-[-0.04em] tabular-nums text-ink sm:text-[84px]'>
+                <span className='font-heading text-ink text-[72px] leading-[0.85] font-light tracking-[-0.04em] tabular-nums'>
                   {independence}
                 </span>
-                <span className='ml-1.5 font-mono text-sm text-muted-foreground'>
+                <span className='text-muted-foreground ml-1.5 font-mono text-sm'>
                   /100
                 </span>
               </div>
-              <div className='mt-3 font-mono text-[11px] tracking-wider text-muted-foreground uppercase'>
+              <div className='text-muted-foreground mt-2 font-mono text-[11px] tracking-wider uppercase'>
                 {t.independence}
               </div>
             </div>
-            <div className='border-l border-border px-6 sm:px-10'>
-              <div className='font-heading text-[28px] leading-none font-light tabular-nums text-ink'>
-                {hintsUsed}
+
+            <div className='border-border mt-auto flex border-t pt-5'>
+              <div className='pr-8'>
+                <div className='font-heading text-ink text-[24px] leading-none font-light tabular-nums'>
+                  {hintsUsed}
+                </div>
+                <div className='text-muted-foreground mt-2 font-mono text-[11px] tracking-wider uppercase'>
+                  {t.hintsUsed}
+                </div>
               </div>
-              <div className='mt-3 font-mono text-[11px] tracking-wider text-muted-foreground uppercase'>
-                {t.hintsUsed}
+              <div className='border-border border-l pl-8'>
+                <div className='font-heading text-ink text-[24px] leading-none font-light tabular-nums'>
+                  {formatTime(elapsed)}
+                </div>
+                <div className='text-muted-foreground mt-2 font-mono text-[11px] tracking-wider uppercase'>
+                  {t.time}
+                </div>
               </div>
             </div>
-            <div className='border-l border-border pl-6 sm:pl-10'>
-              <div className='font-heading text-[28px] leading-none font-light tabular-nums text-ink'>
-                {formatTime(elapsed)}
+          </aside>
+
+          <div className='min-h-0 overflow-y-auto p-7'>
+            {tests && <TestBanner passed={tests.passed} total={tests.total} />}
+            <h3 className='type-h4 mb-3'>{t.reviewTitle}</h3>
+            {reviewing || !review ? (
+              <div className='bg-muted relative overflow-hidden rounded-lg px-6 py-14'>
+                <div className='pointer-events-none absolute inset-0 opacity-30 mix-blend-multiply dark:mix-blend-screen'>
+                  <Halftone
+                    draw={glyph('{ }', 2)}
+                    ambient
+                    spacing={9}
+                    className='absolute inset-0'
+                  />
+                </div>
+                <div className='text-muted-foreground relative flex items-center gap-2 text-sm'>
+                  <Loader2 className='size-4 animate-spin' /> {t.generating}
+                </div>
               </div>
-              <div className='mt-3 font-mono text-[11px] tracking-wider text-muted-foreground uppercase'>
-                {t.time}
+            ) : (
+              <div className='type-body'>
+                <FormattedText text={review} />
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        <div className='min-h-0 flex-1 overflow-y-auto border-t border-border px-8 pt-6 pb-8'>
-          {tests && <TestBanner passed={tests.passed} total={tests.total} />}
-          <h3 className='type-h4 mb-3'>{t.reviewTitle}</h3>
-          {reviewing || !review ? (
-            <div className='relative overflow-hidden rounded-lg bg-muted px-6 py-10'>
-              <div className='pointer-events-none absolute inset-0 opacity-30 mix-blend-multiply dark:mix-blend-screen'>
-                <Halftone
-                  draw={glyph('{ }', 2)}
-                  ambient
-                  spacing={9}
-                  className='absolute inset-0'
-                />
-              </div>
-              <div className='relative flex items-center gap-2 text-sm text-muted-foreground'>
-                <Loader2 className='size-4 animate-spin' /> {t.generating}
-              </div>
-            </div>
-          ) : (
-            <div className='type-body'>
-              <FormattedText text={review} />
-            </div>
-          )}
-        </div>
-
-        <div className='shrink-0 border-t border-border px-8 py-5'>
+        <div className='border-border shrink-0 border-t px-7 py-4'>
           <div className='flex flex-col gap-2 sm:flex-row sm:justify-end'>
             <Button
               size='lg'
