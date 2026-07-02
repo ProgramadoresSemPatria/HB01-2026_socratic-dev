@@ -1,6 +1,7 @@
 export type HintBalance = {
-  usedToday: number
+  usedThisWeek: number
   freeLimit: number
   bonus: number
   remaining: number
+  resetsAt: string
 }
