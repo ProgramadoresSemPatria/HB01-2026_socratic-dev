@@ -121,6 +121,7 @@ export function Modes() {
                 <Halftone
                   draw={m.paint}
                   active={hovered === i}
+                  ambient
                   interactive
                   spacing={8}
                   flow={12}

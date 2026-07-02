@@ -11,6 +11,7 @@ export type Painter = (
 type HalftoneProps = {
   draw: Painter
   active?: boolean
+  ambient?: boolean
   mode?: 'dots' | 'dashes'
   spacing?: number
   flow?: number
@@ -73,6 +74,7 @@ function smoothstep(v: number) {
 export function Halftone({
   draw,
   active = false,
+  ambient = false,
   mode = 'dots',
   spacing = 8,
   flow = 12,
@@ -89,7 +91,9 @@ export function Halftone({
   } | null>(null)
   const sizeRef = React.useRef({ w: 0, h: 0, dpr: 1 })
   const activeRef = React.useRef(active)
+  const ambientRef = React.useRef(ambient)
   const activeSinceRef = React.useRef(0)
+  const lastFrameRef = React.useRef(0)
   const rafRef = React.useRef(0)
   const reducedRef = React.useRef(false)
   const mouseRef = React.useRef({ tx: -9999, ty: -9999, x: -9999, y: -9999 })
@@ -115,6 +119,7 @@ export function Halftone({
       ctx.fillStyle = color
 
       const isActive = activeRef.current
+      const isAmbient = !isActive && ambientRef.current
       const since = isActive ? (t - activeSinceRef.current) / 900 : 1
       const cw = mode === 'dashes' ? Math.max(4, spacing * 0.55) : spacing
 
@@ -133,12 +138,16 @@ export function Halftone({
           let sy = y
           let boost = 1
 
-          if (isActive && !reducedRef.current) {
-            sx += Math.sin(t * 0.0011 + y * 0.016 + x * 0.004) * flow
+          if (!reducedRef.current && (isActive || isAmbient)) {
+            const amp = isActive ? flow : flow * 0.45
+            const speed = isActive ? 1 : 0.5
+            sx += Math.sin(t * 0.0011 * speed + y * 0.016 + x * 0.004) * amp
             sy +=
-              Math.cos(t * 0.00085 + x * 0.012 - y * 0.007) * flow * 0.8
+              Math.cos(t * 0.00085 * speed + x * 0.012 - y * 0.007) *
+              amp *
+              0.8
 
-            if (interactive) {
+            if (interactive && isActive) {
               const dx = x - m.x
               const dy = y - m.y
               const d = Math.hypot(dx, dy)
@@ -157,9 +166,11 @@ export function Halftone({
 
           const wave = isActive
             ? 0.8 + 0.2 * Math.sin(t / 1300 - (x + y) / 210)
-            : 0.9
+            : isAmbient
+              ? 0.84 + 0.1 * Math.sin(t / 2100 - (x + y) / 240)
+              : 0.9
           const reveal = isActive
-            ? smoothstep(since * 2.4 - (x / w) * 1.3 - rnd * 0.15)
+            ? 0.7 + 0.3 * smoothstep(since * 2.4 - (x / w) * 1.3 - rnd * 0.15)
             : 1
           const v = a * wave * reveal * boost
           if (v <= 0.02) continue
@@ -181,8 +192,15 @@ export function Halftone({
 
   const loop = React.useCallback(
     (t: number) => {
-      render(t)
-      if (activeRef.current && !reducedRef.current) {
+      const ambientOnly = !activeRef.current && ambientRef.current
+      if (!ambientOnly || t - lastFrameRef.current >= 40) {
+        render(t)
+        lastFrameRef.current = t
+      }
+      if (
+        (activeRef.current || ambientRef.current) &&
+        !reducedRef.current
+      ) {
         rafRef.current = requestAnimationFrame(loop)
       }
     },
@@ -250,19 +268,16 @@ export function Halftone({
 
   React.useEffect(() => {
     activeRef.current = active
+    ambientRef.current = ambient
     cancelAnimationFrame(rafRef.current)
-    if (active) {
-      activeSinceRef.current = performance.now()
-      if (reducedRef.current) {
-        render(performance.now())
-      } else {
-        rafRef.current = requestAnimationFrame(loop)
-      }
+    if (active) activeSinceRef.current = performance.now()
+    if ((active || ambient) && !reducedRef.current) {
+      rafRef.current = requestAnimationFrame(loop)
     } else {
       render(performance.now())
     }
     return () => cancelAnimationFrame(rafRef.current)
-  }, [active, loop, render])
+  }, [active, ambient, loop, render])
 
   return <canvas ref={canvasRef} aria-hidden className={className} />
 }

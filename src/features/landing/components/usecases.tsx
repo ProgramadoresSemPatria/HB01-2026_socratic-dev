@@ -2,7 +2,7 @@
 
 import { useT } from '@/lib/i18n'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Halftone,
   glyph,
@@ -15,6 +15,7 @@ const copy = {
   en: {
     eyebrow: 'For every kind of challenge',
     title: 'A training ground, not a tutorial.',
+    desc: 'Every challenge arrives as a realistic client briefing. Pick an arena — the tutor adapts its questions to what you came to train.',
     cta: 'Start training',
     soon: 'Coming soon',
     arenas: {
@@ -48,6 +49,7 @@ const copy = {
   pt: {
     eyebrow: 'Para todo tipo de desafio',
     title: 'Um campo de treino, não um tutorial.',
+    desc: 'Cada desafio chega como um briefing realista de cliente. Escolha uma arena — o tutor adapta as perguntas ao que você veio treinar.',
     cta: 'Começar a treinar',
     soon: 'Em breve',
     arenas: {
@@ -144,11 +146,12 @@ const arenas: Arena[] = [
 function Scene({ paint, active }: { paint: Painter; active: boolean }) {
   return (
     <div
-      className={`pointer-events-none absolute inset-x-5 top-4 h-[175px] mix-blend-multiply transition-opacity duration-500 ease-out ${active ? 'opacity-85' : 'opacity-[0.18]'}`}
+      className={`pointer-events-none absolute inset-x-5 top-4 h-[175px] mix-blend-multiply transition-opacity duration-500 ease-out ${active ? 'opacity-85' : 'opacity-[0.22]'}`}
     >
       <Halftone
         draw={paint}
         active={active}
+        ambient
         interactive
         spacing={8}
         flow={12}
@@ -182,6 +185,17 @@ function Arrow() {
 export function UseCases() {
   const t = useT(copy)
   const [active, setActive] = useState(0)
+  const [paused, setPaused] = useState(false)
+
+  useEffect(() => {
+    if (paused) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const id = setInterval(
+      () => setActive((a) => (a + 1) % arenas.length),
+      4500,
+    )
+    return () => clearInterval(id)
+  }, [paused])
 
   const columns = arenas
     .map((_, i) => (i === active ? '4fr' : '1fr'))
@@ -190,13 +204,20 @@ export function UseCases() {
   return (
     <section className='relative overflow-hidden px-6 py-14 sm:px-10 lg:px-16 lg:py-20'>
       <Reveal>
-        <p className='eyebrow'>{t.eyebrow}</p>
-        <h2 className='type-h2 mt-4 max-w-[680px]'>{t.title}</h2>
+        <div className='grid gap-5 lg:grid-cols-[1fr_400px] lg:items-end lg:gap-16'>
+          <div>
+            <p className='eyebrow'>{t.eyebrow}</p>
+            <h2 className='type-h2 mt-4 max-w-[680px]'>{t.title}</h2>
+          </div>
+          <p className='type-body'>{t.desc}</p>
+        </div>
       </Reveal>
 
       <Reveal>
         <div
-          className='mt-[60px] hidden gap-4 transition-[grid-template-columns] duration-500 ease-out lg:grid'
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          className='mt-12 hidden gap-4 transition-[grid-template-columns] duration-500 ease-out lg:grid'
           style={{ gridTemplateColumns: columns }}
         >
           {arenas.map((arena, i) => {
