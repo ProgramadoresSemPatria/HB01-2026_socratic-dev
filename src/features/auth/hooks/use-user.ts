@@ -1,5 +1,6 @@
 'use client'
 
+import { identify, resetAnalytics } from '@/lib/analytics'
 import { supabase } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
@@ -20,9 +21,14 @@ export function useUser() {
       .catch(() => {
         if (mounted) setLoading(false)
       })
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
       setLoading(false)
+      if (session?.user) {
+        identify(session.user.id, { email: session.user.email })
+      } else if (event === 'SIGNED_OUT') {
+        resetAnalytics()
+      }
     })
     return () => {
       mounted = false

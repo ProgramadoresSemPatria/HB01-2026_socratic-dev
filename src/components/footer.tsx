@@ -24,6 +24,8 @@ const copy = {
       { href: '/#problema', label: 'The problem' },
       { href: '/#manifesto', label: 'The manifesto' },
     ],
+    terms: 'Terms',
+    privacy: 'Privacy',
   },
   pt: {
     statementPre: 'A IA que te faz ',
@@ -43,6 +45,8 @@ const copy = {
       { href: '/#problema', label: 'O problema' },
       { href: '/#manifesto', label: 'O manifesto' },
     ],
+    terms: 'Termos',
+    privacy: 'Privacidade',
   },
 }
 
@@ -143,8 +147,20 @@ export function Footer() {
 
       <div className='border-t border-white/10'>
         <div className='container-main flex flex-col items-center gap-3 py-5 sm:flex-row sm:justify-between'>
-          <span className='text-background/40 dark:text-foreground/40 text-[13px]'>
+          <span className='text-background/40 dark:text-foreground/40 flex items-center gap-4 text-[13px]'>
             © 2026 Socratic.dev
+            <Link
+              href='/terms'
+              className='hover:text-lime transition-colors duration-200'
+            >
+              {t.terms}
+            </Link>
+            <Link
+              href='/privacy'
+              className='hover:text-lime transition-colors duration-200'
+            >
+              {t.privacy}
+            </Link>
           </span>
           <div className='flex items-center gap-5'>
             <div className='flex gap-1'>

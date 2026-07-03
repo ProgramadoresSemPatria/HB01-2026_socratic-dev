@@ -14,6 +14,7 @@ import {
   summarizeElements,
   type ExcalidrawApi,
 } from '@/features/design/utils/scene'
+import { track } from '@/lib/analytics'
 import { apiFetch } from '@/lib/api/client'
 import { useT } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase/client'
@@ -284,6 +285,7 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
 
   async function submitDesign() {
     if (!challenge || reviewing) return
+    track('challenge_submitted', { challenge_id: challenge.id, kind: 'design' })
     setReviewOpen(true)
     setReviewing(true)
     setReview(null)

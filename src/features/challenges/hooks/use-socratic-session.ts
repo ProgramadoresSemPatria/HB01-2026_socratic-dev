@@ -10,6 +10,7 @@ import {
   SOLVE_INDEPENDENCE_PENALTY,
 } from '@/features/hints/constants'
 import type { ChatMsg } from '@/lib/ai/types'
+import { track } from '@/lib/analytics'
 import { getAccessToken } from '@/lib/api/client'
 import * as React from 'react'
 import { completeSession, startSession } from '../actions'
@@ -73,6 +74,10 @@ export function useSocraticSession<TWork>(opts: {
       startedAtRef.current = Date.now()
     }
     setReady(true)
+    track('challenge_started', {
+      challenge_id: challenge.id,
+      resumed: !!draft,
+    })
 
     getAccessToken().then((token) => {
       startSession({ token, challengeId: challenge.id })
@@ -128,10 +133,12 @@ export function useSocraticSession<TWork>(opts: {
 
   function applyHint(level: 1 | 2 | 3) {
     spend(1, level * 4)
+    track('hint_used', { challenge_id: challenge?.id, level })
   }
 
   function spendSolve() {
     spend(SOLVE_COST, SOLVE_INDEPENDENCE_PENALTY)
+    track('solve_used', { challenge_id: challenge?.id })
   }
 
   function syncRemaining(n: number | undefined) {
@@ -150,6 +157,7 @@ export function useSocraticSession<TWork>(opts: {
       const b = await getHintBalance(token)
       setHintsRemaining(b.remaining)
       setBought(true)
+      track('hints_purchased', { remaining: b.remaining })
       setTimeout(() => setBought(false), 2500)
     } catch (e) {
       setBuyError(e instanceof Error ? e.message : '')
@@ -164,6 +172,13 @@ export function useSocraticSession<TWork>(opts: {
     durationSeconds: number,
     status: 'completed' | 'abandoned' = 'completed',
   ) {
+    track('challenge_completed', {
+      challenge_id: challenge?.id,
+      status,
+      duration_seconds: durationSeconds,
+      independence,
+      hints_used: hintsUsed,
+    })
     if (!sessionId) return
     getAccessToken()
       .then((token) =>

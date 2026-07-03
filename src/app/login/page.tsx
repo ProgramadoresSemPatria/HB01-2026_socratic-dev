@@ -3,6 +3,7 @@
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { signUp } from '@/features/auth/actions'
+import { track } from '@/lib/analytics'
 import { useT } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase/client'
 import { ArrowRight, Loader2 } from 'lucide-react'
@@ -24,6 +25,10 @@ const copy = {
     toggleToSignup: 'No account? Create one',
     toggleToLogin: 'Already have an account? Sign in',
     backToSite: '← Back to site',
+    consentPre: 'By creating an account you agree to the ',
+    consentTerms: 'Terms of Use',
+    consentAnd: ' and the ',
+    consentPrivacy: 'Privacy Policy',
     errors: {
       invalidCredentials: 'Invalid email or password.',
       emailNotConfirmed: 'Email not confirmed. Check your inbox.',
@@ -47,6 +52,10 @@ const copy = {
     toggleToSignup: 'Não tem conta? Criar uma',
     toggleToLogin: 'Já tem conta? Entrar',
     backToSite: '← Voltar ao site',
+    consentPre: 'Ao criar uma conta você concorda com os ',
+    consentTerms: 'Termos de Uso',
+    consentAnd: ' e a ',
+    consentPrivacy: 'Política de Privacidade',
     errors: {
       invalidCredentials: 'E-mail ou senha inválidos.',
       emailNotConfirmed: 'E-mail não confirmado. Verifique sua caixa de entrada.',
@@ -110,6 +119,7 @@ function LoginForm() {
       if (mode === 'signup') {
         const result = await signUp({ email, password })
         if ('error' in result) throw new Error(result.error)
+        track('signup', { method: 'email' })
       }
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -235,6 +245,19 @@ function LoginForm() {
                 {mode === 'login' ? t.signIn : t.createAccount}
                 <ArrowRight className='size-4 transition-transform group-hover:translate-x-0.5' />
               </Button>
+              {mode === 'signup' && (
+                <p className='text-muted-foreground text-xs leading-relaxed'>
+                  {t.consentPre}
+                  <Link href='/terms' className='link-underline text-ink'>
+                    {t.consentTerms}
+                  </Link>
+                  {t.consentAnd}
+                  <Link href='/privacy' className='link-underline text-ink'>
+                    {t.consentPrivacy}
+                  </Link>
+                  .
+                </p>
+              )}
             </form>
           </div>
 

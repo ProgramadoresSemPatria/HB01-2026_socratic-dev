@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import type { RunnerLanguage } from '@/domain/stacks'
 import { runCode } from '@/features/runner/run-code'
 import type { RunResult } from '@/features/runner/types'
+import { track } from '@/lib/analytics'
 import { apiFetch } from '@/lib/api/client'
 import { useLocale, useT } from '@/lib/i18n'
 import { useIsDark } from '@/lib/theme'
@@ -282,6 +283,7 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
 
   async function submitReview() {
     if (!challenge || reviewing) return
+    track('challenge_submitted', { challenge_id: challenge.id, kind: 'code' })
     setReviewOpen(true)
     setReviewing(true)
     setReview(null)
