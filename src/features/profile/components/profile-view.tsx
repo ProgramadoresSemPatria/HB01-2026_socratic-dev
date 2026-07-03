@@ -59,7 +59,7 @@ const copy = {
     statHints: 'Hints used',
     preferences: 'Preferences',
     prefsNote:
-      'Your next challenges are generated from these choices — saved automatically.',
+      'Your next challenges are based on these choices. Changes save automatically.',
     trackLabel: 'Track',
     trackDesc: 'What kind of challenges you get next.',
     trackPlaceholder: 'Pick a track',
@@ -102,7 +102,7 @@ const copy = {
     statHints: 'Hints usados',
     preferences: 'Preferências',
     prefsNote:
-      'Os próximos desafios são gerados com base nessas escolhas — salvam automaticamente.',
+      'Seus próximos desafios são baseados nessas escolhas. As alterações são salvas automaticamente.',
     trackLabel: 'Trilha',
     trackDesc: 'O tipo de desafio que você recebe.',
     trackPlaceholder: 'Escolher trilha',

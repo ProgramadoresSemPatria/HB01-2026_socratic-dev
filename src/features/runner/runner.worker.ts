@@ -95,7 +95,7 @@ ctx.onmessage = (e: MessageEvent<RunRequest>) => {
     const moduleObj = { exports: {} as Record<string, unknown> }
     const require = (name: string) => {
       throw new Error(
-        `import de "${name}" não é suportado — escreva a solução sem imports externos`,
+        `import de "${name}" não é suportado. Escreva a solução sem imports externos`,
       )
     }
     const userFn = new Function(

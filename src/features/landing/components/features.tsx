@@ -7,12 +7,12 @@ const copy = {
   en: {
     eyebrow: 'The method',
     title: 'Built for devs who want to think, not copy.',
-    body: 'An environment designed for productive struggle — not the easy shortcut.',
+    body: 'An environment designed for productive struggle, not the easy shortcut.',
     features: [
       {
         num: '01',
         title: 'Zero ready-made answers',
-        desc: 'The AI is forbidden from handing you the solution. By design. It answers questions with questions — and the answer stays yours.',
+        desc: 'The AI is forbidden from handing you the solution. By design. It answers questions with questions, and the answer stays yours.',
       },
       {
         num: '02',
@@ -27,12 +27,12 @@ const copy = {
       {
         num: '04',
         title: 'Real briefings',
-        desc: 'Every challenge ships with a client, a scope, and constraints — like real work, not an algorithm drill.',
+        desc: 'Every challenge ships with a client, a scope, and constraints. Just like real work, not an algorithm drill.',
       },
       {
         num: '05',
         title: 'Socratic review',
-        desc: "Submitted? The AI doesn't correct you — it interrogates your choices until you can defend every decision you made.",
+        desc: "Submitted? The AI doesn't correct you. It interrogates your choices until you can defend every decision you made.",
       },
       {
         num: '06',
@@ -44,12 +44,12 @@ const copy = {
   pt: {
     eyebrow: 'O método',
     title: 'Feito para quem quer pensar, não copiar.',
-    body: 'Um ambiente desenhado para o esforço produtivo — não para o atalho fácil.',
+    body: 'Um ambiente desenhado para o esforço produtivo, não para o atalho fácil.',
     features: [
       {
         num: '01',
         title: 'Zero respostas prontas',
-        desc: 'A IA é proibida de entregar a solução. Por design. Ela responde pergunta com pergunta — e a resposta continua sendo sua.',
+        desc: 'A IA é proibida de entregar a solução. Por design. Ela responde pergunta com pergunta, e a resposta continua sendo sua.',
       },
       {
         num: '02',
@@ -64,12 +64,12 @@ const copy = {
       {
         num: '04',
         title: 'Briefings reais',
-        desc: 'Cada desafio chega com cliente, escopo e restrições — como no trabalho de verdade, não como exercício de algoritmo.',
+        desc: 'Cada desafio chega com cliente, escopo e restrições, como no trabalho de verdade, não como exercício de algoritmo.',
       },
       {
         num: '05',
         title: 'Review socrático',
-        desc: 'Submeteu? A IA não corrige — ela interroga suas escolhas até você defender cada decisão que tomou.',
+        desc: 'Submeteu? A IA não corrige. Ela interroga suas escolhas até você defender cada decisão que tomou.',
       },
       {
         num: '06',

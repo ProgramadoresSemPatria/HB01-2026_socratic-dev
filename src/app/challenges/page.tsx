@@ -3,6 +3,7 @@
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { stackById } from '@/domain/stacks'
 import type { Challenge } from '@/features/challenges/types'
 import { levelLabel } from '@/features/challenges/utils'
 import { useT } from '@/lib/i18n'
@@ -23,7 +24,7 @@ const copy = {
     headline: 'Every challenge.',
     flourish: 'Recycled.',
     intro:
-      'Every challenge the AI creates lands here and joins the shared pool — less waiting, lower cost.',
+      'Every challenge the AI creates lands here and joins the shared pool. Less waiting, lower cost.',
     challengeOne: 'challenge',
     challengeMany: 'challenges',
     filters: { all: 'All', code: 'Code', design: 'System Design' },
@@ -43,7 +44,7 @@ const copy = {
     headline: 'Todos os desafios.',
     flourish: 'Reaproveitados.',
     intro:
-      'Cada desafio que a IA cria entra aqui e vira pool pra todo mundo — menos espera, menos custo.',
+      'Cada desafio que a IA cria entra aqui e vira pool pra todo mundo. Menos espera, menos custo.',
     challengeOne: 'desafio',
     challengeMany: 'desafios',
     filters: { all: 'Todos', code: 'Código', design: 'System Design' },
@@ -62,8 +63,7 @@ const copy = {
 
 function stackLabel(c: Challenge): string {
   if (c.kind === 'design') return 'System Design'
-  if (c.stack === 'javascript') return 'JavaScript'
-  return 'TypeScript'
+  return stackById(c.stack)?.label ?? c.stack
 }
 
 function cardGlyph(c: Challenge): string {

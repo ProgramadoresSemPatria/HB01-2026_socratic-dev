@@ -1,5 +1,6 @@
 import { levelById } from '@/domain/levels'
 import { RunnerLanguage } from '@/domain/stacks'
+import type { Locale } from '@/lib/i18n'
 import type { Challenge } from './types'
 
 export const LEVEL_LABEL: Record<string, string> = {
@@ -19,14 +20,35 @@ export function challengeLanguage(stack: string): RunnerLanguage {
   return 'ts'
 }
 
-export function starterCode(challenge: Challenge): string {
+const starterCopy = {
+  en: {
+    fnName: 'solution',
+    todo: 'TODO: implement your solution here',
+    componentTodo: 'TODO: implement your component here',
+    readBrief: 'Read the brief on the left and implement the solution.',
+    exportNote: 'Export your function so the tests can reach it (exports.<name>).',
+    params: 'parameters',
+  },
+  pt: {
+    fnName: 'solucao',
+    todo: 'TODO: implemente sua solução aqui',
+    componentTodo: 'TODO: implemente seu componente aqui',
+    readBrief: 'Leia o briefing à esquerda e implemente a solução.',
+    exportNote:
+      'Exporte sua função para que os testes possam acessá-la (exports.<nome>).',
+    params: 'parâmetros',
+  },
+} as const
+
+export function starterCode(challenge: Challenge, locale: Locale = 'en'): string {
   if (challenge.initial_code) return challenge.initial_code
+  const c = starterCopy[locale] ?? starterCopy.en
   if (challenge.stack === 'python' || challenge.stack === 'py') {
     return [
       `# ${challenge.title}`,
       ``,
-      `def solucao():`,
-      `    # TODO: implemente sua solução aqui`,
+      `def ${c.fnName}():`,
+      `    # ${c.todo}`,
       `    pass`,
       ``,
     ].join('\n')
@@ -36,7 +58,7 @@ export function starterCode(challenge: Challenge): string {
       `// ${challenge.title}`,
       ``,
       `export default function App() {`,
-      `  // TODO: implemente seu componente aqui`,
+      `  // ${c.componentTodo}`,
       `  return <div></div>`,
       `}`,
       ``,
@@ -45,20 +67,20 @@ export function starterCode(challenge: Challenge): string {
   return [
     `// ${challenge.title}`,
     `//`,
-    `// ${challenge.description || 'Leia o briefing à esquerda e implemente a solução.'}`,
-    `// Exporte sua função para que os testes possam acessá-la (exports.<nome>).`,
+    `// ${challenge.description || c.readBrief}`,
+    `// ${c.exportNote}`,
     ``,
-    `export function solucao(/* parâmetros */) {`,
-    `  // TODO: implemente sua solução aqui`,
+    `export function ${c.fnName}(/* ${c.params} */) {`,
+    `  // ${c.todo}`,
     ``,
     `}`,
     ``,
   ].join('\n')
 }
 
-export function challengeIntro(challenge: Challenge): string {
-  return (
-    challenge.intro ||
-    'Olá. Leia o briefing à esquerda e me diga: qual o primeiro passo pra resolver isso?'
-  )
+export function challengeIntro(challenge: Challenge, locale: Locale = 'en'): string {
+  if (challenge.intro) return challenge.intro
+  return locale === 'pt'
+    ? 'Olá. Leia o briefing à esquerda e me diga: qual o primeiro passo pra resolver isso?'
+    : 'Hi. Read the brief on the left and tell me: what is the first step to solve this?'
 }

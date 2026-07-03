@@ -19,8 +19,9 @@ export function useSocraticSession<TWork>(opts: {
   challenge: { id: string } | null
   initialWork: TWork
   initialMessages: ChatMsg[]
+  paused?: boolean
 }) {
-  const { challenge, initialWork, initialMessages } = opts
+  const { challenge, initialWork, initialMessages, paused = false } = opts
   const { user, loading: authLoading } = useUser()
 
   const [messages, setMessages] = React.useState<ChatMsg[]>([])
@@ -40,9 +41,18 @@ export function useSocraticSession<TWork>(opts: {
   const [bought, setBought] = React.useState(false)
 
   const startedAtRef = React.useRef<number>(Date.now())
+  const pausedAtRef = React.useRef<number | null>(null)
   const buyingRef = React.useRef(false)
   const scrollRef = React.useRef<HTMLDivElement>(null)
   const initRef = React.useRef(false)
+
+  const elapsedNow = React.useCallback(
+    () =>
+      Math.floor(
+        ((pausedAtRef.current ?? Date.now()) - startedAtRef.current) / 1000,
+      ),
+    [],
+  )
 
   React.useEffect(() => {
     if (!challenge || !user || initRef.current) return
@@ -76,12 +86,18 @@ export function useSocraticSession<TWork>(opts: {
   }, [challenge, user])
 
   React.useEffect(() => {
-    const t = setInterval(
-      () => setElapsed(Math.floor((Date.now() - startedAtRef.current) / 1000)),
-      1000,
-    )
+    if (paused) {
+      if (pausedAtRef.current == null) pausedAtRef.current = Date.now()
+      return
+    }
+    if (pausedAtRef.current != null) {
+      startedAtRef.current += Date.now() - pausedAtRef.current
+      pausedAtRef.current = null
+    }
+    setElapsed(elapsedNow())
+    const t = setInterval(() => setElapsed(elapsedNow()), 1000)
     return () => clearInterval(t)
-  }, [])
+  }, [paused, elapsedNow])
 
   React.useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -97,7 +113,7 @@ export function useSocraticSession<TWork>(opts: {
       messages,
       hintsUsed,
       independence,
-      elapsed: Math.floor((Date.now() - startedAtRef.current) / 1000),
+      elapsed: elapsedNow(),
     })
   }, [challenge, work, messages, hintsUsed, independence])
 

@@ -12,7 +12,7 @@ const copy = {
       {
         n: '01',
         title: 'A realistic challenge',
-        desc: 'The AI generates a fictional client briefing — scope, constraints, and pain points. You start from the problem, not the syntax.',
+        desc: 'The AI generates a fictional client briefing: scope, constraints, and pain points. You start from the problem, not the syntax.',
       },
       {
         n: '02',
@@ -22,7 +22,7 @@ const copy = {
       {
         n: '03',
         title: 'Gradual hints',
-        desc: 'Three hint levels, from vague to almost-there. You choose how much help you want — and pay for it in points.',
+        desc: 'Three hint levels, from vague to almost-there. You choose how much help you want, and pay for it in points.',
       },
       {
         n: '04',
@@ -38,7 +38,7 @@ const copy = {
       {
         n: '01',
         title: 'Desafio realista',
-        desc: 'A IA gera um briefing de cliente fictício — escopo, restrições e dor. Você começa pelo problema, não pela sintaxe.',
+        desc: 'A IA gera um briefing de cliente fictício: escopo, restrições e dor. Você começa pelo problema, não pela sintaxe.',
       },
       {
         n: '02',
@@ -48,7 +48,7 @@ const copy = {
       {
         n: '03',
         title: 'Hints graduais',
-        desc: 'Três níveis de pista, do vago ao quase-direto. Você escolhe quanta ajuda quer — e paga em pontos.',
+        desc: 'Três níveis de pista, do vago ao quase-direto. Você escolhe quanta ajuda quer, e paga em pontos.',
       },
       {
         n: '04',

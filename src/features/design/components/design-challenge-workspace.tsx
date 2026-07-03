@@ -37,12 +37,12 @@ const copy = {
     solutionDrawn:
       'I drew the architecture on the canvas. Study the flow and why each piece is there.',
     teachWhy: 'Why each piece is here:',
-    teachThink: 'Now you — before moving on:',
+    teachThink: 'Now you, before moving on:',
     solveFallback: "Couldn't solve it right now.",
     nothingDrawn:
-      "You haven't drawn anything yet — start the diagram and submit again.",
+      "You haven't drawn anything yet. Start the diagram and submit again.",
     reviewFallback: "Couldn't generate the review.",
-    canvasLabel: 'Canvas — draw your architecture',
+    canvasLabel: 'Canvas: draw your architecture',
     askAnalysis: 'Ask for analysis',
     errNetwork: 'Lost connection to the tutor — try again.',
     notFound: 'Challenge not found',
@@ -60,12 +60,12 @@ const copy = {
     solutionDrawn:
       'Desenhei a arquitetura no canvas. Estude o fluxo e por que cada peça está ali.',
     teachWhy: 'Por que cada peça está aqui:',
-    teachThink: 'Agora você — antes de seguir:',
+    teachThink: 'Agora você, antes de seguir:',
     solveFallback: 'Não consegui resolver agora.',
     nothingDrawn:
-      'Você ainda não desenhou nada — comece o diagrama e submeta de novo.',
+      'Você ainda não desenhou nada. Comece o diagrama e submeta de novo.',
     reviewFallback: 'Não foi possível gerar o review.',
-    canvasLabel: 'Canvas — desenhe sua arquitetura',
+    canvasLabel: 'Canvas: desenhe sua arquitetura',
     askAnalysis: 'Pedir análise',
     errNetwork: 'Sem conexão com o tutor — tente de novo.',
     notFound: 'Desafio não encontrado',
@@ -89,15 +89,16 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
 
   const intro = challenge?.intro || t.intro
 
+  const [reviewOpen, setReviewOpen] = React.useState(false)
+
   const s = useSocraticSession<readonly unknown[]>({
     challenge: challenge ? { id: challenge.id } : null,
     initialWork: [],
     initialMessages: [{ role: 'ai', text: intro }],
+    paused: reviewOpen,
   })
 
   const [outcome, setOutcome] = React.useState<'pass' | 'fail'>('pass')
-
-  const [reviewOpen, setReviewOpen] = React.useState(false)
   const [review, setReview] = React.useState<string | null>(null)
   const [reviewing, setReviewing] = React.useState(false)
 
@@ -257,7 +258,7 @@ export function DesignChallengeWorkspace({ user }: { user: User }) {
         if (teach?.components?.length) {
           parts.push('', `**${t.teachWhy}**`)
           for (const c of teach.components) {
-            parts.push(`- **${labelOf.get(c.id) ?? c.id}** — ${c.why}`)
+            parts.push(`- **${labelOf.get(c.id) ?? c.id}**: ${c.why}`)
           }
         }
         if (teach?.questions?.length) {

@@ -6,14 +6,14 @@ import { Reveal } from './reveal'
 const copy = {
   en: {
     quote:
-      '“I know that I know nothing. And that is exactly what will make you a real developer — the courage to think before you ask.”',
+      '“I know that I know nothing. And that is exactly what will make you a real developer: the courage to think before you ask.”',
     name: 'Socrates',
     role: 'Philosopher · Athens, 470 BC',
     footnote: 'the method that survived 2,400 years of shortcuts',
   },
   pt: {
     quote:
-      '“Eu sei que nada sei. E é exatamente isso que vai te tornar um dev de verdade — a coragem de pensar antes de perguntar.”',
+      '“Eu sei que nada sei. E é exatamente isso que vai te tornar um dev de verdade: a coragem de pensar antes de perguntar.”',
     name: 'Sócrates',
     role: 'Filósofo · Atenas, 470 a.C.',
     footnote: 'o método que sobreviveu a 2.400 anos de atalhos',

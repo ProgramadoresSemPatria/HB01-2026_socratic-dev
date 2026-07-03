@@ -15,19 +15,19 @@ const copy = {
   en: {
     eyebrow: 'For every kind of challenge',
     title: 'A training ground, not a tutorial.',
-    desc: 'Every challenge arrives as a realistic client briefing. Pick an arena — the tutor adapts its questions to what you came to train.',
+    desc: 'Every challenge arrives as a realistic client briefing. Pick an arena, and the tutor adapts its questions to what you came to train.',
     cta: 'Start training',
     soon: 'Coming soon',
     arenas: {
       api: {
         eyebrow: 'REST · GraphQL · Schema',
         title: 'APIs & data modeling',
-        desc: 'Design endpoints, queries and schema under the real constraints of a fictional client. The tutor questions every contract decision before accepting — you defend the design, not just the code.',
+        desc: 'Design endpoints, queries and schema under the real constraints of a fictional client. The tutor questions every contract decision before accepting. You defend the design, not just the code.',
       },
       ui: {
         eyebrow: 'State · Components · Edge cases',
         title: 'Real-world interfaces',
-        desc: 'State, composition and the edge cases no tutorial shows you — without pasting the first answer from a chat.',
+        desc: 'State, composition and the edge cases no tutorial shows you, without pasting the first answer from a chat.',
       },
       algo: {
         eyebrow: 'Big-O · Structures · Trade-offs',
@@ -49,19 +49,19 @@ const copy = {
   pt: {
     eyebrow: 'Para todo tipo de desafio',
     title: 'Um campo de treino, não um tutorial.',
-    desc: 'Cada desafio chega como um briefing realista de cliente. Escolha uma arena — o tutor adapta as perguntas ao que você veio treinar.',
+    desc: 'Cada desafio chega como um briefing realista de cliente. Escolha uma arena, e o tutor adapta as perguntas ao que você veio treinar.',
     cta: 'Começar a treinar',
     soon: 'Em breve',
     arenas: {
       api: {
         eyebrow: 'REST · GraphQL · Schema',
         title: 'APIs e modelagem de dados',
-        desc: 'Projete endpoints, queries e schema sob as restrições reais de um cliente fictício. O tutor questiona cada decisão de contrato antes de aceitar — você defende o design, não só o código.',
+        desc: 'Projete endpoints, queries e schema sob as restrições reais de um cliente fictício. O tutor questiona cada decisão de contrato antes de aceitar. Você defende o design, não só o código.',
       },
       ui: {
         eyebrow: 'Estado · Componentes · Edge-cases',
         title: 'Interfaces de verdade',
-        desc: 'Estado, composição e os edge-cases que ninguém mostra no tutorial — sem colar a primeira resposta do chat.',
+        desc: 'Estado, composição e os edge-cases que ninguém mostra no tutorial, sem colar a primeira resposta do chat.',
       },
       algo: {
         eyebrow: 'Big-O · Estruturas · Trade-offs',

@@ -37,7 +37,7 @@ export function runCode(
         logs: [],
         tests: [],
         ok: false,
-        error: `Tempo excedido (${timeoutMs}ms) — possível loop infinito`,
+        error: `Tempo excedido (${timeoutMs}ms), possível loop infinito`,
         durationMs: timeoutMs,
       })
     }, timeoutMs)

@@ -14,14 +14,14 @@ const copy = {
     eyebrow: 'Two modes',
     h2: 'Train what the market demands.',
     h2Accent: 'Thinking.',
-    sub: 'Code or system design — same Socratic principle: the AI never hands it to you, it gets you there.',
+    sub: 'Code or system design, same Socratic principle: the AI never hands it to you, it gets you there.',
     modes: [
       {
         tag: null as string | null,
         fill: 'bg-pastel-mist',
         paint: paintCode,
         title: 'Code challenges',
-        desc: 'A real Monaco editor, hidden tests, and a tutor that answers questions with questions. Solve it like you would at work — no cheating.',
+        desc: 'A real Monaco editor, hidden tests, and a tutor that answers questions with questions. Solve it like you would at work, no cheating.',
         cta: 'Solve code',
         points: [
           'JavaScript & TypeScript',
@@ -34,7 +34,7 @@ const copy = {
         fill: 'bg-pastel-lavender',
         paint: paintArchitecture,
         title: 'System design challenges',
-        desc: 'Sketch the architecture on a canvas — services, databases, queues, and how the data flows. The AI sees your diagram and interrogates every decision.',
+        desc: 'Sketch the architecture on a canvas: services, databases, queues, and how the data flows. The AI sees your diagram and interrogates every decision.',
         cta: 'Design architecture',
         points: [
           'Built-in Excalidraw canvas',
@@ -48,14 +48,14 @@ const copy = {
     eyebrow: 'Dois modos',
     h2: 'Treine o que o mercado cobra.',
     h2Accent: 'Pensando.',
-    sub: 'Código ou system design (arquitetura) — o mesmo princípio socrático: a IA nunca entrega pronto, ela te leva até lá.',
+    sub: 'Código ou system design (arquitetura), o mesmo princípio socrático: a IA nunca entrega pronto, ela te leva até lá.',
     modes: [
       {
         tag: null as string | null,
         fill: 'bg-pastel-mist',
         paint: paintCode,
         title: 'Desafios de código',
-        desc: 'Editor Monaco de verdade, testes escondidos e um tutor que responde pergunta com pergunta. Resolva como no trabalho — sem cola.',
+        desc: 'Editor Monaco de verdade, testes escondidos e um tutor que responde pergunta com pergunta. Resolva como no trabalho, sem cola.',
         cta: 'Resolver código',
         points: [
           'JavaScript & TypeScript',
@@ -68,7 +68,7 @@ const copy = {
         fill: 'bg-pastel-lavender',
         paint: paintArchitecture,
         title: 'Desafios de system design',
-        desc: 'Desenhe a arquitetura num canvas — serviços, bancos, filas e o fluxo dos dados. A IA enxerga seu diagrama e interroga cada decisão.',
+        desc: 'Desenhe a arquitetura num canvas: serviços, bancos, filas e o fluxo dos dados. A IA enxerga seu diagrama e interroga cada decisão.',
         cta: 'Desenhar arquitetura',
         points: [
           'Canvas Excalidraw integrado',

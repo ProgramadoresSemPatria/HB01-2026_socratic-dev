@@ -5,7 +5,7 @@ import type { RunnerLanguage } from '@/domain/stacks'
 import { runCode } from '@/features/runner/run-code'
 import type { RunResult } from '@/features/runner/types'
 import { apiFetch } from '@/lib/api/client'
-import { useT } from '@/lib/i18n'
+import { useLocale, useT } from '@/lib/i18n'
 import { useIsDark } from '@/lib/theme'
 import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -40,10 +40,10 @@ const copy = {
     solutionApplied:
       'I applied the solution in the editor. Run the tests and study why it works.',
     teachDecisions: 'Key decisions:',
-    teachThink: 'Now you — before moving on:',
+    teachThink: 'Now you, before moving on:',
     solveFallback: "Couldn't solve it right now.",
     noSolutionYet:
-      "You haven't written a solution yet — implement something in the editor and submit again.",
+      "You haven't written a solution yet. Implement something in the editor and submit again.",
     reviewFallback: "Couldn't generate the review.",
     pythonNote:
       'Python is evaluated by the AI on submit. Click "Submit" to get Socratic feedback.',
@@ -67,10 +67,10 @@ const copy = {
     solutionApplied:
       'Apliquei a solução no editor. Rode os testes e estude por que ela funciona.',
     teachDecisions: 'Decisões-chave:',
-    teachThink: 'Agora você — antes de seguir:',
+    teachThink: 'Agora você, antes de seguir:',
     solveFallback: 'Não consegui resolver agora.',
     noSolutionYet:
-      'Você ainda não escreveu uma solução — implemente algo no editor e submeta de novo.',
+      'Você ainda não escreveu uma solução. Implemente algo no editor e submeta de novo.',
     reviewFallback: 'Não foi possível gerar o review.',
     pythonNote:
       'Python é avaliado pela IA ao submeter. Clique em "Submeter" para receber o feedback socrático.',
@@ -108,22 +108,24 @@ const POST = { method: 'POST', headers: { 'content-type': 'application/json' } }
 export function CodeChallengeWorkspace({ user }: { user: User }) {
   const router = useRouter()
   const t = useT(copy)
+  const { locale } = useLocale()
   const isDark = useIsDark()
   const [challenge, setChallenge] = React.useState<Challenge | null>(null)
   const [loadError, setLoadError] = React.useState(false)
   const [activePanel, setActivePanel] = React.useState<
     'brief' | 'work' | 'chat'
   >('brief')
+  const [reviewOpen, setReviewOpen] = React.useState(false)
 
   const s = useSocraticSession<string>({
     challenge: challenge ? { id: challenge.id } : null,
-    initialWork: challenge ? starterCode(challenge) : '',
+    initialWork: challenge ? starterCode(challenge, locale) : '',
     initialMessages: challenge
-      ? [{ role: 'ai', text: challengeIntro(challenge) }]
+      ? [{ role: 'ai', text: challengeIntro(challenge, locale) }]
       : [],
+    paused: reviewOpen,
   })
 
-  const [reviewOpen, setReviewOpen] = React.useState(false)
   const [review, setReview] = React.useState<string | null>(null)
   const [reviewing, setReviewing] = React.useState(false)
   const [running, setRunning] = React.useState(false)
@@ -254,7 +256,7 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
         if (teach?.decisions?.length) {
           parts.push('', `**${t.teachDecisions}**`)
           for (const d of teach.decisions) {
-            parts.push(`- **${d.what}** — ${d.why}`)
+            parts.push(`- **${d.what}**: ${d.why}`)
           }
         }
         if (teach?.questions?.length) {
@@ -287,7 +289,8 @@ export function CodeChallengeWorkspace({ user }: { user: User }) {
 
     const code = s.work
     const touched =
-      code.trim().length > 0 && code.trim() !== starterCode(challenge).trim()
+      code.trim().length > 0 &&
+      code.trim() !== starterCode(challenge, locale).trim()
     if (!touched) {
       setOutcome('fail')
       setReview(t.noSolutionYet)

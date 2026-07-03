@@ -46,7 +46,7 @@ const copy = {
     socraticReview: 'Socratic review',
     proofTitle: 'Proof without shortcuts',
     proofBodyPre:
-      'This session was AI-generated, with hidden tests running in the browser. The tutor never hands over the answer — it only asks questions. Every hint costs independence. ',
+      'This session was AI-generated, with hidden tests running in the browser. The tutor never hands over the answer. It only asks questions. Every hint costs independence. ',
     proofBodyStrong: 'Want to try?',
     startMyOwn: 'Start my own',
     sessionId: 'Session ID:',
@@ -75,7 +75,7 @@ const copy = {
     socraticReview: 'Review socrático',
     proofTitle: 'Prova sem cola',
     proofBodyPre:
-      'Essa sessão foi gerada por IA, com testes escondidos rodando no browser. O tutor nunca entrega a resposta — só pergunta. Cada hint custa independência. ',
+      'Essa sessão foi gerada por IA, com testes escondidos rodando no browser. O tutor nunca entrega a resposta. Só pergunta. Cada hint custa independência. ',
     proofBodyStrong: 'Quer tentar?',
     startMyOwn: 'Começar meu próprio',
     sessionId: 'ID da sessão:',
@@ -175,7 +175,7 @@ export async function generateMetadata(props: {
     title: `${title} · ${score}% independent · socratic.dev`,
     description: `Public session: ${title} solved with ${score}% independence. No cheating, no AI spitting out the answer.`,
     openGraph: {
-      title: `${title} — ${score}% independent`,
+      title: `${title}: ${score}% independent`,
       description: 'Verifiable social proof. Solved on socratic.dev.',
       type: 'article',
     },

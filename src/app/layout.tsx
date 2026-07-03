@@ -32,9 +32,9 @@ const notoSerif = Noto_Serif({
 })
 
 export const metadata: Metadata = {
-  title: 'Socratic.dev — The AI that makes you think',
+  title: 'Socratic.dev: The AI that makes you think',
   description:
-    'A coding environment where the AI never hands you the answer — it makes you find it. For devs who want to actually learn in the AI era.',
+    'A coding environment where the AI never hands you the answer. It makes you find it. For devs who want to actually learn in the AI era.',
 }
 
 export default function RootLayout({

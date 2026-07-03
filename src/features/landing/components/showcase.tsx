@@ -12,7 +12,7 @@ const copy = {
     loopEyebrow: 'The Socratic loop',
     loopTitle: 'You get stuck. It asks. You think.',
     loopBody:
-      'Instead of dumping the solution, the tutor returns the right question at the right time — nudging you to the next step without giving away the destination.',
+      'Instead of dumping the solution, the tutor returns the right question at the right time, nudging you to the next step without giving away the destination.',
     bullets: [
       'Questions aimed at the concept, not the syntax',
       'Hints that escalate only when you ask',
@@ -22,7 +22,7 @@ const copy = {
     tutorTab: 'Socratic tutor',
     placeholder: 'Think first, then ask',
     scoreEyebrow: 'Measurable independence',
-    scoreTitle: 'How much you solved on your own — as a number.',
+    scoreTitle: 'How much you solved on your own, as a number.',
     scoreBody:
       'Every challenge ends with an independence score. Asked for three hints? It drops. Solved it cold? It climbs. Progress you cannot outsource to the AI.',
     scoreLabel: 'Independence score',
@@ -34,7 +34,7 @@ const copy = {
     loopEyebrow: 'O loop socrático',
     loopTitle: 'Você trava. Ele pergunta. Você pensa.',
     loopBody:
-      'Em vez de despejar a solução, o tutor devolve a pergunta certa no momento certo — te empurrando para o próximo passo sem entregar o destino.',
+      'Em vez de despejar a solução, o tutor devolve a pergunta certa no momento certo, te empurrando para o próximo passo sem entregar o destino.',
     bullets: [
       'Perguntas que miram o conceito, não a sintaxe',
       'Hints que escalam só quando você pede',
@@ -64,7 +64,7 @@ const CHAT: Record<
       from: 'tutor',
       text: (
         <>
-          Before you code — what data structure does{' '}
+          Before you code, what data structure does{' '}
           <code className='text-primary font-mono'>findAll()</code> return?
         </>
       ),
@@ -81,7 +81,7 @@ const CHAT: Record<
       from: 'tutor',
       text: (
         <>
-          Antes de codar — que estrutura de dados o{' '}
+          Antes de codar, que estrutura de dados o{' '}
           <code className='text-primary font-mono'>findAll()</code> te devolve?
         </>
       ),

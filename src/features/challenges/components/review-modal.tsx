@@ -46,12 +46,12 @@ const copy = {
     celebrationFail: "Not this time. But you thought. Come back.",
     celebrationHigh: 'You are free. Socrates would approve.',
     celebrationMid: 'Good work. You did the thinking.',
-    celebrationLow: 'Done. Independence is practice — keep going.',
-    noTests: 'No automated tests in this challenge — the review below is the evaluation.',
+    celebrationLow: 'Done. Independence is practice. Keep going.',
+    noTests: 'No automated tests in this challenge. The review below is the evaluation.',
     testsSolved: (passed: number, total: number) =>
-      `Passed every test (${passed}/${total}) — challenge solved.`,
+      `Passed every test (${passed}/${total}). Challenge solved.`,
     testsNotSolved: (passed: number, total: number) =>
-      `Passed ${passed}/${total} tests — not solved yet. Use the review to close the gap.`,
+      `Passed ${passed}/${total} tests. Not solved yet. Use the review to close the gap.`,
   },
   pt: {
     copyLink: 'Copie o link:',
@@ -82,12 +82,12 @@ const copy = {
     celebrationFail: 'Não passou desta vez. Mas você pensou. Volta.',
     celebrationHigh: 'Você é livre. Sócrates aprovaria.',
     celebrationMid: 'Bom trabalho. Você pensou.',
-    celebrationLow: 'Concluído. Independência é prática — continue.',
-    noTests: 'Sem testes automáticos neste desafio — o review abaixo é a avaliação.',
+    celebrationLow: 'Concluído. Independência é prática. Continue.',
+    noTests: 'Sem testes automáticos neste desafio. O review abaixo é a avaliação.',
     testsSolved: (passed: number, total: number) =>
-      `Passou em todos os testes (${passed}/${total}) — desafio resolvido.`,
+      `Passou em todos os testes (${passed}/${total}). Desafio resolvido.`,
     testsNotSolved: (passed: number, total: number) =>
-      `Passou ${passed}/${total} testes — ainda não resolvido. Use o review pra fechar o que falta.`,
+      `Passou ${passed}/${total} testes. Ainda não resolvido. Use o review pra fechar o que falta.`,
   },
 }
 

@@ -8,12 +8,12 @@ const copy = {
   en: {
     h2: 'Learning to code became copy and paste.',
     h2Muted: 'The reasoning got left behind.',
-    body: "Copilot and ChatGPT hand you the answer before you've even framed the question. You get through the tasks but internalize nothing — and the first blank screen stops you cold. The most powerful tool in computing history is teaching a generation not to think.",
+    body: "Copilot and ChatGPT hand you the answer before you've even framed the question. You get through the tasks but internalize nothing, and the first blank screen stops you cold. The most powerful tool in computing history is teaching a generation not to think.",
   },
   pt: {
     h2: 'Aprender a programar virou copiar e colar.',
     h2Muted: 'O raciocínio ficou pelo caminho.',
-    body: 'Copilot e ChatGPT entregam a resposta antes de você formular a pergunta. Você avança nas tarefas, mas não internaliza nada — e na primeira tela em branco, trava. A ferramenta mais poderosa da história da computação está ensinando uma geração a não pensar.',
+    body: 'Copilot e ChatGPT entregam a resposta antes de você formular a pergunta. Você avança nas tarefas, mas não internaliza nada, e na primeira tela em branco, trava. A ferramenta mais poderosa da história da computação está ensinando uma geração a não pensar.',
   },
 }
 

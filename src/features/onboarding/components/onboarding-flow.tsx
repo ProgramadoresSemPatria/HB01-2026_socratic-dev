@@ -113,7 +113,7 @@ const copy = {
     stepMeta: [
       {
         title: 'How do you want to train today?',
-        subtitle: 'Code or system design (architecture) — pick your track.',
+        subtitle: 'Code or system design (architecture). Pick your track.',
       },
       {
         title: 'Radical honesty: where are you?',
@@ -130,7 +130,7 @@ const copy = {
     setup: 'Setup',
     backToSite: 'Back to site',
     language: 'Language',
-    designNotePre: "System design has no language — you'll ",
+    designNotePre: "System design has no language, so you'll ",
     designNoteBold: 'sketch the system architecture',
     designNotePost: ' (services, data, flow) on a canvas and the AI reviews it.',
     trackLabel: 'Track',
@@ -226,7 +226,7 @@ const copy = {
     stepMeta: [
       {
         title: 'Como você quer treinar hoje?',
-        subtitle: 'Código ou system design (arquitetura) — escolha a trilha.',
+        subtitle: 'Código ou system design (arquitetura). Escolha a trilha.',
       },
       {
         title: 'Honestidade radical: onde você está?',
@@ -241,7 +241,7 @@ const copy = {
     setup: 'Setup',
     backToSite: 'Voltar ao site',
     language: 'Linguagem',
-    designNotePre: 'System design não tem linguagem — você vai ',
+    designNotePre: 'System design não tem linguagem, então você vai ',
     designNoteBold: 'desenhar a arquitetura do sistema',
     designNotePost: ' (serviços, dados, fluxo) num canvas e a IA analisa.',
     trackLabel: 'Trilha',

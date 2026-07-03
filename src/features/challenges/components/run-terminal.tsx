@@ -17,7 +17,7 @@ const copy = {
     idlePost: ' to execute and test your code.',
     executing: 'Running…',
     noOutputPre:
-      'Code ran without errors. This challenge has no tests defined yet — add a ',
+      'Code ran without errors. This challenge has no tests defined yet. Add a ',
     noOutputPost: ' to see the output here.',
   },
   pt: {
@@ -31,7 +31,7 @@ const copy = {
     idlePost: ' para executar e testar seu código.',
     executing: 'Executando…',
     noOutputPre:
-      'Código executado sem erros. Este desafio ainda não tem testes definidos — escreva um ',
+      'Código executado sem erros. Este desafio ainda não tem testes definidos. Escreva um ',
     noOutputPost: ' para ver a saída aqui.',
   },
 }
@@ -151,7 +151,7 @@ export function RunTerminal({
                     <span className='text-white/90'>
                       {test.name}
                       {!test.passed && test.message ? (
-                        <span className='text-ember'> — {test.message}</span>
+                        <span className='text-ember'>: {test.message}</span>
                       ) : null}
                     </span>
                   </div>
