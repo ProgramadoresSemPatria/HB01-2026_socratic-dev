@@ -644,9 +644,27 @@ function RecentChallenges({
   const { locale } = useLocale()
   const PAGE_SIZE = 6
   const [page, setPage] = React.useState(0)
-  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE))
+
+  // One row per challenge. Keep a completed attempt if there is one, otherwise
+  // the most recent session (items already come newest-first).
+  const unique = React.useMemo(() => {
+    const order: string[] = []
+    const chosen = new Map<string, SessionRow>()
+    for (const s of items) {
+      const prev = chosen.get(s.challenge_id)
+      if (!prev) {
+        order.push(s.challenge_id)
+        chosen.set(s.challenge_id, s)
+      } else if (prev.status !== 'completed' && s.status === 'completed') {
+        chosen.set(s.challenge_id, s)
+      }
+    }
+    return order.map((id) => chosen.get(id) as SessionRow)
+  }, [items])
+
+  const totalPages = Math.max(1, Math.ceil(unique.length / PAGE_SIZE))
   const start = page * PAGE_SIZE
-  const pageItems = items.slice(start, start + PAGE_SIZE)
+  const pageItems = unique.slice(start, start + PAGE_SIZE)
 
   return (
     <motion.section
@@ -661,14 +679,14 @@ function RecentChallenges({
           <p className='eyebrow'>{t.historyEyebrow}</p>
           <h2 className='type-h3 mt-2'>{t.historyTitle}</h2>
         </div>
-        {items.length > PAGE_SIZE && (
+        {unique.length > PAGE_SIZE && (
           <div className='flex items-center gap-2 font-mono text-[11px] text-muted-foreground'>
             <span className='sm:hidden'>
               {page + 1}/{totalPages}
             </span>
             <span className='hidden sm:inline'>
-              {start + 1}–{Math.min(start + PAGE_SIZE, items.length)} {t.of}{' '}
-              {items.length}
+              {start + 1}–{Math.min(start + PAGE_SIZE, unique.length)} {t.of}{' '}
+              {unique.length}
             </span>
             <Button
               variant='outline'
@@ -692,7 +710,7 @@ function RecentChallenges({
         )}
       </div>
 
-      {items.length === 0 ? (
+      {unique.length === 0 ? (
         <div className='mt-8 flex flex-col items-start gap-5 border-t border-border pt-8'>
           <p className='text-sm text-muted-foreground'>{t.historyEmpty}</p>
           <Button variant='ink' onClick={onNew} loading={creating}>
