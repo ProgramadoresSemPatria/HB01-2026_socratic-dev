@@ -127,6 +127,7 @@ export type Database = {
         Row: {
           hint_level: number
           id: string
+          is_solve: boolean
           session_id: string
           used_at: string
           user_id: string
@@ -134,6 +135,7 @@ export type Database = {
         Insert: {
           hint_level: number
           id?: string
+          is_solve?: boolean
           session_id: string
           used_at?: string
           user_id: string
@@ -141,6 +143,7 @@ export type Database = {
         Update: {
           hint_level?: number
           id?: string
+          is_solve?: boolean
           session_id?: string
           used_at?: string
           user_id?: string
@@ -198,6 +201,7 @@ export type Database = {
           completed_at: string | null
           duration_seconds: number | null
           id: string
+          independence: number | null
           started_at: string
           status: string
           user_id: string
@@ -207,6 +211,7 @@ export type Database = {
           completed_at?: string | null
           duration_seconds?: number | null
           id?: string
+          independence?: number | null
           started_at?: string
           status?: string
           user_id: string
@@ -216,6 +221,7 @@ export type Database = {
           completed_at?: string | null
           duration_seconds?: number | null
           id?: string
+          independence?: number | null
           started_at?: string
           status?: string
           user_id?: string
