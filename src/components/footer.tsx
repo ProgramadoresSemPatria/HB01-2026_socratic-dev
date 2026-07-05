@@ -18,6 +18,8 @@ const copy = {
       { href: '/onboarding', label: 'Start a challenge' },
       { href: '/challenges', label: 'Library' },
       { href: '/dashboard', label: 'Dashboard' },
+      { href: '/ranking', label: 'Ranking' },
+      { href: '/profile', label: 'Your profile' },
     ],
     learnLinks: [
       { href: '/#metodo', label: 'How it works' },
@@ -39,6 +41,8 @@ const copy = {
       { href: '/onboarding', label: 'Comece um desafio' },
       { href: '/challenges', label: 'Biblioteca' },
       { href: '/dashboard', label: 'Dashboard' },
+      { href: '/ranking', label: 'Ranking' },
+      { href: '/profile', label: 'Seu perfil' },
     ],
     learnLinks: [
       { href: '/#metodo', label: 'Como funciona' },
@@ -137,7 +141,7 @@ export function Footer() {
         aria-hidden
         className='container-main pointer-events-none -mb-[0.16em] select-none'
       >
-        <p className='text-center text-[13.5vw] leading-[0.85] whitespace-nowrap'>
+        <p className='text-center text-[min(13.5vw,10.4rem)] leading-[0.85] whitespace-nowrap'>
           <span className='font-heading font-light tracking-[-0.05em] text-white/[0.07]'>
             socratic
           </span>
