@@ -1,6 +1,6 @@
 'use server'
 
-import { aiErrorMessage, askClaude } from '@/lib/ai/client'
+import { aiErrorMessage, askClaude, MODELS } from '@/lib/ai/client'
 import {
   generateChallenge as runGenerate,
   type GenLevel,
@@ -220,6 +220,7 @@ export async function getTrainingRecommendation(input: {
       user,
       maxTokens: 300,
       effort: 'low',
+      model: MODELS.fast,
     })
     if (!text.trim()) return { error: 'Sem recomendação.' }
     return { text: text.trim() }

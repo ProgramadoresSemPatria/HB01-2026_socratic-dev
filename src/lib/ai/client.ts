@@ -5,43 +5,71 @@ export const anthropic = new Anthropic()
 
 type Effort = 'low' | 'medium' | 'high'
 
-// Sonnet 4.6 during the testing phase to keep credit usage low.
-// Swap back to 'claude-opus-4-7' for the highest-quality answers.
-const MODEL = 'claude-sonnet-4-6'
+export const MODELS = {
+  default: 'claude-sonnet-5',
+  fast: 'claude-haiku-4-5',
+} as const
 
-// Single text completion with adaptive thinking. Params are passed with a cast
-// so we don't depend on the exact SDK type version for `thinking: adaptive` /
-// `output_config.effort`. Both work on Sonnet 4.6 and Opus 4.7.
+export type TextBlock = {
+  type: 'text'
+  text: string
+  cache_control?: { type: 'ephemeral' }
+}
+
+export type ChatTurn = {
+  role: 'user' | 'assistant'
+  content: string | TextBlock[]
+}
+
+function systemBlocks(system: string | TextBlock[]): TextBlock[] {
+  if (typeof system !== 'string') return system
+  return [
+    { type: 'text', text: system, cache_control: { type: 'ephemeral' } },
+  ]
+}
+
+function modelParams(model: string, effort: Effort) {
+  if (model === MODELS.fast) return {}
+  return {
+    thinking: { type: 'adaptive' },
+    output_config: { effort },
+  }
+}
+
 export async function askClaude(opts: {
-  system: string
-  user: string
+  system: string | TextBlock[]
+  user?: string
+  messages?: ChatTurn[]
   maxTokens?: number
   effort?: Effort
+  model?: string
 }): Promise<string> {
+  const model = opts.model ?? MODELS.default
   const params = {
-    model: MODEL,
+    model,
     max_tokens: opts.maxTokens ?? 1024,
-    system: opts.system,
-    messages: [{ role: 'user', content: opts.user }],
-    thinking: { type: 'adaptive' },
-    output_config: { effort: opts.effort ?? 'medium' },
+    system: systemBlocks(opts.system),
+    messages: opts.messages ?? [{ role: 'user', content: opts.user ?? '' }],
+    ...modelParams(model, opts.effort ?? 'medium'),
   }
   const res = await anthropic.messages.create(params as never)
   return extractText(res)
 }
 
 export async function askClaudeVision(opts: {
-  system: string
+  system: string | TextBlock[]
   userText: string
   imageBase64: string
   mediaType?: 'image/png' | 'image/jpeg'
   maxTokens?: number
   effort?: Effort
+  model?: string
 }): Promise<string> {
+  const model = opts.model ?? MODELS.default
   const params = {
-    model: MODEL,
+    model,
     max_tokens: opts.maxTokens ?? 1024,
-    system: opts.system,
+    system: systemBlocks(opts.system),
     messages: [
       {
         role: 'user',
@@ -58,8 +86,7 @@ export async function askClaudeVision(opts: {
         ],
       },
     ],
-    thinking: { type: 'adaptive' },
-    output_config: { effort: opts.effort ?? 'medium' },
+    ...modelParams(model, opts.effort ?? 'medium'),
   }
   const res = await anthropic.messages.create(params as never)
   return extractText(res)
@@ -74,8 +101,6 @@ function extractText(res: unknown): string {
     .trim()
 }
 
-// Friendly message for server actions. Keeps our own thrown messages (e.g.
-// parse errors with retry instructions) but masks raw SDK/API errors.
 export function aiErrorMessage(e: unknown): string {
   Sentry.captureException(e)
   const msg = e instanceof Error ? e.message : ''

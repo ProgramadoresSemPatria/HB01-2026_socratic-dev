@@ -72,7 +72,7 @@ export async function generateChallenge(opts: {
     const raw = await askClaude({
       system: challengeSystem('design', locale),
       user: `Gere um desafio de system design (arquitetura) novo. nível: ${opts.level}.\n\n${levelGuide('design', opts.level)}${userTheme}${avoid}`,
-      maxTokens: 2048,
+      maxTokens: 2600,
       effort: 'medium',
     })
     const json = parseChallenge(raw, locale)
@@ -94,7 +94,7 @@ export async function generateChallenge(opts: {
   const raw = await askClaude({
     system: challengeSystem('code', locale),
     user: `Gere um desafio novo. stack: ${stack}. nível: ${opts.level}.\n\n${levelGuide('code', opts.level)}${userTheme}${avoid}${noTestsNote}`,
-    maxTokens: opts.level === 'advanced' ? 6000 : 3500,
+    maxTokens: opts.level === 'advanced' ? 8000 : 4500,
     effort: opts.level === 'advanced' ? 'high' : 'medium',
   })
   const json = parseChallenge(raw, locale)

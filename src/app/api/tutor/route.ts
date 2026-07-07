@@ -1,5 +1,10 @@
 import type { ChallengeKind } from '@/domain/challenge-kinds'
-import { aiErrorResponse, askClaude } from '@/lib/ai/client'
+import {
+  aiErrorResponse,
+  askClaude,
+  type ChatTurn,
+  type TextBlock,
+} from '@/lib/ai/client'
 import { solveSystem, solveTask } from '@/lib/ai/prompts/solve'
 import { hintGuide, tutorSystem, tutorTask } from '@/lib/ai/prompts/tutor'
 import type { ChatMsg } from '@/lib/ai/types'
@@ -59,12 +64,23 @@ export async function POST(req: Request) {
     }
 
     const locale = await getLocale()
-    const system =
+    const systemText =
       mode === 'solve' ? solveSystem(kind, locale) : tutorSystem(kind, locale)
 
-    const transcript = messages
-      .map((m) => `${m.role === 'ai' ? 'Tutor' : 'Aluno'}: ${m.text}`)
-      .join('\n')
+    // Two cache breakpoints on the system side: the shared tutor prompt
+    // (reused across all users) and the per-challenge context.
+    const system: TextBlock[] = [
+      {
+        type: 'text',
+        text: systemText,
+        cache_control: { type: 'ephemeral' },
+      },
+      {
+        type: 'text',
+        text: `Desafio: ${title}\nBriefing do cliente: ${briefing}`,
+        cache_control: { type: 'ephemeral' },
+      },
+    ]
 
     const task =
       mode === 'solve'
@@ -73,10 +89,26 @@ export async function POST(req: Request) {
           ? hintGuide(kind, (Number(body.hintLevel) || 1) as 1 | 2 | 3)
           : tutorTask(kind)
 
-    const user = [
-      `Desafio: ${title}`,
-      `Briefing do cliente: ${briefing}`,
-      '',
+    // Real multi-turn history so the conversation prefix caches and grows
+    // incrementally; the breakpoint sits on the last history turn. Volatile
+    // content (current code + task) goes after it, in the final user turn.
+    const history: ChatTurn[] = messages.map((m) => ({
+      role: m.role === 'ai' ? 'assistant' : 'user',
+      content: m.text ?? '',
+    }))
+    if (!history.length || history[0].role !== 'user') {
+      history.unshift({ role: 'user', content: '(início — primeira interação)' })
+    }
+    const last = history[history.length - 1]
+    last.content = [
+      {
+        type: 'text',
+        text: typeof last.content === 'string' ? last.content : '',
+        cache_control: { type: 'ephemeral' },
+      },
+    ]
+
+    const finalUser = [
       kind === 'design'
         ? 'Estado atual do diagrama (resumo):'
         : 'Código atual do aluno:',
@@ -84,16 +116,13 @@ export async function POST(req: Request) {
         ? work || '(canvas vazio)'
         : `\`\`\`\n${work || '(vazio)'}\n\`\`\``,
       '',
-      'Conversa até agora:',
-      transcript || '(início — primeira interação)',
-      '',
       task,
     ].join('\n')
 
     const text = await askClaude({
       system,
-      user,
-      maxTokens: mode === 'solve' ? 2048 : 800,
+      messages: [...history, { role: 'user', content: finalUser }],
+      maxTokens: mode === 'solve' ? 2600 : 1024,
       effort: 'medium',
     })
     return Response.json({ text, remaining })
