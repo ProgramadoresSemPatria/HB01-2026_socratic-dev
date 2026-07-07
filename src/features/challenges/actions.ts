@@ -127,6 +127,7 @@ export async function listSessionsForUser(
     )
     .eq('user_id', a.userId)
     .order('started_at', { ascending: false })
+    .limit(200)
   return (data ?? []) as unknown as SessionRow[]
 }
 
@@ -283,24 +284,17 @@ export async function getNextChallenge(input: {
   }
   const stack = stackMap[input.stack ?? ''] ?? 'typescript'
 
-  const { data: seen } = await supabaseAdmin
-    .from('sessions')
-    .select('challenge_id')
-    .eq('user_id', a.userId)
-  const seenIds = [...new Set((seen ?? []).map((s) => s.challenge_id))]
-
-  let query = supabaseAdmin
-    .from('challenges')
-    .select('*')
-    .eq('kind', kind)
-    .eq('level', level)
-  if (kind === 'code') query = query.eq('stack', stack)
-  if (seenIds.length) query = query.not('id', 'in', `(${seenIds.join(',')})`)
-
-  const { data: pool } = await query.limit(12)
-  if (pool && pool.length > 0) {
-    return pool[Math.floor(Math.random() * pool.length)] as unknown as Challenge
-  }
+  const { data: pool } = await supabaseAdmin.rpc(
+    'next_challenge_for_user' as never,
+    {
+      p_user: a.userId,
+      p_kind: kind,
+      p_level: level,
+      p_stack: stack,
+    } as never,
+  )
+  const picked = Array.isArray(pool) ? pool[0] : null
+  if (picked) return picked as unknown as Challenge
 
   return doGenerate({ kind, stack, level })
 }

@@ -38,7 +38,7 @@ export async function getBalance(userId: string): Promise<HintBalance> {
 
   const { data: prof } = await supabaseAdmin
     .from('profiles')
-    .select('*')
+    .select('bonus_hints')
     .eq('id', userId)
     .single()
   const bonus = Number((prof as { bonus_hints?: number } | null)?.bonus_hints ?? 0)

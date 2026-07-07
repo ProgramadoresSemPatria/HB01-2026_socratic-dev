@@ -29,7 +29,9 @@ async function existingTitles(
     .eq('kind', kind)
     .eq('level', level)
   if (kind === 'code') q = q.eq('stack', stack)
-  const { data } = await q
+  // Only the most recent titles: with a large library, dumping every title
+  // into the prompt inflates cost and drowns the "avoid these" instruction.
+  const { data } = await q.order('created_at', { ascending: false }).limit(40)
   return (data ?? []).map((c) => String(c.title)).filter(Boolean)
 }
 
