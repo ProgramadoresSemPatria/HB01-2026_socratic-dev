@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import * as Sentry from '@sentry/nextjs'
 
 export const anthropic = new Anthropic()
 
@@ -73,14 +74,32 @@ function extractText(res: unknown): string {
     .trim()
 }
 
+// Friendly message for server actions. Keeps our own thrown messages (e.g.
+// parse errors with retry instructions) but masks raw SDK/API errors.
+export function aiErrorMessage(e: unknown): string {
+  Sentry.captureException(e)
+  const msg = e instanceof Error ? e.message : ''
+  if (/credit balance|too low|billing/i.test(msg)) {
+    return 'A conta da Anthropic está sem créditos. Adicione em console.anthropic.com → Plans & Billing.'
+  }
+  if (e instanceof Anthropic.RateLimitError) {
+    return 'A IA está sobrecarregada. Tente de novo em instantes.'
+  }
+  if (e instanceof Anthropic.APIError) {
+    return 'Erro na IA. Tente novamente.'
+  }
+  return msg || 'Erro inesperado'
+}
+
 export function aiErrorResponse(e: unknown): Response {
+  Sentry.captureException(e)
   if (e instanceof Anthropic.AuthenticationError) {
     return Response.json(
       { error: 'ANTHROPIC_API_KEY ausente ou inválida no servidor.' },
       { status: 500 },
     )
   }
-  const msg = e instanceof Error ? e.message : 'Erro na IA'
+  const msg = e instanceof Error ? e.message : ''
   if (/credit balance|too low|billing/i.test(msg)) {
     return Response.json(
       {
@@ -90,5 +109,14 @@ export function aiErrorResponse(e: unknown): Response {
       { status: 402 },
     )
   }
-  return Response.json({ error: msg }, { status: 500 })
+  if (e instanceof Anthropic.RateLimitError) {
+    return Response.json(
+      { error: 'A IA está sobrecarregada. Tente de novo em instantes.' },
+      { status: 429 },
+    )
+  }
+  return Response.json(
+    { error: 'Erro na IA. Tente novamente.' },
+    { status: 500 },
+  )
 }

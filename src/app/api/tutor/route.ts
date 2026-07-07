@@ -16,13 +16,15 @@ import { getLocale } from '@/lib/i18n/server'
 
 type Mode = 'reply' | 'hint' | 'solve'
 
+export const maxDuration = 60
+
 export async function POST(req: Request) {
   try {
     const auth = await requireUser(req)
     if (auth instanceof Response) return auth
     const userId = auth.user.id
 
-    if (!rateLimit(`tutor:${userId}`, 40, 60_000)) return tooMany()
+    if (!(await rateLimit(`tutor:${userId}`, 40, 60_000))) return tooMany()
 
     const body = await req.json()
     const kind: ChallengeKind = body.domain === 'design' ? 'design' : 'code'

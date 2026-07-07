@@ -1,6 +1,6 @@
 'use server'
 
-import { askClaude } from '@/lib/ai/client'
+import { aiErrorMessage, askClaude } from '@/lib/ai/client'
 import {
   generateChallenge as runGenerate,
   type GenLevel,
@@ -146,7 +146,7 @@ export async function getTrainingRecommendation(input: {
 }): Promise<{ text: string } | { error: string }> {
   const a = await authActionUser(input.token)
   if ('error' in a) return { error: 'Não autenticado.' }
-  if (!rateLimit(`recommend:${a.userId}`, 10, 60_000)) {
+  if (!(await rateLimit(`recommend:${a.userId}`, 10, 60_000))) {
     return { error: 'Muitas requisições. Aguarde um momento.' }
   }
 
@@ -224,7 +224,7 @@ export async function getTrainingRecommendation(input: {
     if (!text.trim()) return { error: 'Sem recomendação.' }
     return { text: text.trim() }
   } catch (e) {
-    return { error: e instanceof Error ? e.message : 'Erro inesperado' }
+    return { error: aiErrorMessage(e) }
   }
 }
 
@@ -242,11 +242,11 @@ async function doGenerate(input: {
       userPrompt: input.userPrompt,
       locale: await getLocale(),
     })
-    if (error) return { error: error.message }
+    if (error) return { error: 'Não foi possível salvar o desafio. Tente de novo.' }
     revalidatePath('/dashboard')
     return data as unknown as Challenge
   } catch (e) {
-    return { error: e instanceof Error ? e.message : 'Erro inesperado' }
+    return { error: aiErrorMessage(e) }
   }
 }
 
@@ -259,7 +259,7 @@ export async function generateChallenge(input: {
 }): Promise<Challenge | { error: string }> {
   const a = await authActionUser(input.token)
   if ('error' in a) return a
-  if (!rateLimit(`generate:${a.userId}`, 10, 60_000)) {
+  if (!(await rateLimit(`generate:${a.userId}`, 10, 60_000))) {
     return { error: 'Muitas requisições. Aguarde um momento.' }
   }
   return doGenerate(input)
@@ -273,7 +273,7 @@ export async function getNextChallenge(input: {
 }): Promise<Challenge | { error: string }> {
   const a = await authActionUser(input.token)
   if ('error' in a) return a
-  if (!rateLimit(`next-challenge:${a.userId}`, 20, 60_000)) {
+  if (!(await rateLimit(`next-challenge:${a.userId}`, 20, 60_000))) {
     return { error: 'Muitas requisições. Aguarde um momento.' }
   }
 

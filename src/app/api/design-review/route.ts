@@ -10,12 +10,14 @@ import {
 import { getLocale } from '@/lib/i18n/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 
+export const maxDuration = 60
+
 export async function POST(req: Request) {
   const auth = await requireUser(req)
   if (auth instanceof Response) return auth
   const userId = auth.user.id
 
-  if (!rateLimit(`design-review:${userId}`, 20, 60_000)) return tooMany()
+  if (!(await rateLimit(`design-review:${userId}`, 20, 60_000))) return tooMany()
 
   const body = await req.json().catch(() => ({}))
   const title: string = body.title ?? ''

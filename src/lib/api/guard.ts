@@ -41,19 +41,26 @@ export function serverError(context: string, e: unknown): Response {
   return jsonError('Erro interno. Tente novamente.', 500)
 }
 
-type Bucket = { count: number; reset: number }
-const buckets = new Map<string, Bucket>()
-
-export function rateLimit(key: string, max: number, windowMs: number): boolean {
-  const now = Date.now()
-  const b = buckets.get(key)
-  if (!b || now > b.reset) {
-    buckets.set(key, { count: 1, reset: now + windowMs })
+// Durable fixed-window limit via Supabase (migration 014). Fails open on DB
+// errors so a transient outage doesn't block the whole app.
+export async function rateLimit(
+  key: string,
+  max: number,
+  windowMs: number,
+): Promise<boolean> {
+  const { data, error } = await supabaseAdmin.rpc(
+    'check_rate_limit' as never,
+    {
+      p_key: key,
+      p_max: max,
+      p_window_seconds: Math.max(1, Math.ceil(windowMs / 1000)),
+    } as never,
+  )
+  if (error) {
+    console.error('[rateLimit]', error)
     return true
   }
-  if (b.count >= max) return false
-  b.count++
-  return true
+  return data !== false
 }
 
 export function clientIp(req: Request): string {

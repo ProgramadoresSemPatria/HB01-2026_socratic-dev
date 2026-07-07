@@ -13,7 +13,7 @@ export async function signUp(input: {
   if (String(input.password).length < 6) {
     return { error: 'A senha precisa ter pelo menos 6 caracteres.' }
   }
-  if (!rateLimit(`signup:${String(input.email).toLowerCase()}`, 5, 600_000)) {
+  if (!(await rateLimit(`signup:${String(input.email).toLowerCase()}`, 5, 600_000))) {
     return { error: 'Muitas tentativas. Aguarde alguns minutos.' }
   }
   const { error } = await supabaseAdmin.auth.admin.createUser({
