@@ -2,120 +2,120 @@
 
 # socratic.dev
 
-**A IA nunca te dá a resposta. Ela te leva até ela.**
+**The AI never gives you the answer. It leads you to it.**
 
-Um tutor de programação socrático: você resolve desafios reais de código e de arquitetura,
-e a IA responde pergunta com pergunta — como um bom tech lead num pair programming.
+A Socratic programming tutor: you solve real code and architecture challenges,
+and the AI answers questions with questions — like a good tech lead in a pair programming session.
 
-[Stack](#stack) · [Como funciona](#como-funciona) · [Rodando localmente](#rodando-localmente) · [Arquitetura](#arquitetura) · [Deploy](#deploy)
+[Stack](#stack) · [How it works](#how-it-works) · [Running locally](#running-locally) · [Architecture](#architecture) · [Deploy](#deploy)
 
 </div>
 
 ---
 
-## O problema
+## The problem
 
-Ferramentas de IA hoje entregam a resposta pronta. Você cola, funciona, e não aprendeu nada.
-Na entrevista — ou no trabalho de verdade — a cola não está lá.
+AI tools today hand you the finished answer. You paste it, it works, and you learned nothing.
+In the interview — or in real work — the cheat sheet isn't there.
 
-**socratic.dev inverte isso.** A IA tem uma única regra inquebrável: **nunca revelar a solução.**
-Ela pergunta, provoca, aponta o próximo passo — e te força a pensar. O aprendizado acontece
-no esforço, não na resposta.
+**socratic.dev flips that.** The AI has a single unbreakable rule: **never reveal the solution.**
+It asks, probes, points to the next step — and forces you to think. Learning happens
+in the effort, not in the answer.
 
-## Duas trilhas
+## Two tracks
 
-| Trilha | O que você faz | Como a IA avalia |
+| Track | What you do | How the AI evaluates |
 |---|---|---|
-| **Código** | Resolve desafios num editor Monaco de verdade, com testes escondidos que rodam no navegador | Tutor socrático via texto + testes reais executados em sandbox |
-| **System Design** *(arquitetura)* | Desenha a arquitetura num canvas Excalidraw — serviços, bancos, filas, fluxo de dados | A IA **enxerga o diagrama** (visão) e interroga cada decisão de distribuição/escala |
+| **Code** | Solve challenges in a real Monaco editor, with hidden tests running in the browser | Socratic tutor via text + real tests executed in a sandbox |
+| **System Design** *(architecture)* | Draw the architecture on an Excalidraw canvas — services, databases, queues, data flow | The AI **sees the diagram** (vision) and interrogates every distribution/scaling decision |
 
-Do nível iniciante ao nível big-tech — a dificuldade escala com o seu perfil.
+From beginner to big-tech level — difficulty scales with your profile.
 
-## Como funciona
+## How it works
 
 ```
-Onboarding  →  escolhe trilha + stack + nível
-            →  a IA GERA (ou reaproveita) um desafio sob medida
+Onboarding  →  pick a track + stack + level
+            →  the AI GENERATES (or reuses) a tailor-made challenge
 
-Workspace   →  você resolve (código no Monaco / arquitetura no Excalidraw)
-            →  conversa com o tutor: ele só faz perguntas
-            →  pede um hint quando trava (custa do seu saldo)
+Workspace   →  you solve it (code in Monaco / architecture in Excalidraw)
+            →  talk to the tutor: it only asks questions
+            →  ask for a hint when stuck (costs from your balance)
 
-Submit      →  Código:  roda os testes escondidos → passou/falhou real
-            →  Design:  exporta o PNG → Claude analisa a imagem → feedback
-            →  métricas: independência, hints usados, tempo
+Submit      →  Code:    runs the hidden tests → real pass/fail
+            →  Design:  exports the PNG → Claude analyzes the image → feedback
+            →  metrics: independence, hints used, time
 ```
 
-### A IA é indispensável por design
+### The AI is indispensable by design
 
-Tire a IA e o produto deixa de existir. Ela não é um enfeite — ela **gera os desafios**,
-**conduz o diálogo socrático**, **analisa o diagrama de arquitetura por visão** e **mede sua
-independência**. Não há fallback estático: sem IA, não há desafio, não há tutor, não há avaliação.
+Remove the AI and the product ceases to exist. It is not a garnish — it **generates the challenges**,
+**drives the Socratic dialogue**, **analyzes the architecture diagram through vision** and **measures your
+independence**. There is no static fallback: without AI there is no challenge, no tutor, no evaluation.
 
-## Recursos
+## Features
 
-- **Tutor socrático** — `claude-sonnet-4-6` com prompts que proíbem revelar a solução; modos separados para código e design.
-- **Editor Monaco + runner real** — testes JS/TS rodam num **Web Worker** isolado (transpilação via `sucrase`), com timeout. Nada é hardcoded; o verde só aparece se os testes passam.
-- **Canvas Excalidraw + Claude Vision** — o diagrama vira PNG e é analisado por visão; o chat usa um *resumo de texto* dos elementos pra economizar tokens, e a visão só é chamada no submit.
-- **Geração inteligente de desafios** — a dificuldade depende fortemente do nível; avançado mira testes estilo FAANG.
-- **Biblioteca reaproveitável** — todo desafio gerado vira pool compartilhado: a próxima pessoa recebe na hora, sem regenerar (menos espera, menos custo). Deduplicação para não repetir.
-- **Economia de hints (SaaS)** — saldo diário grátis + compra de mais hints + "Resolver pra mim" como último recurso (caro), que **aplica** a solução direto no editor / canvas.
-- **Resolver pra mim** — não devolve texto: escreve o código no Monaco, ou monta o diagrama no Excalidraw (layout em camadas, didático, com legendas nas setas).
-- **Dashboard** — heatmap de atividade estilo GitHub, anel de independência, histórico paginado com retomar de onde parou.
-- **Drafts persistentes** — código + chat sobrevivem a um F5 (localStorage).
+- **Socratic tutor** — `claude-sonnet-5` with prompts that forbid revealing the solution; separate modes for code and design.
+- **Monaco editor + real runner** — JS/TS tests run in an isolated **Web Worker** (transpiled via `sucrase`), with a timeout. Nothing is hardcoded; the green only shows up if the tests pass.
+- **Excalidraw canvas + Claude Vision** — the diagram becomes a PNG and is analyzed by vision; the chat uses a *text summary* of the elements to save tokens, and vision is only called on submit.
+- **Smart challenge generation** — difficulty depends heavily on the level; advanced targets FAANG-style tests.
+- **Reusable library** — every generated challenge becomes a shared pool: the next person gets it instantly, without regenerating (less waiting, lower cost). Deduplication so nothing repeats.
+- **Hint economy (SaaS)** — free weekly balance + purchasable extra hints + "Solve it for me" as an expensive last resort that **applies** the solution straight into the editor / canvas.
+- **Solve it for me** — doesn't return text: it writes the code into Monaco, or builds the diagram in Excalidraw (layered, didactic layout with labeled arrows).
+- **Dashboard** — GitHub-style activity heatmap, independence ring, paginated history with resume-where-you-left-off.
+- **Persistent drafts** — code + chat survive an F5 (localStorage).
 
 ## Stack
 
-| Camada | Tecnologia |
+| Layer | Technology |
 |---|---|
 | Framework | **Next.js 16** (App Router, Turbopack, React Compiler) |
 | UI | **React 19**, **Tailwind v4**, Base UI, Motion, Recharts, Lucide |
-| Editor / Canvas | **Monaco** (código) · **Excalidraw** (arquitetura) |
-| IA | **Claude** via `@anthropic-ai/sdk` (texto + visão, adaptive thinking + effort) |
+| Editor / Canvas | **Monaco** (code) · **Excalidraw** (architecture) |
+| AI | **Claude** via `@anthropic-ai/sdk` (text + vision, adaptive thinking + effort, prompt caching, streaming) |
 | Backend | **Supabase** — Postgres, Auth, RLS |
-| Execução de código | **Web Worker** + `sucrase` (sandbox no navegador) |
-| Linguagem | **TypeScript** (strict) |
+| Code execution | **Web Worker** + `sucrase` (in-browser sandbox) |
+| Language | **TypeScript** (strict) |
 
-## Rodando localmente
+## Running locally
 
-**Pré-requisitos:** Node 20+, uma conta [Supabase](https://supabase.com) e uma chave da [Anthropic](https://console.anthropic.com).
+**Prerequisites:** Node 20+, a [Supabase](https://supabase.com) account and an [Anthropic](https://console.anthropic.com) API key.
 
 ```bash
-# 1. Instalar dependências (peer-deps do Excalidraw exigem a flag)
+# 1. Install dependencies (Excalidraw's peer deps require the flag)
 npm install --legacy-peer-deps
 
-# 2. Configurar variáveis de ambiente
-cp .env.example .env.local   # e preencha os valores
+# 2. Configure environment variables
+cp .env.example .env.local   # then fill in the values
 
-# 3. Aplicar as migrations no seu projeto Supabase
-supabase link --project-ref <seu-ref>
+# 3. Apply the migrations to your Supabase project
+supabase link --project-ref <your-ref>
 supabase db push
 
-# 4. Subir o dev server
+# 4. Start the dev server
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000).
 
-### Variáveis de ambiente
+### Environment variables
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=        # URL do projeto Supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=   # chave anon (pública)
-SUPABASE_SERVICE_ROLE_KEY=       # chave service-role (servidor — nunca exponha no client)
-ANTHROPIC_API_KEY=               # chave da API da Anthropic
+NEXT_PUBLIC_SUPABASE_URL=        # Supabase project URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=   # anon key (public)
+SUPABASE_SERVICE_ROLE_KEY=       # service-role key (server only — never expose to the client)
+ANTHROPIC_API_KEY=               # Anthropic API key
 ```
 
-> `.env.local` está no `.gitignore`. **Nunca** commite chaves. Em produção, configure no painel da Vercel.
+> `.env.local` is in `.gitignore`. **Never** commit keys. In production, set them in the Vercel dashboard.
 
-## Arquitetura
+## Architecture
 
-O projeto foi reorganizado para uma estrutura feature-based, separando melhor responsabilidades de UI, domínio, integrações e lógica de aplicação.
+The project is organized in a feature-based structure, separating UI, domain, integrations and application logic.
 
 ```
 src/
-├─ app/                 Rotas do App Router e entrypoints mínimos
-│  ├─ api/              Apenas rotas HTTP ainda expostas
+├─ app/                 App Router routes and minimal entrypoints
+│  ├─ api/              Only the HTTP routes still exposed
 │  ├─ challenge/
 │  ├─ challenges/
 │  ├─ dashboard/
@@ -124,10 +124,10 @@ src/
 │  ├─ onboarding/
 │  ├─ profile/
 │  └─ page.tsx
-├─ components/          Componentes compartilhados
+├─ components/          Shared components
 │  └─ ui/
-├─ domain/              Constantes e regras de domínio
-├─ features/            Módulos por feature
+├─ domain/              Domain constants and rules
+├─ features/            Per-feature modules
 │  ├─ auth/
 │  ├─ challenges/
 │  ├─ dashboard/
@@ -137,8 +137,8 @@ src/
 │  ├─ onboarding/
 │  ├─ profile/
 │  └─ runner/
-├─ hooks/               Hooks compartilhados
-└─ lib/                 Integrações e infraestrutura
+├─ hooks/               Shared hooks
+└─ lib/                 Integrations and infrastructure
    ├─ ai/
    ├─ api/
    └─ supabase/
@@ -147,27 +147,27 @@ src/
 
 ## Deploy
 
-O alvo é **Vercel + Supabase** (Supabase é gerenciado — sem deploy próprio).
+The target is **Vercel + Supabase** (Supabase is managed — no deploy of your own).
 
-1. Importe o repositório na **Vercel** (detecta Next.js automaticamente).
-2. Configure as **4 variáveis de ambiente** acima.
-3. Após o deploy, no **Supabase → Authentication → URL Configuration**, defina **Site URL** e **Redirect URLs** (`https://seu-dominio/**`) para o login funcionar em produção.
+1. Import the repository on **Vercel** (it detects Next.js automatically).
+2. Set the **4 environment variables** above.
+3. After deploying, in **Supabase → Authentication → URL Configuration**, set **Site URL** and **Redirect URLs** (`https://your-domain/**`) so login works in production.
 
 ```bash
-npm run build   # valida o build de produção antes de subir
+npm run build   # validate the production build before shipping
 ```
 
 ## Scripts
 
-| Comando | O quê |
+| Command | What |
 |---|---|
 | `npm run dev` | Dev server (Turbopack) |
-| `npm run build` | Build de produção |
-| `npm run start` | Servir o build |
+| `npm run build` | Production build |
+| `npm run start` | Serve the build |
 | `npm run format` | Prettier |
 
 ---
 
 <div align="center">
-Feito para a hackathon HB01-2026
+© 2026 Socratic.dev
 </div>
