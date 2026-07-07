@@ -2,13 +2,10 @@
 
 import { SOLVE_CAP } from '@/domain/scoring'
 import { useUser } from '@/features/auth/hooks/use-user'
-import {
-  buyHints as buyHintsAction,
-  getHintBalance,
-} from '@/features/hints/actions'
+import { getHintBalance } from '@/features/hints/actions'
 import type { ChatMsg } from '@/lib/ai/types'
 import { track } from '@/lib/analytics'
-import { getAccessToken } from '@/lib/api/client'
+import { apiFetch, getAccessToken } from '@/lib/api/client'
 import * as React from 'react'
 import { completeSession, startSession } from '../actions'
 import { loadDraft, saveDraft } from '../draft'
@@ -76,13 +73,34 @@ export function useSocraticSession<TWork>(opts: {
       resumed: !!draft,
     })
 
+    const params = new URLSearchParams(window.location.search)
+    const purchased = params.get('purchase') === 'success'
+    if (params.has('purchase')) {
+      params.delete('purchase')
+      const qs = params.toString()
+      window.history.replaceState(
+        null,
+        '',
+        window.location.pathname + (qs ? `?${qs}` : ''),
+      )
+    }
+
     getAccessToken().then((token) => {
       startSession({ token, challengeId: challenge.id })
         .then((d) => d?.id && setSessionId(d.id))
         .catch(() => {})
-      getHintBalance(token)
-        .then((b) => setHintsRemaining(b.remaining))
-        .catch(() => {})
+      const refreshBalance = () =>
+        getHintBalance(token)
+          .then((b) => setHintsRemaining(b.remaining))
+          .catch(() => {})
+      refreshBalance()
+      if (purchased) {
+        setBought(true)
+        track('hints_purchased', { challenge_id: challenge.id })
+        // The Stripe webhook may land a moment after the redirect.
+        setTimeout(refreshBalance, 3000)
+        setTimeout(() => setBought(false), 4000)
+      }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [challenge, user])
@@ -184,8 +202,24 @@ export function useSocraticSession<TWork>(opts: {
     setBuyError(null)
     setBought(false)
     try {
+      const res = await apiFetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: window.location.pathname }),
+      })
+      const data = (await res.json().catch(() => ({}))) as {
+        url?: string
+        mock?: boolean
+        error?: string
+      }
+      if (!res.ok) throw new Error(data.error || 'Não foi possível iniciar a compra.')
+      if (data.url) {
+        track('checkout_started', { challenge_id: challenge?.id })
+        window.location.href = data.url
+        return
+      }
+      // Dev fallback (no Stripe keys): pack credited directly.
       const token = await getAccessToken()
-      await buyHintsAction(token)
       const b = await getHintBalance(token)
       setHintsRemaining(b.remaining)
       setBought(true)

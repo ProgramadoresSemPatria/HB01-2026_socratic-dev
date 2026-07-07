@@ -8,3 +8,11 @@ export const FREE_WEEKLY_HINTS = 35
 // solution. Costs many hint credits and drops independence to zero (see
 // SOLVE_CAP in domain/scoring).
 export const SOLVE_COST = 5
+
+// Purchasable pack (Stripe Checkout). Price is defined inline via price_data
+// so no product needs to exist in the Stripe dashboard.
+export const HINT_PACK = {
+  hints: 20,
+  amountCents: 990,
+  currency: 'brl',
+} as const
