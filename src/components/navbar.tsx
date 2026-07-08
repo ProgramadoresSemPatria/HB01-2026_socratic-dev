@@ -1,10 +1,6 @@
 'use client'
 
 import { useUser } from '@/features/auth/hooks/use-user'
-import {
-  getDailyChallenge,
-  type DailyChallenge,
-} from '@/features/challenges/actions'
 import { getStreak } from '@/features/dashboard/actions'
 import { getHintBalance } from '@/features/hints/actions'
 import { HINT_PACK } from '@/features/hints/constants'
@@ -60,7 +56,6 @@ const copy = {
     trackDesignQ: 'Will it survive a million users?',
     resume: 'Pick up where you left off',
     explore: 'Browse the library',
-    daily: 'Daily challenge',
     streakTitle: 'day streak — every 7th day pays bonus hints',
   },
   pt: {
@@ -87,7 +82,6 @@ const copy = {
     trackDesignQ: 'Aguenta um milhão de usuários?',
     resume: 'Continue de onde parou',
     explore: 'Explore a biblioteca',
-    daily: 'Desafio do dia',
     streakTitle: 'dias seguidos — a cada 7 dias você ganha hints bônus',
   },
 } as const
@@ -246,18 +240,8 @@ function StatusCluster({
 function TrainMenu({ loggedIn }: { loggedIn: boolean }) {
   const t = useT(copy)
   const [open, setOpen] = React.useState(false)
-  const [daily, setDaily] = React.useState<DailyChallenge | null>(null)
-  const dailyFetched = React.useRef(false)
   const ref = React.useRef<HTMLDivElement>(null)
   const closeTimer = React.useRef<number | null>(null)
-
-  React.useEffect(() => {
-    if (!open || dailyFetched.current) return
-    dailyFetched.current = true
-    getDailyChallenge()
-      .then((d) => setDaily(d))
-      .catch(() => {})
-  }, [open])
 
   const cancelClose = React.useCallback(() => {
     if (closeTimer.current !== null) {
@@ -370,25 +354,6 @@ function TrainMenu({ loggedIn }: { loggedIn: boolean }) {
                 </Link>
               ))}
             </div>
-            {daily && (
-              <Link
-                href={
-                  loggedIn
-                    ? `${daily.kind === 'design' ? '/design' : '/challenge'}?id=${daily.id}`
-                    : '/onboarding'
-                }
-                onClick={() => setOpen(false)}
-                className='border-border hover:bg-secondary flex items-center gap-2 border-t px-5 py-3 transition-colors duration-200'
-              >
-                <Flame className='size-3.5 shrink-0 text-orange-500' strokeWidth={1.5} />
-                <span className='text-primary font-mono text-[11px] uppercase'>
-                  {t.daily}
-                </span>
-                <span className='text-ink truncate text-[13px] font-medium'>
-                  {daily.title}
-                </span>
-              </Link>
-            )}
             <Link
               href={loggedIn ? '/dashboard' : '/challenges'}
               onClick={() => setOpen(false)}

@@ -353,7 +353,10 @@ export function DashboardView({ user }: { user: User }) {
             </div>
           </motion.section>
 
-          {daily && (
+          {daily &&
+            !sessions.some(
+              (x) => x.challenge_id === daily.id && x.status === 'completed',
+            ) && (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}

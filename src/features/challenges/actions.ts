@@ -318,7 +318,8 @@ const getDailyCached = unstable_cache(
 )
 
 export async function getDailyChallenge(): Promise<DailyChallenge | null> {
-  return getDailyCached(new Date().toISOString().slice(0, 10))
+  const day = new Date(Date.now() - 3 * 3600_000).toISOString().slice(0, 10)
+  return getDailyCached(day)
 }
 
 export async function getNextChallenge(input: {

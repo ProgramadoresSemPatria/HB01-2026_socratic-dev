@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Loader2,
   PlayCircle,
+  Sparkles,
   Terminal,
   XCircle,
 } from 'lucide-react'
@@ -39,7 +40,13 @@ const copy = {
     replyFallback: "Couldn't respond right now.",
     hintUnavailable: 'Hint unavailable.',
     solutionApplied:
-      'I applied the solution in the editor. Run the tests and study why it works.',
+      "Here's the solution as a diff — study it and apply when it makes sense.",
+    askTutor: 'Ask the tutor',
+    selectionMsg: (a: number, b: number, code: string) =>
+      `${a === b ? `About line ${a}` : `About lines ${a}–${b}`}:\n\`\`\`\n${code}\n\`\`\`\nCan you guide me through this part?`,
+    proposedSolution: 'Proposed solution — review the diff before applying',
+    apply: 'Apply',
+    discard: 'Discard',
     teachDecisions: 'Key decisions:',
     teachThink: 'Now you, before moving on:',
     solveFallback: "Couldn't solve it right now.",
@@ -66,7 +73,13 @@ const copy = {
     replyFallback: 'Não consegui responder agora.',
     hintUnavailable: 'Hint indisponível.',
     solutionApplied:
-      'Apliquei a solução no editor. Rode os testes e estude por que ela funciona.',
+      'Preparei a solução como diff — estude e aplique quando fizer sentido.',
+    askTutor: 'Perguntar ao tutor',
+    selectionMsg: (a: number, b: number, code: string) =>
+      `${a === b ? `Sobre a linha ${a}` : `Sobre as linhas ${a}–${b}`}:\n\`\`\`\n${code}\n\`\`\`\nPode me guiar nesse trecho?`,
+    proposedSolution: 'Solução proposta — revise o diff antes de aplicar',
+    apply: 'Aplicar',
+    discard: 'Descartar',
     teachDecisions: 'Decisões-chave:',
     teachThink: 'Agora você, antes de seguir:',
     solveFallback: 'Não consegui resolver agora.',
@@ -104,6 +117,11 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   loading: () => <EditorLoading />,
 })
 
+const DiffEditor = dynamic(
+  () => import('@monaco-editor/react').then((m) => m.DiffEditor),
+  { ssr: false, loading: () => <EditorLoading /> },
+)
+
 const REACT_EDITOR_TYPES = `
 declare const React: any
 declare namespace JSX {
@@ -135,6 +153,10 @@ declare module 'react' {
 
 type MonacoInstance = Parameters<
   NonNullable<React.ComponentProps<typeof MonacoEditor>['beforeMount']>
+>[0]
+
+type EditorInstance = Parameters<
+  NonNullable<React.ComponentProps<typeof MonacoEditor>['onMount']>
 >[0]
 
 function setupMonaco(monaco: MonacoInstance) {
@@ -185,6 +207,15 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
     total: number
   } | null>(null)
   const [outcome, setOutcome] = React.useState<'pass' | 'fail'>('pass')
+  const [pendingSolution, setPendingSolution] = React.useState<string | null>(
+    null,
+  )
+  const [selAction, setSelAction] = React.useState<{
+    top: number
+    left: number
+  } | null>(null)
+  const editorRef = React.useRef<EditorInstance | null>(null)
+  const askSelectionRef = React.useRef<() => void>(() => {})
 
   const language: RunnerLanguage = challenge
     ? challengeLanguage(challenge.stack)
@@ -212,12 +243,10 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
     }
   }, [])
 
-  async function sendUser() {
-    if (!s.input.trim() || s.thinking || !challenge) return
-    const text = s.input.trim()
-    const next = [...s.messages, { role: 'user' as const, text }]
+  async function sendTutorMessage(text: string) {
+    if (!text.trim() || s.thinking || !challenge) return
+    const next = [...s.messages, { role: 'user' as const, text: text.trim() }]
     s.setMessages(next)
-    s.setInput('')
     s.setThinking(true)
     try {
       const res = await apiFetch('/api/tutor', {
@@ -241,6 +270,56 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
     } finally {
       s.setThinking(false)
     }
+  }
+
+  async function sendUser() {
+    const text = s.input.trim()
+    if (!text) return
+    s.setInput('')
+    await sendTutorMessage(text)
+  }
+
+  function askAboutSelection() {
+    const editor = editorRef.current
+    const sel = editor?.getSelection()
+    const model = editor?.getModel()
+    if (!editor || !sel || !model || sel.isEmpty()) return
+    const text = model.getValueInRange(sel)
+    if (!text.trim()) return
+    setSelAction(null)
+    track('selection_asked', { challenge_id: challenge?.id })
+    void sendTutorMessage(
+      t.selectionMsg(sel.startLineNumber, sel.endLineNumber, text),
+    )
+    if (window.innerWidth < 1024) setActivePanel('chat')
+  }
+  React.useEffect(() => {
+    askSelectionRef.current = askAboutSelection
+  })
+
+  function onEditorMount(editor: EditorInstance, monaco: MonacoInstance) {
+    editorRef.current = editor
+    const update = () => {
+      const sel = editor.getSelection()
+      if (!sel || sel.isEmpty()) {
+        setSelAction(null)
+        return
+      }
+      const pos = editor.getScrolledVisiblePosition(sel.getStartPosition())
+      if (!pos) {
+        setSelAction(null)
+        return
+      }
+      setSelAction({
+        top: Math.max(pos.top - 40, 6),
+        left: Math.max(pos.left, 12),
+      })
+    }
+    editor.onDidChangeCursorSelection(update)
+    editor.onDidScrollChange(update)
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () =>
+      askSelectionRef.current(),
+    )
   }
 
   async function askHint(level: 1 | 2 | 3) {
@@ -301,7 +380,8 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
       const data = await res.json()
       s.syncRemaining(data.remaining)
       if (data.code) {
-        s.setWork(data.code)
+        setPendingSolution(data.code)
+        setActivePanel('work')
         const teach = data.teach as
           | {
               flow?: string
@@ -530,37 +610,98 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
             </div>
           </div>
           <div className='relative min-h-0 flex-1'>
-            <MonacoEditor
-              height='100%'
-              language={language === 'js' ? 'javascript' : language === 'py' ? 'python' : 'typescript'}
-              path={
-                language === 'react'
-                  ? 'file:///solucao.tsx'
-                  : language === 'py'
-                    ? 'file:///solucao.py'
-                    : language === 'js'
-                      ? 'file:///solucao.js'
-                      : 'file:///solucao.ts'
-              }
-              beforeMount={setupMonaco}
-              value={s.work}
-              onChange={(v) => s.setWork(v ?? '')}
-              theme={isDark ? 'vs-dark' : 'light'}
-              options={{
-                fontSize: 14,
-                fontFamily: 'var(--font-mono)',
-                fontLigatures: true,
-                minimap: { enabled: false },
-                padding: { top: 20, bottom: 20 },
-                scrollBeyondLastLine: false,
-                lineNumbersMinChars: 3,
-                renderLineHighlight: 'none',
-                cursorBlinking: 'smooth',
-                cursorSmoothCaretAnimation: 'on',
-                smoothScrolling: true,
-                tabSize: 2,
-              }}
-            />
+            {pendingSolution === null ? (
+              <MonacoEditor
+                height='100%'
+                language={language === 'js' ? 'javascript' : language === 'py' ? 'python' : 'typescript'}
+                path={
+                  language === 'react'
+                    ? 'file:///solucao.tsx'
+                    : language === 'py'
+                      ? 'file:///solucao.py'
+                      : language === 'js'
+                        ? 'file:///solucao.js'
+                        : 'file:///solucao.ts'
+                }
+                beforeMount={setupMonaco}
+                onMount={onEditorMount}
+                value={s.work}
+                onChange={(v) => s.setWork(v ?? '')}
+                theme={isDark ? 'vs-dark' : 'light'}
+                options={{
+                  fontSize: 14,
+                  fontFamily: 'var(--font-mono)',
+                  fontLigatures: true,
+                  minimap: { enabled: false },
+                  padding: { top: 20, bottom: 20 },
+                  scrollBeyondLastLine: false,
+                  lineNumbersMinChars: 3,
+                  renderLineHighlight: 'none',
+                  cursorBlinking: 'smooth',
+                  cursorSmoothCaretAnimation: 'on',
+                  smoothScrolling: true,
+                  tabSize: 2,
+                }}
+              />
+            ) : (
+              <>
+                <DiffEditor
+                  height='100%'
+                  language={language === 'js' ? 'javascript' : language === 'py' ? 'python' : 'typescript'}
+                  original={s.work}
+                  modified={pendingSolution}
+                  theme={isDark ? 'vs-dark' : 'light'}
+                  options={{
+                    readOnly: true,
+                    renderSideBySide: false,
+                    fontSize: 14,
+                    fontFamily: 'var(--font-mono)',
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    lineNumbersMinChars: 3,
+                  }}
+                />
+                <div className='absolute inset-x-0 bottom-0 z-10 flex items-center justify-between gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur'>
+                  <span className='min-w-0 truncate text-[13px] text-muted-foreground'>
+                    {t.proposedSolution}
+                  </span>
+                  <div className='flex shrink-0 gap-2'>
+                    <Button
+                      size='xs'
+                      variant='ghost'
+                      onClick={() => setPendingSolution(null)}
+                    >
+                      {t.discard}
+                    </Button>
+                    <Button
+                      size='xs'
+                      variant='ink'
+                      onClick={() => {
+                        s.setWork(pendingSolution)
+                        setPendingSolution(null)
+                      }}
+                    >
+                      {t.apply}
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+            {selAction && pendingSolution === null && (
+              <button
+                type='button'
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={askAboutSelection}
+                style={{ top: selAction.top, left: selAction.left }}
+                className='absolute z-10 flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-[12px] font-medium text-ink shadow-md transition-colors duration-150 hover:bg-secondary'
+              >
+                <Sparkles className='size-3.5 text-primary' strokeWidth={1.5} />
+                {t.askTutor}
+                <span className='font-mono text-[10px] text-muted-foreground'>
+                  ⌘K
+                </span>
+              </button>
+            )}
           </div>
           {showPanel &&
             (language === 'react' ? (
