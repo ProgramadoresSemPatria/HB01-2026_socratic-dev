@@ -29,6 +29,17 @@ import { challengeIntro, challengeLanguage, starterCode } from '../utils'
 import { BriefingPanel } from './briefing-panel'
 import { ChallengeSkeleton } from './challenge-skeleton'
 import { ChatPanel } from './chat-panel'
+import { AskTutorPill } from './editor/ask-tutor-pill'
+import { EditorStatusbar } from './editor/editor-statusbar'
+import {
+  MonacoEditor,
+  monacoLanguage,
+  monacoPath,
+  setupMonaco,
+  type EditorInstance,
+  type MonacoInstance,
+} from './editor/monaco'
+import { SolutionDiff } from './editor/solution-diff'
 import { LineCitationContext } from './formatted-text'
 import { ReactPreview } from './react-preview'
 import { ReviewModal } from './review-modal'
@@ -102,77 +113,6 @@ const copy = {
     panelWork: 'Código',
     panelTutor: 'Tutor',
   },
-}
-
-function EditorLoading() {
-  const t = useT(copy)
-  return (
-    <div className='flex flex-1 items-center justify-center text-sm text-muted-foreground'>
-      <Loader2 className='mr-2 size-4 animate-spin' /> {t.loadingEditor}
-    </div>
-  )
-}
-
-const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
-  ssr: false,
-  loading: () => <EditorLoading />,
-})
-
-const DiffEditor = dynamic(
-  () => import('@monaco-editor/react').then((m) => m.DiffEditor),
-  { ssr: false, loading: () => <EditorLoading /> },
-)
-
-const REACT_EDITOR_TYPES = `
-declare const React: any
-declare namespace JSX {
-  interface IntrinsicElements { [elemName: string]: any }
-  interface Element {}
-  interface ElementChildrenAttribute { children: {} }
-}
-declare module 'react' {
-  export type ReactNode = any
-  export type CSSProperties = any
-  export type FC<P = any> = (props: P) => any
-  export function useState<T = any>(
-    initial?: T | (() => T),
-  ): [T, (v: T | ((p: T) => T)) => void]
-  export function useEffect(fn: () => any, deps?: any[]): void
-  export function useMemo<T = any>(fn: () => T, deps?: any[]): T
-  export function useCallback<T extends (...a: any[]) => any>(
-    fn: T,
-    deps?: any[],
-  ): T
-  export function useRef<T = any>(initial?: T): { current: T }
-  export function useReducer(...args: any[]): any
-  export function useContext(...args: any[]): any
-  export function createContext(...args: any[]): any
-  const ReactDefault: any
-  export default ReactDefault
-}
-`
-
-type MonacoInstance = Parameters<
-  NonNullable<React.ComponentProps<typeof MonacoEditor>['beforeMount']>
->[0]
-
-type EditorInstance = Parameters<
-  NonNullable<React.ComponentProps<typeof MonacoEditor>['onMount']>
->[0]
-
-function setupMonaco(monaco: MonacoInstance) {
-  const ts = monaco.languages.typescript
-  ts.typescriptDefaults.setCompilerOptions({
-    jsx: ts.JsxEmit.React,
-    target: ts.ScriptTarget.ES2020,
-    moduleResolution: ts.ModuleResolutionKind.NodeJs,
-    allowNonTsExtensions: true,
-    esModuleInterop: true,
-  })
-  ts.typescriptDefaults.addExtraLib(
-    REACT_EDITOR_TYPES,
-    'file:///node_modules/@types/react/index.d.ts',
-  )
 }
 
 const POST = { method: 'POST', headers: { 'content-type': 'application/json' } }
@@ -661,16 +601,8 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
             {pendingSolution === null ? (
               <MonacoEditor
                 height='100%'
-                language={language === 'js' ? 'javascript' : language === 'py' ? 'python' : 'typescript'}
-                path={
-                  language === 'react'
-                    ? 'file:///solucao.tsx'
-                    : language === 'py'
-                      ? 'file:///solucao.py'
-                      : language === 'js'
-                        ? 'file:///solucao.js'
-                        : 'file:///solucao.ts'
-                }
+                language={monacoLanguage(language)}
+                path={monacoPath(language)}
                 beforeMount={setupMonaco}
                 onMount={onEditorMount}
                 value={s.work}
@@ -692,80 +624,33 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
                 }}
               />
             ) : (
-              <>
-                <DiffEditor
-                  height='100%'
-                  language={language === 'js' ? 'javascript' : language === 'py' ? 'python' : 'typescript'}
-                  original={s.work}
-                  modified={pendingSolution}
-                  theme={isDark ? 'vs-dark' : 'light'}
-                  options={{
-                    readOnly: true,
-                    renderSideBySide: false,
-                    fontSize: 14,
-                    fontFamily: 'var(--font-mono)',
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    lineNumbersMinChars: 3,
-                  }}
-                />
-                <div className='absolute inset-x-0 bottom-0 z-10 flex items-center justify-between gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur'>
-                  <span className='min-w-0 truncate text-[13px] text-muted-foreground'>
-                    {t.proposedSolution}
-                  </span>
-                  <div className='flex shrink-0 gap-2'>
-                    <Button
-                      size='xs'
-                      variant='ghost'
-                      onClick={() => setPendingSolution(null)}
-                    >
-                      {t.discard}
-                    </Button>
-                    <Button
-                      size='xs'
-                      variant='ink'
-                      onClick={() => {
-                        s.setWork(pendingSolution)
-                        setPendingSolution(null)
-                      }}
-                    >
-                      {t.apply}
-                    </Button>
-                  </div>
-                </div>
-              </>
+              <SolutionDiff
+                language={language}
+                original={s.work}
+                modified={pendingSolution}
+                isDark={isDark}
+                onApply={() => {
+                  s.setWork(pendingSolution)
+                  setPendingSolution(null)
+                }}
+                onDiscard={() => setPendingSolution(null)}
+              />
             )}
             {selAction && pendingSolution === null && (
-              <button
-                type='button'
-                onMouseDown={(e) => e.preventDefault()}
+              <AskTutorPill
+                top={selAction.top}
+                left={selAction.left}
                 onClick={askAboutSelection}
-                style={{ top: selAction.top, left: selAction.left }}
-                className='absolute z-10 flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-[12px] font-medium text-ink shadow-md transition-colors duration-150 hover:bg-secondary'
-              >
-                <Sparkles className='size-3.5 text-primary' strokeWidth={1.5} />
-                {t.askTutor}
-                <span className='font-mono text-[10px] text-muted-foreground'>
-                  ⌘K
-                </span>
-              </button>
+              />
             )}
           </div>
           {pendingSolution === null && (
-            <div className='flex h-6 shrink-0 items-center justify-between border-t border-border bg-muted px-4 font-mono text-[11px] text-muted-foreground'>
-              <div className='flex items-center gap-3'>
-                <span>{language === 'react' ? 'tsx' : language}</span>
-                <span className={cn(problems > 0 && 'text-destructive')}>
-                  {problems === 0 ? '✓' : `✕ ${problems}`}
-                </span>
-              </div>
-              <div className='flex items-center gap-3'>
-                <span className='hidden sm:inline'>⌘K → tutor</span>
-                <span>
-                  Ln {cursorPos.line}, Col {cursorPos.col}
-                </span>
-              </div>
-            </div>
+            <EditorStatusbar
+              language={language}
+              problems={problems}
+              line={cursorPos.line}
+              col={cursorPos.col}
+            />
           )}
           {showPanel &&
             (language === 'react' ? (
