@@ -15,12 +15,13 @@ import { getDashboardStats } from '@/features/dashboard/actions'
 import type { Stats } from '@/features/dashboard/types'
 import { Halftone, glyph } from '@/features/landing/components/halftone'
 import { getProfile, type Profile } from '@/features/profile/actions'
+import { setShareSolutions } from '@/features/solutions/actions'
 import { getAccessToken } from '@/lib/api/client'
 import { useLocale, useT, type Locale } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase/client'
 import { useTheme, type ThemeSetting } from '@/lib/theme'
 import type { User } from '@supabase/supabase-js'
-import { ArrowRight, LogOut } from 'lucide-react'
+import { ArrowRight, Award, LogOut } from 'lucide-react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -53,6 +54,7 @@ const copy = {
     ],
     avatarAlt: 'Your avatar',
     yourProfile: 'Your profile',
+    certificate: 'View my certificate',
     memberSince: 'Member since',
     statCompleted: 'Completed',
     statIndependence: 'Independence',
@@ -78,6 +80,13 @@ const copy = {
     ],
     languageLabel: 'Language',
     languageDesc: 'Interface language.',
+    shareLabel: 'Community solutions',
+    shareDesc:
+      'Share your solutions on the "how others solved it" page, under a masked name. Only people who completed the challenge can see them.',
+    shareOptions: [
+      { value: 'on', label: 'On' },
+      { value: 'off', label: 'Off' },
+    ],
     redoSetup: 'Redo setup',
     signOut: 'Sign out',
     loadError: "Couldn't load your data.",
@@ -96,6 +105,7 @@ const copy = {
     ],
     avatarAlt: 'Seu avatar',
     yourProfile: 'Seu perfil',
+    certificate: 'Ver meu certificado',
     memberSince: 'Membro desde',
     statCompleted: 'Concluídos',
     statIndependence: 'Independência',
@@ -121,6 +131,13 @@ const copy = {
     ],
     languageLabel: 'Idioma',
     languageDesc: 'Idioma da interface.',
+    shareLabel: 'Soluções da comunidade',
+    shareDesc:
+      'Compartilhe suas soluções na página "como outros resolveram", com nome mascarado. Só quem completou o desafio consegue ver.',
+    shareOptions: [
+      { value: 'on', label: 'Ativo' },
+      { value: 'off', label: 'Inativo' },
+    ],
     redoSetup: 'Refazer setup',
     signOut: 'Sair',
     loadError: 'Não foi possível carregar seus dados.',
@@ -144,6 +161,7 @@ export function ProfileView({ user }: { user: User }) {
   const [stack, setStack] = React.useState('')
   const [level, setLevel] = React.useState('')
   const [saveState, setSaveState] = React.useState<SaveState>('idle')
+  const [share, setShare] = React.useState(false)
 
   React.useEffect(() => {
     const meta = user?.user_metadata as
@@ -179,6 +197,18 @@ export function ProfileView({ user }: { user: User }) {
     setTimeout(() => setSaveState('idle'), 2000)
   }
 
+  async function saveShare(next: boolean) {
+    setShare(next)
+    setSaveState('saving')
+    const r = await setShareSolutions(await getAccessToken(), next)
+    if ('error' in r) {
+      setSaveState('error')
+      return
+    }
+    setSaveState('saved')
+    setTimeout(() => setSaveState('idle'), 2000)
+  }
+
   React.useEffect(() => {
     if (!user) return
     let active = true
@@ -190,8 +220,10 @@ export function ProfileView({ user }: { user: User }) {
           getDashboardStats(token),
         ])
         if (!active) return
-        if (p) setProfile(p)
-        else setLoadError(true)
+        if (p) {
+          setProfile(p)
+          setShare(!!p.share_solutions)
+        } else setLoadError(true)
         if (s && !('error' in s)) setStats(s)
         else setLoadError(true)
       } catch {
@@ -260,6 +292,16 @@ export function ProfileView({ user }: { user: User }) {
                       t.dateLocale,
                     )}
                   </p>
+                )}
+                {user && (
+                  <Link
+                    href={`/cert/${user.id}`}
+                    target='_blank'
+                    className='mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-primary transition-opacity hover:opacity-80'
+                  >
+                    <Award className='size-4' strokeWidth={1.5} />
+                    {t.certificate}
+                  </Link>
                 )}
               </div>
             </div>
@@ -371,6 +413,14 @@ export function ProfileView({ user }: { user: User }) {
                     value={locale}
                     options={LANGUAGE_OPTIONS}
                     onChange={(v) => setLocale(v as Locale)}
+                  />
+                </SettingRow>
+
+                <SettingRow label={t.shareLabel} description={t.shareDesc}>
+                  <Segmented
+                    value={share ? 'on' : 'off'}
+                    options={t.shareOptions}
+                    onChange={(v) => saveShare(v === 'on')}
                   />
                 </SettingRow>
               </section>

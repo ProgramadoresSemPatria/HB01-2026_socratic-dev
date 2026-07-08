@@ -9,10 +9,12 @@ import {
   GitPullRequestArrow,
   Link2,
   Loader2,
+  Users,
   X,
   XCircle,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import Link from 'next/link'
 import * as React from 'react'
 import { FormattedText } from './formatted-text'
 
@@ -41,6 +43,7 @@ const copy = {
     reviewAgain: 'Keep working',
     linkCopied: 'Link copied',
     share: 'Share',
+    communitySolutions: 'How others solved it',
     finish: 'Finish',
     markFailed: 'Mark as failed',
     celebrationFail: "Not this time. But you thought. Come back.",
@@ -77,6 +80,7 @@ const copy = {
     reviewAgain: 'Revisar de novo',
     linkCopied: 'Link copiado',
     share: 'Compartilhar',
+    communitySolutions: 'Como outros resolveram',
     finish: 'Concluir',
     markFailed: 'Marcar como reprovado',
     celebrationFail: 'Não passou desta vez. Mas você pensou. Volta.',
@@ -108,6 +112,7 @@ export function ReviewModal({
   tests,
   outcome = 'pass',
   sessionId,
+  solutionsHref,
   onClose,
   onComplete,
 }: {
@@ -119,6 +124,7 @@ export function ReviewModal({
   tests: { passed: number; total: number } | null
   outcome?: ReviewOutcome
   sessionId?: string | null
+  solutionsHref?: string | null
   onClose: () => void
   onComplete?: () => void
 }) {
@@ -278,6 +284,16 @@ export function ReviewModal({
             >
               {t.reviewAgain}
             </Button>
+            {passed && solutionsHref && (
+              <Button
+                size='lg'
+                variant='outline'
+                render={<Link href={solutionsHref} />}
+              >
+                <Users className='size-4' />
+                {t.communitySolutions}
+              </Button>
+            )}
             {canShare && (
               <Button size='lg' variant='ink' onClick={copyShareLink}>
                 {copied ? (

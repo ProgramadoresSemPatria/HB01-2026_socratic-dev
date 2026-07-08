@@ -1,8 +1,16 @@
 import * as React from 'react'
 
-const INLINE = /(\*\*[^*]+\*\*)|(`[^`]+`)/g
+export const LineCitationContext = React.createContext<
+  ((start: number, end?: number) => void) | null
+>(null)
 
-function renderInline(text: string): React.ReactNode[] {
+const INLINE =
+  /(\*\*[^*]+\*\*)|(`[^`]+`)|\b((?:linhas?|lines?)\s+(\d+)(?:\s*(?:[-–—]|a|e|to|and)\s*(\d+))?)/gi
+
+function renderInline(
+  text: string,
+  onLine: ((start: number, end?: number) => void) | null,
+): React.ReactNode[] {
   const out: React.ReactNode[] = []
   let lastIdx = 0
   let key = 0
@@ -11,13 +19,13 @@ function renderInline(text: string): React.ReactNode[] {
   while ((m = INLINE.exec(text)) !== null) {
     if (m.index > lastIdx) out.push(text.slice(lastIdx, m.index))
     const tok = m[0]
-    if (tok.startsWith('**')) {
+    if (m[1]) {
       out.push(
         <strong key={key++} className='font-medium text-ink'>
           {tok.slice(2, -2)}
         </strong>,
       )
-    } else {
+    } else if (m[2]) {
       out.push(
         <code
           key={key++}
@@ -26,6 +34,23 @@ function renderInline(text: string): React.ReactNode[] {
           {tok.slice(1, -1)}
         </code>,
       )
+    } else {
+      const start = Number(m[4])
+      const end = m[5] ? Number(m[5]) : undefined
+      if (onLine && Number.isFinite(start)) {
+        out.push(
+          <button
+            key={key++}
+            type='button'
+            onClick={() => onLine(start, end)}
+            className='cursor-pointer text-primary underline decoration-dotted underline-offset-2 hover:decoration-solid'
+          >
+            {tok}
+          </button>,
+        )
+      } else {
+        out.push(tok)
+      }
     }
     lastIdx = m.index + tok.length
   }
@@ -34,6 +59,7 @@ function renderInline(text: string): React.ReactNode[] {
 }
 
 export function FormattedText({ text }: { text: string }) {
+  const onLine = React.useContext(LineCitationContext)
   const lines = (text ?? '').split('\n')
   const blocks: React.ReactNode[] = []
   let bullets: string[] = []
@@ -46,7 +72,7 @@ export function FormattedText({ text }: { text: string }) {
         className='my-2 list-disc space-y-1.5 pl-5'
       >
         {bullets.map((b, i) => (
-          <li key={i}>{renderInline(b)}</li>
+          <li key={i}>{renderInline(b, onLine)}</li>
         ))}
       </ul>,
     )
@@ -63,7 +89,7 @@ export function FormattedText({ text }: { text: string }) {
     if (raw.trim()) {
       blocks.push(
         <p key={`p-${blocks.length}`} className='my-2'>
-          {renderInline(raw)}
+          {renderInline(raw, onLine)}
         </p>,
       )
     }

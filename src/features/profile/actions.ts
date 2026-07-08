@@ -11,6 +11,7 @@ export type Profile = {
   preferred_level: string | null
   total_challenges_completed: number
   total_hints_used: number
+  share_solutions: boolean
   created_at: string
 }
 

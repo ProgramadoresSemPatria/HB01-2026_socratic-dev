@@ -29,6 +29,7 @@ import { challengeIntro, challengeLanguage, starterCode } from '../utils'
 import { BriefingPanel } from './briefing-panel'
 import { ChallengeSkeleton } from './challenge-skeleton'
 import { ChatPanel } from './chat-panel'
+import { LineCitationContext } from './formatted-text'
 import { ReactPreview } from './react-preview'
 import { ReviewModal } from './review-modal'
 import { RunTerminal } from './run-terminal'
@@ -215,7 +216,10 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
     left: number
   } | null>(null)
   const editorRef = React.useRef<EditorInstance | null>(null)
+  const monacoRef = React.useRef<MonacoInstance | null>(null)
   const askSelectionRef = React.useRef<() => void>(() => {})
+  const [cursorPos, setCursorPos] = React.useState({ line: 1, col: 1 })
+  const [problems, setProblems] = React.useState(0)
 
   const language: RunnerLanguage = challenge
     ? challengeLanguage(challenge.stack)
@@ -297,8 +301,52 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
     askSelectionRef.current = askAboutSelection
   })
 
+  function highlightLines(start: number, end?: number) {
+    const editor = editorRef.current
+    const monaco = monacoRef.current
+    const model = editor?.getModel()
+    if (!editor || !monaco || !model) return
+    const last = model.getLineCount()
+    const a = Math.min(Math.max(1, start), last)
+    const b = Math.min(Math.max(a, end ?? a), last)
+    if (window.innerWidth < 1024) setActivePanel('work')
+    editor.revealLinesInCenterIfOutsideViewport(a, b)
+    const decorations = editor.createDecorationsCollection([
+      {
+        range: new monaco.Range(a, 1, b, model.getLineMaxColumn(b)),
+        options: { isWholeLine: true, className: 'tutor-line-flash' },
+      },
+    ])
+    window.setTimeout(() => decorations.clear(), 2400)
+  }
+
   function onEditorMount(editor: EditorInstance, monaco: MonacoInstance) {
     editorRef.current = editor
+    monacoRef.current = monaco
+    editor.onDidChangeCursorPosition(
+      (e: { position: { lineNumber: number; column: number } }) => {
+        setCursorPos({ line: e.position.lineNumber, col: e.position.column })
+      },
+    )
+    monaco.editor.onDidChangeMarkers((uris: readonly { toString(): string }[]) => {
+      const model = editor.getModel()
+      if (
+        !model ||
+        !uris.some(
+          (u: { toString(): string }) =>
+            u.toString() === model.uri.toString(),
+        )
+      )
+        return
+      setProblems(
+        monaco.editor
+          .getModelMarkers({ resource: model.uri })
+          .filter(
+            (mk: { severity: number }) =>
+              mk.severity === monaco.MarkerSeverity.Error,
+          ).length,
+      )
+    })
     const update = () => {
       const sel = editor.getSelection()
       if (!sel || sel.isEmpty()) {
@@ -703,6 +751,22 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
               </button>
             )}
           </div>
+          {pendingSolution === null && (
+            <div className='flex h-6 shrink-0 items-center justify-between border-t border-border bg-muted px-4 font-mono text-[11px] text-muted-foreground'>
+              <div className='flex items-center gap-3'>
+                <span>{language === 'react' ? 'tsx' : language}</span>
+                <span className={cn(problems > 0 && 'text-destructive')}>
+                  {problems === 0 ? '✓' : `✕ ${problems}`}
+                </span>
+              </div>
+              <div className='flex items-center gap-3'>
+                <span className='hidden sm:inline'>⌘K → tutor</span>
+                <span>
+                  Ln {cursorPos.line}, Col {cursorPos.col}
+                </span>
+              </div>
+            </div>
+          )}
           {showPanel &&
             (language === 'react' ? (
               <ReactPreview code={s.work} onClose={() => setShowPanel(false)} />
@@ -721,22 +785,24 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
             activePanel === 'chat' ? 'flex flex-1' : 'hidden lg:flex',
           )}
         >
-          <ChatPanel
-            messages={s.messages}
-            scrollRef={s.scrollRef}
-            thinking={s.thinking}
-            input={s.input}
-            setInput={s.setInput}
-            sendUser={sendUser}
-            askHint={askHint}
-            hintsUsed={s.hintsUsed}
-            hintsRemaining={s.hintsRemaining}
-            onSolve={askSolve}
-            onBuy={s.buyHints}
-            buying={s.buying}
-            buyError={s.buyError}
-            bought={s.bought}
-          />
+          <LineCitationContext.Provider value={highlightLines}>
+            <ChatPanel
+              messages={s.messages}
+              scrollRef={s.scrollRef}
+              thinking={s.thinking}
+              input={s.input}
+              setInput={s.setInput}
+              sendUser={sendUser}
+              askHint={askHint}
+              hintsUsed={s.hintsUsed}
+              hintsRemaining={s.hintsRemaining}
+              onSolve={askSolve}
+              onBuy={s.buyHints}
+              buying={s.buying}
+              buyError={s.buyError}
+              bought={s.bought}
+            />
+          </LineCitationContext.Provider>
         </aside>
       </div>
 
@@ -751,6 +817,7 @@ export function CodeChallengeWorkspace({ user: _user }: { user: User }) {
             tests={submitTests}
             outcome={outcome}
             sessionId={s.sessionId}
+            solutionsHref={challenge ? `/solutions/${challenge.id}` : null}
             onClose={() => setReviewOpen(false)}
             onComplete={() => router.push('/dashboard')}
           />

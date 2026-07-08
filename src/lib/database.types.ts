@@ -243,6 +243,8 @@ export type Database = {
           id: string
           preferred_level: string | null
           preferred_stack: string | null
+          share_solutions: boolean
+          bonus_hints: number
           total_challenges_completed: number
           total_hints_used: number
           total_points: number
@@ -254,6 +256,8 @@ export type Database = {
           id: string
           preferred_level?: string | null
           preferred_stack?: string | null
+          share_solutions?: boolean
+          bonus_hints?: number
           total_challenges_completed?: number
           total_hints_used?: number
           total_points?: number
@@ -265,6 +269,8 @@ export type Database = {
           id?: string
           preferred_level?: string | null
           preferred_stack?: string | null
+          share_solutions?: boolean
+          bonus_hints?: number
           total_challenges_completed?: number
           total_hints_used?: number
           total_points?: number
