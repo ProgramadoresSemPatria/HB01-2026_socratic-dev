@@ -12,11 +12,13 @@ import {
   ChevronDown,
   Code2,
   Flame,
+  Library,
   Lightbulb,
   Menu,
   Network,
   Plus,
   Trophy,
+  Users,
   X,
 } from 'lucide-react'
 import {
@@ -57,6 +59,14 @@ const copy = {
     resume: 'Pick up where you left off',
     explore: 'Browse the library',
     streakTitle: 'day streak — every 7th day pays bonus hints',
+    community: 'Community',
+    libraryDesc: 'Every challenge ever generated',
+    libraryQ: "Which one can't you solve yet?",
+    rankingDesc: 'Who trains with the most independence',
+    rankingQ: 'How much do you solve on your own?',
+    solutionsTitle: 'Solutions',
+    solutionsDesc: 'How others solved what you completed',
+    solutionsQ: 'How did others think it through?',
   },
   pt: {
     library: 'Biblioteca',
@@ -83,6 +93,14 @@ const copy = {
     resume: 'Continue de onde parou',
     explore: 'Explore a biblioteca',
     streakTitle: 'dias seguidos — a cada 7 dias você ganha hints bônus',
+    community: 'Comunidade',
+    libraryDesc: 'Todos os desafios já gerados',
+    libraryQ: 'Qual você ainda não resolve?',
+    rankingDesc: 'Quem treina com mais independência',
+    rankingQ: 'Quanto você resolve sozinho?',
+    solutionsTitle: 'Soluções',
+    solutionsDesc: 'Como outros resolveram o que você completou',
+    solutionsQ: 'Como outros pensaram o problema?',
   },
 } as const
 
@@ -237,8 +255,23 @@ function StatusCluster({
   )
 }
 
-function TrainMenu({ loggedIn }: { loggedIn: boolean }) {
-  const t = useT(copy)
+type MenuItem = {
+  href: string
+  icon: typeof Code2
+  title: string
+  desc: string
+  question: string
+}
+
+function NavMenu({
+  label,
+  items,
+  footer,
+}: {
+  label: string
+  items: MenuItem[]
+  footer: { href: string; label: string }
+}) {
   const [open, setOpen] = React.useState(false)
   const ref = React.useRef<HTMLDivElement>(null)
   const closeTimer = React.useRef<number | null>(null)
@@ -278,23 +311,6 @@ function TrainMenu({ loggedIn }: { loggedIn: boolean }) {
     }
   }, [open])
 
-  const tracks = [
-    {
-      href: loggedIn ? '/challenge' : '/onboarding',
-      icon: Code2,
-      title: t.trackCode,
-      desc: t.trackCodeDesc,
-      question: t.trackCodeQ,
-    },
-    {
-      href: loggedIn ? '/design' : '/onboarding',
-      icon: Network,
-      title: t.trackDesign,
-      desc: t.trackDesignDesc,
-      question: t.trackDesignQ,
-    },
-  ]
-
   return (
     <div
       ref={ref}
@@ -311,7 +327,7 @@ function TrainMenu({ loggedIn }: { loggedIn: boolean }) {
           open ? 'text-ink' : 'text-muted-foreground hover:text-ink',
         )}
       >
-        {t.train}
+        {label}
         <ChevronDown
           className={cn(
             'size-3.5 transition-transform duration-200',
@@ -330,41 +346,103 @@ function TrainMenu({ loggedIn }: { loggedIn: boolean }) {
             className='border-border bg-background absolute top-full left-0 mt-2 w-[340px] overflow-hidden rounded-2xl border shadow-xl'
           >
             <div className='p-2'>
-              {tracks.map((track) => (
+              {items.map((item) => (
                 <Link
-                  key={track.title}
-                  href={track.href}
+                  key={item.title}
+                  href={item.href}
                   onClick={() => setOpen(false)}
-                  className='group/track hover:bg-secondary flex gap-3 rounded-xl p-3 transition-colors duration-200'
+                  className='group/item hover:bg-secondary flex gap-3 rounded-xl p-3 transition-colors duration-200'
                 >
-                  <span className='border-border bg-background text-ink group-hover/track:border-primary/40 group-hover/track:text-primary mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg border transition-colors duration-200'>
-                    <track.icon className='size-4' strokeWidth={1.5} />
+                  <span className='border-border bg-background text-ink group-hover/item:border-primary/40 group-hover/item:text-primary mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg border transition-colors duration-200'>
+                    <item.icon className='size-4' strokeWidth={1.5} />
                   </span>
                   <span className='flex flex-col gap-0.5'>
                     <span className='text-ink text-sm font-medium'>
-                      {track.title}
+                      {item.title}
                     </span>
                     <span className='text-muted-foreground text-[13px]'>
-                      {track.desc}
+                      {item.desc}
                     </span>
                     <span className='text-primary font-serif text-[13px] italic'>
-                      {track.question}
+                      {item.question}
                     </span>
                   </span>
                 </Link>
               ))}
             </div>
             <Link
-              href={loggedIn ? '/dashboard' : '/challenges'}
+              href={footer.href}
               onClick={() => setOpen(false)}
               className='border-border text-muted-foreground hover:text-ink hover:bg-secondary block border-t px-5 py-3 text-[13px] font-medium transition-colors duration-200'
             >
-              {loggedIn ? t.resume : t.explore} →
+              {footer.label} →
             </Link>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+function TrainMenu({ loggedIn }: { loggedIn: boolean }) {
+  const t = useT(copy)
+  return (
+    <NavMenu
+      label={t.train}
+      items={[
+        {
+          href: loggedIn ? '/challenge' : '/onboarding',
+          icon: Code2,
+          title: t.trackCode,
+          desc: t.trackCodeDesc,
+          question: t.trackCodeQ,
+        },
+        {
+          href: loggedIn ? '/design' : '/onboarding',
+          icon: Network,
+          title: t.trackDesign,
+          desc: t.trackDesignDesc,
+          question: t.trackDesignQ,
+        },
+      ]}
+      footer={{
+        href: loggedIn ? '/dashboard' : '/challenges',
+        label: loggedIn ? t.resume : t.explore,
+      }}
+    />
+  )
+}
+
+function CommunityMenu() {
+  const t = useT(copy)
+  return (
+    <NavMenu
+      label={t.community}
+      items={[
+        {
+          href: '/challenges',
+          icon: Library,
+          title: t.library,
+          desc: t.libraryDesc,
+          question: t.libraryQ,
+        },
+        {
+          href: '/ranking',
+          icon: Trophy,
+          title: t.ranking,
+          desc: t.rankingDesc,
+          question: t.rankingQ,
+        },
+        {
+          href: '/solutions',
+          icon: Users,
+          title: t.solutionsTitle,
+          desc: t.solutionsDesc,
+          question: t.solutionsQ,
+        },
+      ]}
+      footer={{ href: '/#metodo', label: t.how }}
+    />
   )
 }
 
@@ -483,7 +561,14 @@ function MobileMenu({
         <MobileLink href='/challenges' label={t.library} onClick={onClose} />
         <MobileLink href='/#metodo' label={t.how} onClick={onClose} />
         {loggedIn && (
-          <MobileLink href='/ranking' label={t.ranking} onClick={onClose} />
+          <>
+            <MobileLink href='/ranking' label={t.ranking} onClick={onClose} />
+            <MobileLink
+              href='/solutions'
+              label={t.solutionsTitle}
+              onClick={onClose}
+            />
+          </>
         )}
         {loggedIn ? (
           <MobileLink href='/dashboard' label={t.dashboard} onClick={onClose} />
@@ -590,12 +675,7 @@ export function Navbar() {
           />
           <nav className='hidden items-center gap-1 md:flex'>
             <TrainMenu loggedIn={!loading && !!user} />
-            <NavLink href='/challenges' label={t.library} />
-            {!loading && user ? (
-              <NavLink href='/ranking' label={t.ranking} />
-            ) : (
-              <NavLink href='/#metodo' label={t.how} />
-            )}
+            <CommunityMenu />
           </nav>
         </div>
 
