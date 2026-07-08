@@ -11,7 +11,7 @@ import {
 import { getAccessToken } from '@/lib/api/client'
 import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
-import { Lock, Users } from 'lucide-react'
+import { ChevronDown, Lock, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import * as React from 'react'
@@ -50,6 +50,63 @@ type State =
   | { kind: 'locked' }
   | { kind: 'not-found' }
   | { kind: 'ready'; title: string; solutions: CommunitySolution[] }
+
+// Compact by default: a row per author, code revealed on demand so people
+// can pick whose solution to study.
+function SolutionCard({
+  sol,
+  youLabel,
+  indLabel,
+}: {
+  sol: CommunitySolution
+  youLabel: string
+  indLabel: string
+}) {
+  const [open, setOpen] = React.useState(false)
+  return (
+    <article className='overflow-hidden rounded-lg border border-border bg-card'>
+      <button
+        type='button'
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className='flex w-full cursor-pointer flex-wrap items-center gap-2.5 px-5 py-3.5 text-left transition-colors duration-200 hover:bg-secondary'
+      >
+        <span className='text-sm font-medium text-ink'>{sol.name}</span>
+        {sol.isMe && (
+          <span className='rounded-full bg-lime px-2 py-0.5 font-mono text-[10px] uppercase text-ink dark:text-background'>
+            {youLabel}
+          </span>
+        )}
+        <span className='ml-auto flex items-center gap-3'>
+          {typeof sol.independence === 'number' && (
+            <span
+              className={cn(
+                'font-mono text-[11px]',
+                sol.independence > 70
+                  ? 'text-primary'
+                  : 'text-muted-foreground',
+              )}
+            >
+              {sol.independence}% {indLabel}
+            </span>
+          )}
+          <ChevronDown
+            className={cn(
+              'size-4 text-muted-foreground transition-transform duration-200',
+              open && 'rotate-180',
+            )}
+            strokeWidth={1.5}
+          />
+        </span>
+      </button>
+      {open && (
+        <pre className='overflow-x-auto border-t border-border px-5 py-4 font-mono text-[13px] leading-relaxed text-ink'>
+          <code>{sol.code}</code>
+        </pre>
+      )}
+    </article>
+  )
+}
 
 function SolutionsContent({ challengeId }: { challengeId: string }) {
   const t = useT(copy)
@@ -124,38 +181,9 @@ function SolutionsContent({ challengeId }: { challengeId: string }) {
                 </Button>
               </div>
             ) : (
-              <div className='mt-10 flex flex-col gap-6'>
+              <div className='mt-10 flex flex-col gap-3'>
                 {state.solutions.map((sol, i) => (
-                  <article
-                    key={i}
-                    className='overflow-hidden rounded-lg border border-border bg-card'
-                  >
-                    <header className='flex flex-wrap items-center gap-2.5 border-b border-border px-5 py-3'>
-                      <span className='text-sm font-medium text-ink'>
-                        {sol.name}
-                      </span>
-                      {sol.isMe && (
-                        <span className='rounded-full bg-lime px-2 py-0.5 font-mono text-[10px] uppercase text-ink dark:text-background'>
-                          {t.you}
-                        </span>
-                      )}
-                      {typeof sol.independence === 'number' && (
-                        <span
-                          className={cn(
-                            'ml-auto font-mono text-[11px]',
-                            sol.independence > 70
-                              ? 'text-primary'
-                              : 'text-muted-foreground',
-                          )}
-                        >
-                          {sol.independence}% {t.independent}
-                        </span>
-                      )}
-                    </header>
-                    <pre className='overflow-x-auto px-5 py-4 font-mono text-[13px] leading-relaxed text-ink'>
-                      <code>{sol.code}</code>
-                    </pre>
-                  </article>
+                  <SolutionCard key={i} sol={sol} youLabel={t.you} indLabel={t.independent} />
                 ))}
               </div>
             )}
