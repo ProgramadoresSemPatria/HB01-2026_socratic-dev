@@ -31,8 +31,6 @@ const copy = {
   },
 }
 
-// Mirrors independenceTier (>70 high, >40 mid, else low) onto the chart palette
-// already used by the independence ring.
 export const TIER_BAR: Record<SkillStat['tier'], string> = {
   high: 'bg-chart-1',
   mid: 'bg-chart-2',

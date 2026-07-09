@@ -189,8 +189,6 @@ export function DashboardView({ user }: { user: User }) {
     return () => clearTimeout(id)
   }, [startError])
 
-  // `id` keys the spinner so each button shows its own pending state. A code
-  // target without a stack means "use whatever the user picked at onboarding".
   async function startChallenge(
     id: string,
     target: { kind: 'code' | 'design'; stack?: string },
@@ -266,8 +264,6 @@ export function DashboardView({ user }: { user: User }) {
   }
 
   const score = stats?.independence_score ?? 100
-  // getDashboardStats defaults to 100 when nothing is completed. Showing that as
-  // "100% independent" to someone who has solved nothing inverts the premise.
   const hasScore = !!stats && stats.total_completed > 0
   const weakest = stats ? weakestSkill(stats.skill_breakdown) : null
 

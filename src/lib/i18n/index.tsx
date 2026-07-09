@@ -18,13 +18,8 @@ export function LocaleProvider({
   initialLocale?: Locale
   children: React.ReactNode
 }) {
-  // The server already resolved the locale (cookie, then Accept-Language) and
-  // rendered the HTML with it, so starting here means the first client render
-  // matches the SSR output exactly — no hydration mismatch, no language flash.
   const [locale, setLocaleState] = React.useState<Locale>(initialLocale)
 
-  // One-way sync only: never call setLocaleState here. localStorage is a mirror
-  // of the server's decision, not an input to it.
   React.useEffect(() => {
     window.localStorage.setItem(LOCALE_COOKIE, locale)
   }, [locale])

@@ -121,14 +121,14 @@ export async function getDashboardStats(
   const streak = calcStreak(completed.map((s) => s.started_at))
   const weekProgress = buildWeekProgress(weekSessions.map((s) => s.started_at))
 
-  // Per-skill breakdown and progress-over-time: the helper dedupes by challenge
-  // and resolves independence with the same hint fallback used above.
   const skillSessions: SkillSession[] = completed.map((s) => {
-    const challenge = (s as { challenges: { stack: string; kind: string | null } | null })
-      .challenges
+    const challenge = (
+      s as { challenges: { stack: string; kind: string | null } | null }
+    ).challenges
     return {
       challengeId: s.challenge_id,
-      independence: s.independence ?? computeIndependence(hintsBySession.get(s.id) ?? []),
+      independence:
+        s.independence ?? computeIndependence(hintsBySession.get(s.id) ?? []),
       completedAt: s.completed_at ?? s.started_at,
       stack: challenge?.stack ?? null,
       kind: challenge?.kind ?? null,

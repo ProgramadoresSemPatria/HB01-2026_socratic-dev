@@ -23,8 +23,6 @@ type Level = 'beginner' | 'intermediate' | 'advanced'
 
 const LEVEL_IDS: Level[] = ['beginner', 'intermediate', 'advanced']
 
-// Sourced from the domain so this dialog offers the same stacks onboarding and
-// the profile let users pick. generate-challenge.ts handles all four.
 const STACKS = DOMAIN_STACKS.map((s) => ({ id: s.id, label: s.label }))
 
 const MAX_PROMPT = 500

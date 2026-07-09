@@ -1,9 +1,6 @@
 import { cookies, headers } from 'next/headers'
 import type { Locale } from './index'
 
-// Kept as a literal rather than importing LOCALE_COOKIE: './index' is a
-// 'use client' module, so importing a runtime value from it here would cross
-// the client boundary.
 const LOCALE_COOKIE = 'locale'
 
 /**
