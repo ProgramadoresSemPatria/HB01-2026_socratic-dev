@@ -1,5 +1,7 @@
 'use client'
 
+import { STACKS as DOMAIN_STACKS } from '@/domain/stacks'
+import { getAccessToken } from '@/lib/api/client'
 import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import {
@@ -15,17 +17,15 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { generateChallenge, getTrainingRecommendation } from '../actions'
-import { getAccessToken } from '@/lib/api/client'
 
 type Kind = 'code' | 'design'
 type Level = 'beginner' | 'intermediate' | 'advanced'
 
 const LEVEL_IDS: Level[] = ['beginner', 'intermediate', 'advanced']
 
-const STACKS = [
-  { id: 'javascript', label: 'JavaScript' },
-  { id: 'typescript', label: 'TypeScript' },
-]
+// Sourced from the domain so this dialog offers the same stacks onboarding and
+// the profile let users pick. generate-challenge.ts handles all four.
+const STACKS = DOMAIN_STACKS.map((s) => ({ id: s.id, label: s.label }))
 
 const MAX_PROMPT = 500
 
@@ -225,9 +225,7 @@ export function CustomChallengeDialog({
                   <PenLine className='size-3' />
                   {t.badge}
                 </div>
-                <h2 className='type-h3 mb-2'>
-                  {t.heading}
-                </h2>
+                <h2 className='type-h3 mb-2'>{t.heading}</h2>
                 <p className='mb-6 text-sm text-muted-foreground'>
                   {t.subheading}
                 </p>
@@ -351,7 +349,7 @@ export function CustomChallengeDialog({
                   </div>
 
                   {error && (
-                    <div className='border-destructive/30 bg-destructive/5 text-destructive rounded-lg border px-4 py-3 text-sm'>
+                    <div className='rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive'>
                       {error}
                     </div>
                   )}
@@ -361,7 +359,7 @@ export function CustomChallengeDialog({
                   <button
                     type='button'
                     onClick={onClose}
-                    className='border-border text-muted-foreground hover:bg-muted hover:text-ink flex-1 cursor-pointer rounded-full border px-5 py-2.5 text-sm font-medium transition-colors'
+                    className='flex-1 cursor-pointer rounded-full border border-border px-5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-ink'
                   >
                     {t.cancel}
                   </button>
@@ -369,7 +367,7 @@ export function CustomChallengeDialog({
                     type='button'
                     onClick={submit}
                     disabled={prompt.trim().length < 10}
-                    className='group bg-ink hover:bg-primary inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium tracking-tight text-background transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+                    className='group inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-medium tracking-tight text-background transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50'
                   >
                     <PenLine className='size-4' />
                     {t.generate}
