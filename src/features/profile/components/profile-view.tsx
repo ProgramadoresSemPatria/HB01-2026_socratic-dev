@@ -2,20 +2,21 @@
 
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
 import { signOut } from '@/features/auth/hooks/use-user'
 import { getDashboardStats } from '@/features/dashboard/actions'
 import type { Stats } from '@/features/dashboard/types'
 import { Halftone, glyph } from '@/features/landing/components/halftone'
 import { getProfile, type Profile } from '@/features/profile/actions'
 import { setShareSolutions } from '@/features/solutions/actions'
+import { copy, LANGUAGE_OPTIONS, STACK_OPTIONS } from './copy'
+import { ProfileSkeleton } from './profile-skeleton'
+import {
+  SaveBadge,
+  Segmented,
+  SelectControl,
+  SettingRow,
+  type SaveState,
+} from './settings-controls'
 import { getAccessToken } from '@/lib/api/client'
 import { useLocale, useT, type Locale } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase/client'
@@ -27,125 +28,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
-
-const STACK_OPTIONS = [
-  { value: 'javascript', label: 'JavaScript' },
-  { value: 'typescript', label: 'TypeScript' },
-  { value: 'python', label: 'Python' },
-  { value: 'react', label: 'React' },
-]
-
-const LANGUAGE_OPTIONS: readonly { value: Locale; label: string }[] = [
-  { value: 'en', label: 'EN' },
-  { value: 'pt', label: 'PT' },
-]
-
-const copy = {
-  en: {
-    dateLocale: 'en-US',
-    levelOptions: [
-      { value: 'beginner', label: 'Beginner' },
-      { value: 'intermediate', label: 'Intermediate' },
-      { value: 'advanced', label: 'Advanced' },
-    ],
-    trackOptions: [
-      { value: 'code', label: 'Code' },
-      { value: 'design', label: 'System Design' },
-    ],
-    avatarAlt: 'Your avatar',
-    yourProfile: 'Your profile',
-    certificate: 'View my certificate',
-    memberSince: 'Member since',
-    statCompleted: 'Completed',
-    statIndependence: 'Independence',
-    statHints: 'Hints used',
-    preferences: 'Preferences',
-    prefsNote:
-      'Your next challenges are based on these choices. Changes save automatically.',
-    trackLabel: 'Track',
-    trackDesc: 'What kind of challenges you get next.',
-    trackPlaceholder: 'Pick a track',
-    stackLabel: 'Stack',
-    stackDesc: 'Language for code challenges.',
-    stackPlaceholder: 'Pick a stack',
-    difficultyLabel: 'Difficulty',
-    difficultyDesc: 'How hard the next one should be.',
-    levelPlaceholder: 'Pick a level',
-    appearanceLabel: 'Appearance',
-    appearanceDesc: 'Light, dark, or follow your system.',
-    themeOptions: [
-      { value: 'light', label: 'Light' },
-      { value: 'dark', label: 'Dark' },
-      { value: 'system', label: 'System' },
-    ],
-    languageLabel: 'Language',
-    languageDesc: 'Interface language.',
-    shareLabel: 'Community solutions',
-    shareDesc:
-      'Share your solutions on the "how others solved it" page, under a masked name. Only people who completed the challenge can see them.',
-    shareOptions: [
-      { value: 'on', label: 'On' },
-      { value: 'off', label: 'Off' },
-    ],
-    redoSetup: 'Redo setup',
-    signOut: 'Sign out',
-    loadError: "Couldn't load your data.",
-    retry: 'Retry',
-  },
-  pt: {
-    dateLocale: 'pt-BR',
-    levelOptions: [
-      { value: 'beginner', label: 'Iniciante' },
-      { value: 'intermediate', label: 'Intermediário' },
-      { value: 'advanced', label: 'Avançado' },
-    ],
-    trackOptions: [
-      { value: 'code', label: 'Código' },
-      { value: 'design', label: 'System Design' },
-    ],
-    avatarAlt: 'Seu avatar',
-    yourProfile: 'Seu perfil',
-    certificate: 'Ver meu certificado',
-    memberSince: 'Membro desde',
-    statCompleted: 'Concluídos',
-    statIndependence: 'Independência',
-    statHints: 'Hints usados',
-    preferences: 'Preferências',
-    prefsNote:
-      'Seus próximos desafios são baseados nessas escolhas. As alterações são salvas automaticamente.',
-    trackLabel: 'Trilha',
-    trackDesc: 'O tipo de desafio que você recebe.',
-    trackPlaceholder: 'Escolher trilha',
-    stackLabel: 'Stack',
-    stackDesc: 'Linguagem dos desafios de código.',
-    stackPlaceholder: 'Escolher stack',
-    difficultyLabel: 'Dificuldade',
-    difficultyDesc: 'O quão difícil deve ser o próximo.',
-    levelPlaceholder: 'Escolher nível',
-    appearanceLabel: 'Aparência',
-    appearanceDesc: 'Claro, escuro ou seguir o sistema.',
-    themeOptions: [
-      { value: 'light', label: 'Claro' },
-      { value: 'dark', label: 'Escuro' },
-      { value: 'system', label: 'Sistema' },
-    ],
-    languageLabel: 'Idioma',
-    languageDesc: 'Idioma da interface.',
-    shareLabel: 'Soluções da comunidade',
-    shareDesc:
-      'Compartilhe suas soluções na página "como outros resolveram", com nome mascarado. Só quem completou o desafio consegue ver.',
-    shareOptions: [
-      { value: 'on', label: 'Ativo' },
-      { value: 'off', label: 'Inativo' },
-    ],
-    redoSetup: 'Refazer setup',
-    signOut: 'Sair',
-    loadError: 'Não foi possível carregar seus dados.',
-    retry: 'Tentar novamente',
-  },
-}
-
-type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 export function ProfileView({ user }: { user: User }) {
   const router = useRouter()
@@ -467,151 +349,4 @@ function StatCol({ value, label }: { value: string; label: string }) {
       </div>
     </div>
   )
-}
-
-function SettingRow({
-  label,
-  description,
-  children,
-}: {
-  label: string
-  description: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className='flex flex-col gap-3 border-b border-border py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8'>
-      <div className='min-w-0'>
-        <div className='font-medium text-ink'>{label}</div>
-        <div className='mt-0.5 text-sm text-muted-foreground'>
-          {description}
-        </div>
-      </div>
-      <div className='shrink-0'>{children}</div>
-    </div>
-  )
-}
-
-function SelectControl({
-  ariaLabel,
-  value,
-  placeholder,
-  options,
-  onChange,
-}: {
-  ariaLabel: string
-  value: string
-  placeholder: string
-  options: readonly { value: string; label: string }[]
-  onChange: (value: string) => void
-}) {
-  return (
-    <Select
-      items={options}
-      value={value || null}
-      onValueChange={(v) => onChange((v as string | null) ?? '')}
-    >
-      <SelectTrigger aria-label={ariaLabel} className='w-full sm:w-[200px]'>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((o) => (
-          <SelectItem key={o.value} value={o.value}>
-            {o.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
-}
-
-function Segmented({
-  value,
-  options,
-  onChange,
-}: {
-  value: string
-  options: readonly { value: string; label: string }[]
-  onChange: (value: string) => void
-}) {
-  return (
-    <div className='inline-flex rounded-full border border-border p-0.5'>
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type='button'
-          onClick={() => onChange(o.value)}
-          className={`min-h-10 rounded-full px-3.5 py-2 font-mono text-[11px] tracking-wider uppercase transition-colors ${
-            value === o.value
-              ? 'bg-ink text-background'
-              : 'text-muted-foreground hover:text-ink'
-          }`}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function ProfileSkeleton() {
-  return (
-    <div>
-      <div className='mt-12 grid grid-cols-1 gap-y-6 sm:grid-cols-3'>
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className='border-border sm:border-l sm:pl-8 sm:first:border-l-0 sm:first:pl-0'
-          >
-            <Skeleton className='h-11 w-16 sm:h-14' />
-            <Skeleton className='mt-3 h-3 w-20' />
-          </div>
-        ))}
-      </div>
-      <div className='mt-14 border-b border-border pb-4'>
-        <Skeleton className='h-3 w-28' />
-        <Skeleton className='mt-3 h-3.5 w-64' />
-      </div>
-      {[0, 1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className='flex items-center justify-between border-b border-border py-5'
-        >
-          <div>
-            <Skeleton className='h-4 w-24' />
-            <Skeleton className='mt-2 h-3 w-44' />
-          </div>
-          <Skeleton className='h-9 w-[180px] rounded-full' />
-        </div>
-      ))}
-      <div className='mt-10 flex items-center justify-between'>
-        <Skeleton className='h-4 w-24' />
-        <Skeleton className='h-9 w-28 rounded-full' />
-      </div>
-    </div>
-  )
-}
-
-const badgeCopy = {
-  en: {
-    saving: 'Saving…',
-    saved: 'Saved ✓',
-    error: 'Save failed',
-  },
-  pt: {
-    saving: 'Salvando…',
-    saved: 'Salvo ✓',
-    error: 'Erro ao salvar',
-  },
-}
-
-function SaveBadge({ state }: { state: SaveState }) {
-  const t = useT(badgeCopy)
-  if (state === 'idle') return null
-  const map = {
-    saving: [t.saving, 'text-muted-foreground'],
-    saved: [t.saved, 'text-mint'],
-    error: [t.error, 'text-destructive'],
-  } as const
-  const [text, cls] = map[state]
-  return <span className={`shrink-0 font-mono text-[11px] ${cls}`}>{text}</span>
 }
