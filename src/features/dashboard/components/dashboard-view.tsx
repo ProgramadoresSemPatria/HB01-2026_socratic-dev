@@ -13,6 +13,7 @@ import {
 } from '@/features/challenges/actions'
 import { CustomChallengeDialog } from '@/features/challenges/components/custom-challenge-dialog'
 import { getDashboardStats } from '@/features/dashboard/actions'
+import { skillTarget, weakestSkill } from '@/features/dashboard/independence'
 import type { Stats } from '@/features/dashboard/types'
 import { activityLevel } from '@/features/dashboard/utils'
 import { Halftone, glyph } from '@/features/landing/components/halftone'
@@ -27,6 +28,7 @@ import {
   Network,
   PenLine,
   Sparkles,
+  Target,
   TrendingUp,
 } from 'lucide-react'
 import { motion } from 'motion/react'
@@ -39,6 +41,8 @@ import {
   RadialBarChart,
   ResponsiveContainer,
 } from 'recharts'
+import { IndependenceTrend } from './independence-trend'
+import { SkillBreakdown, TIER_BAR } from './skill-breakdown'
 
 const copy = {
   en: {
@@ -87,6 +91,9 @@ const copy = {
       'What comes out of your head is worth a thousand times more than what comes out of mine.',
     quoteBy: 'Socratic tutor, just now',
     daily: 'Daily challenge',
+    weakEyebrow: 'Train your weakest skill',
+    weakBody: 'is where you lean on hints the most.',
+    weakCta: 'Practice it',
   },
   pt: {
     welcome: 'Bem-vindo de volta',
@@ -133,6 +140,9 @@ const copy = {
       'O que sai da sua cabeça vale mil vezes mais que o que sai da minha.',
     quoteBy: 'Tutor Socrático, agora há pouco',
     daily: 'Desafio do dia',
+    weakEyebrow: 'Treine sua skill mais fraca',
+    weakBody: 'é onde você mais depende de hints.',
+    weakCta: 'Praticar',
   },
 }
 
@@ -250,6 +260,7 @@ export function DashboardView({ user }: { user: User }) {
   }
 
   const score = stats?.independence_score ?? 100
+  const weakest = stats ? weakestSkill(stats.skill_breakdown) : null
 
   return (
     <div className='relative flex min-h-screen flex-1 flex-col bg-background'>
@@ -431,6 +442,51 @@ export function DashboardView({ user }: { user: User }) {
                   <IndependenceRing score={score} />
                 </div>
               </motion.section>
+
+              {stats && stats.skill_breakdown.length > 0 && (
+                <motion.section
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, ease: EASE }}
+                  className='mb-10 border-t border-border pt-8'
+                >
+                  {weakest && (
+                    <div className='mb-10 flex flex-col gap-4 rounded-lg border border-border bg-card px-5 py-4 sm:flex-row sm:items-center'>
+                      <span
+                        className={`size-2 shrink-0 rounded-full ${TIER_BAR[weakest.tier]}`}
+                        aria-hidden
+                      />
+                      <div className='min-w-0 flex-1'>
+                        <p className='font-mono text-[11px] tracking-wider text-primary uppercase'>
+                          {t.weakEyebrow}
+                        </p>
+                        <p className='mt-1 text-sm text-ink'>
+                          <span className='font-medium'>{weakest.label}</span>{' '}
+                          <span className='text-muted-foreground'>
+                            ({weakest.avgIndependence}%) {t.weakBody}
+                          </span>
+                        </p>
+                      </div>
+                      <Button
+                        variant='outline'
+                        className='shrink-0'
+                        loading={pending === 'weak'}
+                        onClick={() =>
+                          startChallenge('weak', skillTarget(weakest.key))
+                        }
+                      >
+                        <Target strokeWidth={1.5} />
+                        {t.weakCta}
+                      </Button>
+                    </div>
+                  )}
+                  <div className='grid gap-10 lg:grid-cols-2 lg:gap-0'>
+                    <SkillBreakdown breakdown={stats.skill_breakdown} />
+                    <IndependenceTrend trend={stats.independence_trend} />
+                  </div>
+                </motion.section>
+              )}
 
               <RecentChallenges
                 items={sessions}
