@@ -1,10 +1,12 @@
 import { independenceTier } from '@/domain/scoring'
 import { stackById } from '@/domain/stacks'
 
-// The dimensions we break the independence score down by: the four code stacks
-// plus system design. Derived from a challenge's `stack` (code) or `kind`
-// (design), so no extra tagging is needed on challenges.
-export type SkillKey = 'javascript' | 'typescript' | 'python' | 'react' | 'design'
+export type SkillKey =
+  | 'javascript'
+  | 'typescript'
+  | 'python'
+  | 'react'
+  | 'design'
 
 export type SkillSession = {
   challengeId: string
@@ -53,14 +55,12 @@ function categoryOf(s: SkillSession): SkillKey | null {
   }
 }
 
-// The same challenge can be completed in several sessions. Count each challenge
-// once, keeping its most recent completion — mirrors getDashboardStats' distinct
-// count so the breakdown and the headline number stay consistent.
 function uniqueByChallenge(sessions: SkillSession[]): SkillSession[] {
   const byChallenge = new Map<string, SkillSession>()
   for (const s of sessions) {
     const prev = byChallenge.get(s.challengeId)
-    if (!prev || s.completedAt > prev.completedAt) byChallenge.set(s.challengeId, s)
+    if (!prev || s.completedAt > prev.completedAt)
+      byChallenge.set(s.challengeId, s)
   }
   return [...byChallenge.values()]
 }
@@ -112,8 +112,10 @@ export function weakestSkill(
   if (!eligible.length) return null
   return eligible.reduce((worst, cur) => {
     if (cur.avgIndependence < worst.avgIndependence) return cur
-    // Tie-break toward the skill with more evidence behind the low score.
-    if (cur.avgIndependence === worst.avgIndependence && cur.completed > worst.completed)
+    if (
+      cur.avgIndependence === worst.avgIndependence &&
+      cur.completed > worst.completed
+    )
       return cur
     return worst
   })
