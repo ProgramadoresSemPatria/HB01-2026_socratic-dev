@@ -13,6 +13,7 @@ import { calcStreak } from '@/features/dashboard/streak'
 import { STREAK_REWARD } from '@/features/hints/constants'
 import { authActionUser } from '@/lib/api/guard'
 import { rateLimit } from '@/lib/api/guard'
+import { lifetimeStats } from '@/lib/api/lifetime-stats'
 import { getLocale } from '@/lib/i18n/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import * as Sentry from '@sentry/nextjs'
@@ -192,12 +193,8 @@ export async function getTrainingRecommendation(input: {
   }
 
   try {
-    const [profileR, sessionsR, hintsR, communityR] = await Promise.all([
-      supabaseAdmin
-        .from('profiles')
-        .select('total_challenges_completed, total_hints_used')
-        .eq('id', a.userId)
-        .maybeSingle(),
+    const [stats, sessionsR, hintsR, communityR] = await Promise.all([
+      lifetimeStats(a.userId),
       supabaseAdmin
         .from('sessions')
         .select('status, challenges(title, stack, level)')
@@ -219,7 +216,6 @@ export async function getTrainingRecommendation(input: {
         .limit(8),
     ])
 
-    const prof = profileR.data
     const recent = (sessionsR.data ?? []) as unknown as {
       status: string
       challenges: { title: string; stack: string; level: string } | null
@@ -239,8 +235,8 @@ export async function getTrainingRecommendation(input: {
       `Trilha: ${input.kind === 'design' ? 'system design (arquitetura)' : 'código'}`,
       input.stack ? `Linguagem: ${input.stack}` : '',
       `Nível: ${input.level}`,
-      `Desafios completados na vida: ${prof?.total_challenges_completed ?? 0}`,
-      `Hints usados na vida: ${prof?.total_hints_used ?? 0}`,
+      `Desafios completados na vida: ${stats.challengesCompleted}`,
+      `Hints usados na vida: ${stats.hintsUsed}`,
       recentTitles.length
         ? `Desafios recentes do aluno:\n- ${recentTitles.join('\n- ')}`
         : 'O aluno ainda não fez nenhum desafio.',
