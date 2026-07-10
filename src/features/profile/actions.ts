@@ -1,6 +1,7 @@
 'use server'
 
 import { authActionUser } from '@/lib/api/guard'
+import { lifetimeStats } from '@/lib/api/lifetime-stats'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
@@ -18,13 +19,16 @@ export type Profile = {
 export async function getProfile(token: string): Promise<Profile | null> {
   const a = await authActionUser(token)
   if ('error' in a) return null
-  const { data, error } = await supabaseAdmin
-    .from('profiles')
-    .select('*')
-    .eq('id', a.userId)
-    .single()
+  const [{ data, error }, stats] = await Promise.all([
+    supabaseAdmin.from('profiles').select('*').eq('id', a.userId).single(),
+    lifetimeStats(a.userId),
+  ])
   if (error) return null
-  return data as Profile
+  return {
+    ...(data as Profile),
+    total_challenges_completed: stats.challengesCompleted,
+    total_hints_used: stats.hintsUsed,
+  }
 }
 
 export async function updateProfile(input: {
@@ -34,16 +38,23 @@ export async function updateProfile(input: {
 }): Promise<Profile | { error: string }> {
   const a = await authActionUser(input.token)
   if ('error' in a) return a
-  const { data, error } = await supabaseAdmin
-    .from('profiles')
-    .update({
-      preferred_stack: input.preferred_stack,
-      preferred_level: input.preferred_level,
-    })
-    .eq('id', a.userId)
-    .select()
-    .single()
+  const [{ data, error }, stats] = await Promise.all([
+    supabaseAdmin
+      .from('profiles')
+      .update({
+        preferred_stack: input.preferred_stack,
+        preferred_level: input.preferred_level,
+      })
+      .eq('id', a.userId)
+      .select()
+      .single(),
+    lifetimeStats(a.userId),
+  ])
   if (error) return { error: 'Não foi possível salvar o perfil.' }
   revalidatePath('/profile')
-  return data as Profile
+  return {
+    ...(data as Profile),
+    total_challenges_completed: stats.challengesCompleted,
+    total_hints_used: stats.hintsUsed,
+  }
 }
