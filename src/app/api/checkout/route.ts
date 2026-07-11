@@ -17,8 +17,13 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => ({}))
   const path = safePath((body as { path?: string }).path)
+  // Payment redirect URLs must never be derived from request headers (Origin
+  // is attacker-controlled → phishing after a real payment). The site host is
+  // pinned by env; dev falls back to localhost.
   const origin =
-    req.headers.get('origin') ?? new URL(req.url).origin
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, '') ??
+    (process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : null)
+  if (!origin) return jsonError('Pagamentos indisponíveis no momento.', 503)
 
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) {
