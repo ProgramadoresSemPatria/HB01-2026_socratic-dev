@@ -95,20 +95,19 @@ export async function completeSession(args: {
       } as never,
     )
     // Season league: scoring completions also count toward the user's small
-    // 4-week cohort (joined lazily on the first scoring completion).
+    // 4-week cohort (joined lazily on the first scoring completion). Join and
+    // points land in a single transaction — either both happen or neither.
     const earned = typeof awarded === 'number' ? awarded : 0
     if (earned > 0) {
-      const season = seasonKey()
-      const { error: joinErr } = await supabaseAdmin.rpc(
-        'join_league' as never,
-        { p_user: a.userId, p_season: season } as never,
+      const { error: leagueErr } = await supabaseAdmin.rpc(
+        'join_and_add_league_points' as never,
+        {
+          p_user: a.userId,
+          p_season: seasonKey(),
+          p_amount: earned,
+        } as never,
       )
-      const { error: ptsErr } = await supabaseAdmin.rpc(
-        'add_league_points' as never,
-        { p_user: a.userId, p_season: season, p_amount: earned } as never,
-      )
-      if (joinErr) Sentry.captureException(joinErr)
-      if (ptsErr) Sentry.captureException(ptsErr)
+      if (leagueErr) Sentry.captureException(leagueErr)
     }
   }
 
