@@ -10,7 +10,7 @@ import {
   tooLarge,
   tooMany,
 } from '@/lib/api/guard'
-import { consumeHints, getBalance } from '@/lib/api/hints-server'
+import { consumeHints } from '@/lib/api/hints-server'
 import { getLocale } from '@/lib/i18n/server'
 import { SOLVE_COST } from '@/features/hints/constants'
 
@@ -181,8 +181,10 @@ export async function POST(req: Request) {
     if (tests.length > CAPS.text) return tooLarge()
     if (!sessionId) return jsonError('session_id é obrigatório.', 400)
 
-    const balance = await getBalance(userId)
-    if (balance.remaining < SOLVE_COST)
+    // Consume (and record is_solve) before generating: the solution must
+    // never be handed out without the penalty landing in hints_used.
+    const remaining = await consumeHints(userId, sessionId, 3, SOLVE_COST, true)
+    if (remaining === null)
       return jsonError('Hints insuficientes para resolver.', 429)
 
     const codeParts = [
@@ -236,7 +238,6 @@ export async function POST(req: Request) {
         json.teach,
         new Set(nodes.map((n) => n.id)),
       )
-      const remaining = await consumeHints(userId, sessionId, 3, SOLVE_COST, true)
       return Response.json({ nodes, edges, teach, remaining })
     }
 
@@ -256,7 +257,6 @@ export async function POST(req: Request) {
         teach = undefined
       }
     }
-    const remaining = await consumeHints(userId, sessionId, 3, SOLVE_COST, true)
     return Response.json({ code, teach, remaining })
   } catch (e) {
     return aiErrorResponse(e)

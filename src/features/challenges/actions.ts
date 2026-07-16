@@ -70,10 +70,14 @@ export async function completeSession(args: {
   } | null
   if (!session || session.user_id !== a.userId) return
 
+  // Hints span every session of this challenge: reopening creates a new
+  // session row, but the client draft (and the score it shows) is per
+  // challenge — a solve in an earlier attempt still counts.
   const { data: hints } = await supabaseAdmin
     .from('hints_used')
-    .select('hint_level, is_solve')
-    .eq('session_id', args.id)
+    .select('hint_level, is_solve, sessions!inner(challenge_id)')
+    .eq('user_id', a.userId)
+    .eq('sessions.challenge_id', session.challenge_id)
   const independence = computeIndependence(
     (hints ?? []) as { hint_level: number; is_solve: boolean }[],
   )

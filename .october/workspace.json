@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "workspace": {
+    "name": "HB01-2026_socratic-dev",
+    "kind": "folder"
+  },
+  "apps": [
+    {
+      "id": "app",
+      "name": "HB01-2026_socratic-dev",
+      "folder": ".",
+      "framework": "Next.js",
+      "platform": "web",
+      "default": true
+    }
+  ]
+}

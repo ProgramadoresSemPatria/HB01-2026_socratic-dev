@@ -140,10 +140,12 @@ async function fetchReplay(id: string) {
     .limit(1)
     .maybeSingle()
 
+  const s = session.data as { user_id: string; challenge_id: string }
   const hints = await supabaseAdmin
     .from('hints_used')
-    .select('hint_level, used_at, is_solve')
-    .eq('session_id', id)
+    .select('hint_level, used_at, is_solve, sessions!inner(challenge_id)')
+    .eq('user_id', s.user_id)
+    .eq('sessions.challenge_id', s.challenge_id)
 
   return {
     session: session.data as Awaited<
@@ -164,7 +166,8 @@ function replayIndependence(
   stored: number | null | undefined,
   hints: { hint_level: number; is_solve: boolean }[],
 ): number {
-  return stored ?? computeIndependence(hints)
+  if (hints.length > 0) return computeIndependence(hints)
+  return stored ?? 100
 }
 
 export async function generateMetadata(props: {

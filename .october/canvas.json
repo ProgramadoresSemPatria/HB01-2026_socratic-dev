@@ -1,0 +1,296 @@
+{
+  "screens": [
+    {
+      "id": "screen-mrldtqhi-0",
+      "title": "Home",
+      "kind": "desktop",
+      "routePath": "/",
+      "filePath": "src/app/page.tsx",
+      "position": {
+        "x": 80,
+        "y": 60
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-1",
+      "title": "auth/callback",
+      "kind": "desktop",
+      "routePath": "/auth/callback",
+      "filePath": "src/app/auth/callback/page.tsx",
+      "position": {
+        "x": 780,
+        "y": 60
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-2",
+      "title": "challenge",
+      "kind": "desktop",
+      "routePath": "/challenge",
+      "filePath": "src/app/challenge/page.tsx",
+      "position": {
+        "x": 1480,
+        "y": 60
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-3",
+      "title": "challenges",
+      "kind": "desktop",
+      "routePath": "/challenges",
+      "filePath": "src/app/challenges/page.tsx",
+      "position": {
+        "x": 80,
+        "y": 550
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-4",
+      "title": "dashboard",
+      "kind": "desktop",
+      "routePath": "/dashboard",
+      "filePath": "src/app/dashboard/page.tsx",
+      "position": {
+        "x": 780,
+        "y": 550
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-5",
+      "title": "design",
+      "kind": "desktop",
+      "routePath": "/design",
+      "filePath": "src/app/design/page.tsx",
+      "position": {
+        "x": 1480,
+        "y": 550
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-6",
+      "title": "dev/scene-preview",
+      "kind": "desktop",
+      "routePath": "/dev/scene-preview",
+      "filePath": "src/app/dev/scene-preview/page.tsx",
+      "position": {
+        "x": 80,
+        "y": 1040
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-7",
+      "title": "login",
+      "kind": "desktop",
+      "routePath": "/login",
+      "filePath": "src/app/login/page.tsx",
+      "position": {
+        "x": -740,
+        "y": 972.3076923076924
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-8",
+      "title": "onboarding",
+      "kind": "desktop",
+      "routePath": "/onboarding",
+      "filePath": "src/app/onboarding/page.tsx",
+      "position": {
+        "x": 1480,
+        "y": 1040
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-9",
+      "title": "privacy",
+      "kind": "desktop",
+      "routePath": "/privacy",
+      "filePath": "src/app/privacy/page.tsx",
+      "position": {
+        "x": 80,
+        "y": 1530
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-a",
+      "title": "profile",
+      "kind": "desktop",
+      "routePath": "/profile",
+      "filePath": "src/app/profile/page.tsx",
+      "position": {
+        "x": 780,
+        "y": 1530
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    },
+    {
+      "id": "screen-mrldtqhi-b",
+      "title": "ranking",
+      "kind": "desktop",
+      "routePath": "/ranking",
+      "filePath": "src/app/ranking/page.tsx",
+      "position": {
+        "x": 1480,
+        "y": 1530
+      },
+      "size": {
+        "width": 640,
+        "height": 430
+      },
+      "screenVersion": 2
+    }
+  ],
+  "chatBoxes": [
+    {
+      "id": "chat-mrldtqhi-c",
+      "title": "Chat",
+      "position": {
+        "x": 80,
+        "y": 2040
+      },
+      "size": {
+        "width": 380,
+        "height": 420
+      },
+      "messages": [],
+      "activeScreenId": "screen-mrldtqhi-0",
+      "agentName": "Apollo"
+    },
+    {
+      "id": "chat-mrldu1zm-e",
+      "title": "Chat",
+      "position": {
+        "x": 2358.461538461538,
+        "y": 545.7712965745192
+      },
+      "size": {
+        "width": 380,
+        "height": 420
+      },
+      "messages": [],
+      "harness": "claude-code",
+      "agentName": "Atlas"
+    },
+    {
+      "id": "chat-mrldvxsr-f",
+      "title": "Chat",
+      "position": {
+        "x": 981.5724331356034,
+        "y": 1045.7496263302955
+      },
+      "size": {
+        "width": 349,
+        "height": 429
+      },
+      "messages": [
+        {
+          "id": "msg-mrldwaq5-g",
+          "role": "user",
+          "content": "he;p",
+          "ts": 1784077864781
+        },
+        {
+          "id": "msg-mrldwq6x-k",
+          "role": "assistant",
+          "content": "The user's message is just \"he;p\" (a typo for \"help\"). Let me answer directly.\n\nI'm October's Shopify storefront assistant — but your store isn't connected yet, so I can't run any `shopify` commands or touch theme files.\n\nTo connect it:\n\n1. Open October's **Settings → Agents → Shopify**\n2. Enter your **store domain** — `your-store.myshopify.com`\n3. Enter a **Theme Access password** — install the free **\"Theme Access\"** app from the Shopify App Store; it emails you a password starting with `shptka_…`. Paste that in.\n\nSave, and then re-send whatever you'd like me to do.\n\nOnce connected, I can help with things like:\n- Building or editing theme sections, blocks, and snippets (Liquid)\n- Fixing accessibility (WCAG) issues in theme components\n- Storefront API / headless integrations\n- Performance and UX improvements\n\nIf your question doesn't actually need store access, just ask it here and I'll answer directly. What would you like to do?\n\n(No files were changed.)",
+          "ts": 1784077884825
+        }
+      ],
+      "harness": "shopify",
+      "engineHarness": "claude-code",
+      "agentName": "Orion",
+      "activeScreenId": "screen-mrldtqhi-8"
+    }
+  ],
+  "stickies": [],
+  "analytics": [],
+  "experiments": [],
+  "terminals": [],
+  "connections": [
+    {
+      "id": "conn-mrldtqhi-d",
+      "source": "chat-mrldtqhi-c",
+      "target": "screen-mrldtqhi-0"
+    },
+    {
+      "id": "conn-mrldwh8w-h",
+      "source": "chat-mrldvxsr-f",
+      "target": "screen-mrldtqhi-8",
+      "sourceHandle": "right",
+      "targetHandle": "l"
+    },
+    {
+      "id": "conn-mrldwjpu-i",
+      "source": "chat-mrldvxsr-f",
+      "target": "screen-mrldtqhi-5",
+      "sourceHandle": "right",
+      "targetHandle": "l"
+    },
+    {
+      "id": "conn-mrldwltg-j",
+      "source": "chat-mrldvxsr-f",
+      "target": "screen-mrldtqhi-4",
+      "sourceHandle": "right",
+      "targetHandle": "r"
+    }
+  ],
+  "viewport": {
+    "x": -284.8329318886497,
+    "y": -806.517675900157,
+    "zoom": 1.1151798537745699
+  },
+  "busCanvasId": "f0b68d48-568d-45c5-832d-62441db7a8a0"
+}
