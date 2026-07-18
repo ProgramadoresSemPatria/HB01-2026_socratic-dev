@@ -36,3 +36,13 @@ Sentry.init({
 })
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart
+
+// Bridge for modules that must not import @sentry/nextjs themselves:
+// global-error.tsx is SSR-compiled, and importing the SDK there would drag
+// the multi-MB server build of Sentry into the server bundle.
+declare global {
+  interface Window {
+    __captureException?: (e: unknown) => void
+  }
+}
+window.__captureException = (e) => Sentry.captureException(e)
