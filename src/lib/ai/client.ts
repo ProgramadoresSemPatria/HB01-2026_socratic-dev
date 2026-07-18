@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import * as Sentry from '@sentry/nextjs'
+import { captureException } from '@/lib/report-error'
 
 export const anthropic = new Anthropic()
 
@@ -113,7 +113,7 @@ function extractText(res: unknown): string {
 }
 
 export function aiErrorMessage(e: unknown): string {
-  Sentry.captureException(e)
+  captureException(e)
   const msg = e instanceof Error ? e.message : ''
   if (/credit balance|too low|billing/i.test(msg)) {
     return 'A conta da Anthropic está sem créditos. Adicione em console.anthropic.com → Plans & Billing.'
@@ -128,7 +128,7 @@ export function aiErrorMessage(e: unknown): string {
 }
 
 export function aiErrorResponse(e: unknown): Response {
-  Sentry.captureException(e)
+  captureException(e)
   if (e instanceof Anthropic.AuthenticationError) {
     return Response.json(
       { error: 'ANTHROPIC_API_KEY ausente ou inválida no servidor.' },
