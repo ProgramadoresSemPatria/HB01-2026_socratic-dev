@@ -16,7 +16,7 @@ import { rateLimit } from '@/lib/api/guard'
 import { lifetimeStats } from '@/lib/api/lifetime-stats'
 import { getLocale } from '@/lib/i18n/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import * as Sentry from '@sentry/nextjs'
+import { captureException } from '@/lib/report-error'
 import { revalidatePath, updateTag } from 'next/cache'
 import { dailyChallengeFor, type DailyChallenge } from './queries'
 import type { Challenge } from './types'
@@ -111,7 +111,7 @@ export async function completeSession(args: {
           p_amount: earned,
         } as never,
       )
-      if (leagueErr) Sentry.captureException(leagueErr)
+      if (leagueErr) captureException(leagueErr)
     }
   }
 
@@ -149,7 +149,7 @@ export async function completeSession(args: {
           p_awarded_on: new Date().toISOString().slice(0, 10),
         } as never,
       )
-      if (streakError) Sentry.captureException(streakError)
+      if (streakError) captureException(streakError)
     }
   }
 
@@ -419,7 +419,7 @@ export async function getNextChallenge(input: {
   let picked: unknown = Array.isArray(pool) ? pool[0] : null
 
   if (rpcError) {
-    Sentry.captureException(rpcError)
+    captureException(rpcError)
     const { data: seen } = await supabaseAdmin
       .from('sessions')
       .select('challenge_id')
