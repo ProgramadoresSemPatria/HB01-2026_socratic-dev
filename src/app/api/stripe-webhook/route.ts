@@ -1,7 +1,7 @@
 import { jsonError } from '@/lib/api/guard'
 import { addBonus } from '@/lib/api/hints-server'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import * as Sentry from '@sentry/nextjs'
+import { captureException, captureMessage } from '@/lib/report-error'
 import Stripe from 'stripe'
 
 export async function POST(req: Request) {
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       secret,
     )
   } catch (e) {
-    Sentry.captureException(e)
+    captureException(e)
     return jsonError('Assinatura inválida.', 400)
   }
 
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const userId = session.metadata?.user_id
     const hints = Number(session.metadata?.hints)
     if (!userId || !Number.isFinite(hints) || hints <= 0) {
-      Sentry.captureMessage(`stripe-webhook: metadata inválida em ${session.id}`)
+      captureMessage(`stripe-webhook: metadata inválida em ${session.id}`)
       return Response.json({ received: true })
     }
 
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     })
     if (error) {
       if (error.code === '23505') return Response.json({ received: true })
-      Sentry.captureException(error)
+      captureException(error)
       return jsonError('Erro ao registrar compra.', 500)
     }
 
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         .from('hint_purchases')
         .delete()
         .eq('stripe_session_id', session.id)
-      Sentry.captureMessage(
+      captureMessage(
         `stripe-webhook: crédito falhou para ${session.id}, aguardando retry`,
       )
       return jsonError('Erro ao creditar hints.', 500)
