@@ -1,6 +1,5 @@
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import * as React from 'react'
 
 export default function GlobalError({
@@ -9,7 +8,10 @@ export default function GlobalError({
   error: Error & { digest?: string }
 }) {
   React.useEffect(() => {
-    Sentry.captureException(error)
+    // Sentry is reached through the bridge set up by instrumentation-client —
+    // importing @sentry/nextjs here would pull the SDK's multi-MB server
+    // build into the SSR bundle.
+    window.__captureException?.(error)
   }, [error])
 
   return (
