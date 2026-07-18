@@ -5,7 +5,7 @@ import {
   type ChatTurn,
   type TextBlock,
 } from '@/lib/ai/client'
-import * as Sentry from '@sentry/nextjs'
+import { captureException } from '@/lib/report-error'
 import { solveSystem, solveTask } from '@/lib/ai/prompts/solve'
 import { hintGuide, tutorSystem, tutorTask } from '@/lib/ai/prompts/tutor'
 import type { ChatMsg } from '@/lib/ai/types'
@@ -155,7 +155,7 @@ export async function POST(req: Request) {
           }
           controller.close()
         } catch (e) {
-          Sentry.captureException(e)
+          captureException(e)
           controller.error(e)
         }
       },
